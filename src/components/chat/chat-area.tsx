@@ -17,15 +17,11 @@ import type { Channel } from '@/hooks/use-channels'
 interface ChatAreaProps {
   channel: Channel | null
   onlineUsers: string[]
-  onToggleSidebar?: () => void
-  isMobile?: boolean
 }
 
 export function ChatArea({
   channel,
   onlineUsers,
-  onToggleSidebar,
-  isMobile,
 }: ChatAreaProps) {
   const user = useAuthStore((s) => s.user) as User | null
   const queryClient = useQueryClient()
@@ -187,8 +183,6 @@ export function ChatArea({
       <ChannelHeader
         channel={channel}
         onToggleMembers={() => setShowMembers(!showMembers)}
-        onToggleSidebar={onToggleSidebar}
-        isMobile={isMobile}
       />
 
       <div className="flex flex-1 overflow-hidden">
@@ -240,7 +234,7 @@ export function ChatArea({
             <div
               ref={scrollRef}
               onScroll={handleScroll}
-              className="flex-1 overflow-y-auto"
+              className="flex-1 overflow-y-auto px-2"
             >
               {hasPreviousPage && (
                 <div className="flex justify-center py-2">
@@ -259,7 +253,7 @@ export function ChatArea({
                 </div>
               )}
 
-              <div className="py-4">
+              <div className="py-2">
                 {allMessages.map((message, index) => (
                   <MessageItem
                     key={message.id}

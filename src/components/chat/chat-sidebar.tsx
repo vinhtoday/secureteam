@@ -80,15 +80,15 @@ export function ChatSidebar({
   }).filter(Boolean))
 
   return (
-    <div className={cn('flex h-full flex-col border-r bg-sidebar', className)}>
+    <div className={cn('flex h-full w-64 flex-col border-r bg-sidebar', className)}>
       {/* Header */}
-      <div className="flex h-14 items-center justify-between border-b px-3">
-        <h3 className="font-semibold text-sm">SecureTeam</h3>
+      <div className="flex h-12 items-center justify-between border-b px-3">
+        <h3 className="font-semibold text-sm">Kênh</h3>
         <div className="flex gap-1">
           <CreateChannelDialog
             trigger={
-              <Button variant="ghost" size="icon" className="h-8 w-8" title="Tạo kênh mới" aria-label="Tạo kênh mới">
-                <Plus className="h-4 w-4" />
+              <Button variant="ghost" size="icon" className="h-7 w-7" title="Tạo kênh mới" aria-label="Tạo kênh mới">
+                <Plus className="h-3.5 w-3.5" />
               </Button>
             }
           />
@@ -123,12 +123,6 @@ export function ChatSidebar({
         <Separator className="mx-2 w-auto" />
 
         {/* Channels section */}
-        <div className="px-2 pt-2 pb-1">
-          <span className="flex items-center gap-1.5 px-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-            Kênh
-          </span>
-        </div>
-
         <div className="px-2 space-y-0.5">
           {channelsLoading ? (
             Array.from({ length: 3 }).map((_, i) => (

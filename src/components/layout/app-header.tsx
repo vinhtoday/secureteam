@@ -12,6 +12,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { cn } from '@/lib/utils'
 import {
   Shield,
   Sun,
@@ -21,13 +22,19 @@ import {
   User,
   Settings,
   Menu,
+  PanelLeftClose,
+  PanelLeft,
 } from 'lucide-react'
 
 interface AppHeaderProps {
   onToggleSidebar?: () => void
+  navItems?: { id: string; label: string; icon: React.ElementType; adminOnly: boolean }[]
+  activeNavItem?: string
+  onNavigate?: (item: string) => void
+  isAdmin?: boolean
 }
 
-function getInitials(name: string) {
+function getInitials(name: string): string {
   return name
     .split(' ')
     .map((n) => n[0])
@@ -36,7 +43,7 @@ function getInitials(name: string) {
     .slice(0, 2)
 }
 
-function getRoleBadgeColor(role: string) {
+function getRoleBadgeColor(role: string): string {
   switch (role) {
     case 'SUPER_ADMIN':
       return 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
@@ -49,20 +56,26 @@ function getRoleBadgeColor(role: string) {
   }
 }
 
-function getRoleLabel(role: string) {
+function getRoleLabel(role: string): string {
   switch (role) {
     case 'SUPER_ADMIN':
-      return 'Quản trị tối cao'
+      return 'Super Admin'
     case 'ADMIN':
-      return 'Quản trị viên'
+      return 'Admin'
     case 'LEADER':
-      return 'Trưởng nhóm'
+      return 'Leader'
     default:
-      return 'Thành viên'
+      return 'Member'
   }
 }
 
-export function AppHeader({ onToggleSidebar }: AppHeaderProps) {
+export function AppHeader({
+  onToggleSidebar,
+  navItems,
+  activeNavItem,
+  onNavigate,
+  isAdmin,
+}: AppHeaderProps) {
   const { theme, setTheme } = useTheme()
   const user = useAuthStore((s) => s.user) as User | null
   const logout = useAuthStore((s) => s.logout)
@@ -72,34 +85,62 @@ export function AppHeader({ onToggleSidebar }: AppHeaderProps) {
   }
 
   return (
-    <header className="sticky top-0 z-40 flex h-14 items-center gap-4 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4 lg:px-6">
+    <header className="sticky top-0 z-40 flex h-12 items-center gap-2 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-3">
       {/* Left: Hamburger + Logo */}
       <div className="flex items-center gap-2">
         {onToggleSidebar && (
           <Button
             variant="ghost"
             size="icon"
-            className="lg:hidden"
+            className="h-8 w-8"
             onClick={onToggleSidebar}
-            aria-label="Mở menu"
+            aria-label="Toggle sidebar"
           >
-            <Menu className="h-5 w-5" />
-            <span className="sr-only">Menu</span>
+            <Menu className="h-4 w-4" />
           </Button>
         )}
-        <Shield className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
-        <span className="hidden font-bold text-lg sm:inline-block">SecureTeam</span>
+        <Shield className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+        <span className="hidden font-bold text-sm sm:inline-block">SecureTeam</span>
       </div>
 
+      {/* Center: Nav tabs */}
+      {navItems && onNavigate && (
+        <nav className="hidden md:flex items-center gap-0.5 mx-4 bg-muted/50 rounded-lg p-0.5">
+          {navItems
+            .filter((item) => !item.adminOnly || isAdmin)
+            .map((item) => {
+              const Icon = item.icon
+              const isActive = activeNavItem === item.id
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => onNavigate(item.id)}
+                  className={cn(
+                    'flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors',
+                    isActive
+                      ? 'bg-background text-foreground shadow-sm'
+                      : 'text-muted-foreground hover:text-foreground'
+                  )}
+                >
+                  <Icon className="h-3.5 w-3.5" />
+                  <span className="hidden lg:inline">{item.label}</span>
+                </button>
+              )
+            })}
+        </nav>
+      )}
+
+      {/* Spacer */}
+      <div className="flex-1" />
+
       {/* Right section */}
-      <div className="ml-auto flex items-center gap-2">
+      <div className="flex items-center gap-1">
         {/* Dark mode toggle */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-9 w-9" aria-label="Chuyển giao diện">
+            <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="Theme">
               <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
               <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-              <span className="sr-only">Chuyển giao diện</span>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
@@ -118,25 +159,28 @@ export function AppHeader({ onToggleSidebar }: AppHeaderProps) {
         {/* User menu */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="relative h-9 gap-2 rounded-full pl-2 pr-3">
-              <Avatar className="h-7 w-7">
+            <Button variant="ghost" className="relative h-8 gap-1.5 rounded-full pl-1.5 pr-2.5">
+              <Avatar className="h-6 w-6">
                 <AvatarImage src={user?.avatar || undefined} alt={user?.name} />
-                <AvatarFallback className="bg-emerald-100 text-emerald-700 text-xs dark:bg-emerald-900/30 dark:text-emerald-400">
+                <AvatarFallback className="bg-emerald-100 text-emerald-700 text-[10px] dark:bg-emerald-900/30 dark:text-emerald-400">
                   {user?.name ? getInitials(user.name) : '?'}
                 </AvatarFallback>
               </Avatar>
-              <span className="hidden max-w-[120px] truncate text-sm font-medium md:inline-block">
+              <span className="hidden max-w-[100px] truncate text-xs font-medium md:inline-block">
                 {user?.name}
               </span>
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-56" align="end" forceMount>
+          <DropdownMenuContent className="w-52" align="end" forceMount>
             <DropdownMenuLabel className="font-normal">
               <div className="flex flex-col space-y-1">
                 <p className="text-sm font-medium leading-none">{user?.name}</p>
                 <p className="text-xs leading-none text-muted-foreground">{user?.email}</p>
                 {user?.role && (
-                  <span className={`mt-1 inline-flex w-fit items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${getRoleBadgeColor(user.role.name)}`}>
+                  <span className={cn(
+                    'mt-1 inline-flex w-fit items-center rounded-full px-2 py-0.5 text-[10px] font-medium',
+                    getRoleBadgeColor(user.role.name)
+                  )}>
                     {getRoleLabel(user.role.name)}
                   </span>
                 )}

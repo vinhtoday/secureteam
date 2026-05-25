@@ -1,6 +1,5 @@
 'use client'
 
-import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -8,7 +7,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
-import { Hash, Lock, Users, Search, Settings, Menu } from 'lucide-react'
+import { Hash, Lock, Users, Search } from 'lucide-react'
 import type { Channel } from '@/hooks/use-channels'
 
 interface ChannelHeaderProps {
@@ -16,8 +15,6 @@ interface ChannelHeaderProps {
   onSearchMessages?: () => void
   onToggleMembers?: () => void
   onToggleSettings?: () => void
-  onToggleSidebar?: () => void
-  isMobile?: boolean
 }
 
 export function ChannelHeader({
@@ -25,8 +22,6 @@ export function ChannelHeader({
   onSearchMessages,
   onToggleMembers,
   onToggleSettings,
-  onToggleSidebar,
-  isMobile,
 }: ChannelHeaderProps) {
   const typeIcon =
     channel.type === 'direct' ? (
@@ -45,35 +40,27 @@ export function ChannelHeader({
         : 'Kênh công khai'
 
   return (
-    <div className="flex h-14 items-center gap-2 border-b bg-background px-4">
-      {isMobile && onToggleSidebar && (
-        <Button variant="ghost" size="icon" className="h-8 w-8 lg:hidden" onClick={onToggleSidebar} aria-label="Mở danh sách kênh">
-          <Menu className="h-4 w-4" />
-        </Button>
-      )}
-
-      <div className="flex items-center gap-2 min-w-0 flex-1">
-        <span className="text-muted-foreground">{typeIcon}</span>
-        <div className="min-w-0">
-          <h2 className="truncate font-semibold text-sm">
-            {channel.name}
-          </h2>
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <Badge variant="outline" className="h-4 px-1.5 text-[10px] font-normal">
-              {typeLabel}
-            </Badge>
-            {channel.memberCount > 0 && (
-              <span>{channel.memberCount} thành viên</span>
-            )}
-          </div>
+    <div className="flex h-12 items-center gap-2 border-b bg-background px-4">
+      <span className="text-muted-foreground">{typeIcon}</span>
+      <div className="min-w-0 flex-1">
+        <div className="flex items-center gap-2">
+          <h2 className="truncate font-semibold text-sm">{channel.name}</h2>
+          <Badge variant="outline" className="h-4 px-1.5 text-[10px] font-normal shrink-0">
+            {typeLabel}
+          </Badge>
+          {channel.memberCount > 0 && (
+            <span className="text-xs text-muted-foreground hidden sm:inline">
+              {channel.memberCount} thành viên
+            </span>
+          )}
         </div>
       </div>
 
-      <div className="flex items-center gap-1">
+      <div className="flex items-center gap-0.5">
         {onSearchMessages && (
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={onSearchMessages} aria-label="Tìm tin nhắn">
+              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={onSearchMessages}>
                 <Search className="h-4 w-4" />
               </Button>
             </TooltipTrigger>
@@ -83,21 +70,11 @@ export function ChannelHeader({
         {onToggleMembers && (
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={onToggleMembers} aria-label="Danh sách thành viên">
+              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={onToggleMembers}>
                 <Users className="h-4 w-4" />
               </Button>
             </TooltipTrigger>
-            <TooltipContent>Danh sách thành viên</TooltipContent>
-          </Tooltip>
-        )}
-        {onToggleSettings && (channel.type !== 'direct') && (
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={onToggleSettings} aria-label="Cài đặt kênh">
-                <Settings className="h-4 w-4" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>Cài đặt kênh</TooltipContent>
+            <TooltipContent>Thành viên</TooltipContent>
           </Tooltip>
         )}
       </div>

@@ -151,3 +151,23 @@ Stage Summary:
 - Dark mode fully supported via next-themes
 - Vietnamese UI labels throughout
 - ESLint: 0 errors, 0 warnings
+
+---
+Task ID: 4
+Agent: Main
+Task: Fix UI layout issues - 3-column sidebar clutter
+
+Work Log:
+- Analyzed screenshot: 3 sidebars (AppSidebar + ChatSidebar) causing clutter
+- Refactored page.tsx: Chat mode only shows ChatSidebar + ChatArea, Admin mode shows compact nav
+- Updated AppHeader: compact height (h-12), added center nav tabs for switching Chat/Admin views
+- Updated ChatSidebar: removed redundant "SecureTeam" header text, fixed width to w-64
+- Updated ChannelHeader: simplified, removed redundant props (onToggleSidebar, isMobile)
+- Updated ChatArea: removed unnecessary props, cleaner layout
+- ESLint: 0 errors after changes
+
+Stage Summary:
+- Fixed 3-column layout clutter - now 2-column in chat mode
+- Clean navigation: tabs in header for switching between Chat and Admin
+- Removed redundant branding (SecureTeam appeared 3 times before)
+- Compact, professional layout

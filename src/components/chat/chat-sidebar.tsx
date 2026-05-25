@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import { cn } from '@/lib/utils'
 import { useAuthStore, type User } from '@/stores/auth-store'
 import { useChannels, type Channel } from '@/hooks/use-channels'

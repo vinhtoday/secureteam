@@ -1,0 +1,220 @@
+// SecureTeam - Database Schema (SQLite compatible, designed for MySQL migration)
+// Phase 1: Authentication + Chat + Admin Dashboard
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// ROLES (RBAC System)
+// ============================================
+
+model Role {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  permissions String   @default("{}")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  users User[]
+}
+
+// ============================================
+// USER & AUTHENTICATION
+// ============================================
+
+model User {
+  id                String    @id @default(cuid())
+  email             String    @unique
+  passwordHash      String
+  name              String
+  avatar            String?
+  bio               String?
+  roleId            String
+  isEmailVerified   Boolean   @default(false)
+  isActive          Boolean   @default(true)
+  isLocked          Boolean   @default(false)
+  twoFactorEnabled  Boolean   @default(false)
+  twoFactorSecret   String?
+  lastSeen          DateTime?
+  onlineStatus      String    @default("offline")
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  role            Role             @relation(fields: [roleId], references: [id])
+  sessions        Session[]
+  memberships     ChannelMember[]
+  messages        Message[]        @relation("MessageSender")
+  unreadMessages  UnreadMessage[]
+  auditLogs       AuditLog[]
+  encryptionKeys  EncryptionKey[]
+  ownedChannels   Channel[]        @relation("ChannelOwner")
+
+  @@index([roleId])
+  @@index([isActive])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  userId       String
+  tokenHash    String   @unique
+  refreshToken String   @unique
+  deviceInfo   String?
+  ipAddress    String?
+  userAgent    String?
+  expiresAt    DateTime
+  lastActiveAt DateTime @default(now())
+  createdAt    DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+// ============================================
+// CHANNELS & GROUPS
+// ============================================
+
+model Channel {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  type        String   @default("public")
+  avatar      String?
+  ownerId     String?
+  isArchived  Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  owner   User?           @relation("ChannelOwner", fields: [ownerId], references: [id])
+  members ChannelMember[]
+  messages Message[]
+
+  @@index([type])
+}
+
+model ChannelMember {
+  id         String   @id @default(cuid())
+  userId     String
+  channelId  String
+  role       String   @default("member")
+  joinedAt   DateTime @default(now())
+  muted      Boolean  @default(false)
+  lastReadAt DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  channel Channel @relation(fields: [channelId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, channelId])
+  @@index([channelId])
+}
+
+// ============================================
+// MESSAGES & THREADS
+// ============================================
+
+model Message {
+  id           String   @id @default(cuid())
+  channelId    String
+  senderId     String
+  content      String?
+  contentType  String   @default("text")
+  replyToId    String?
+  isPinned     Boolean  @default(false)
+  isEdited     Boolean  @default(false)
+  editedAt     DateTime?
+  fileUrl      String?
+  fileName     String?
+  fileSize     Int?
+  fileMimeType String?
+  metadata     String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  channel       Channel          @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  sender        User             @relation("MessageSender", fields: [senderId], references: [id])
+  replyTo       Message?         @relation("MessageReply", fields: [replyToId], references: [id])
+  replies       Message[]        @relation("MessageReply")
+  unreadBy      UnreadMessage[]
+  threadParent  ThreadReply[]    @relation("ThreadParent")
+  threadChild   ThreadReply[]    @relation("ThreadChild")
+
+  @@index([channelId, createdAt])
+  @@index([senderId])
+  @@index([replyToId])
+}
+
+model ThreadReply {
+  id        String   @id @default(cuid())
+  messageId String
+  replyId   String
+  createdAt DateTime @default(now())
+
+  message Message @relation("ThreadParent", fields: [messageId], references: [id], onDelete: Cascade)
+  reply   Message @relation("ThreadChild", fields: [replyId], references: [id], onDelete: Cascade)
+
+  @@unique([messageId, replyId])
+  @@index([messageId])
+}
+
+model UnreadMessage {
+  id        String   @id @default(cuid())
+  userId    String
+  messageId String
+  createdAt DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  message Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, messageId])
+  @@index([userId])
+}
+
+// ============================================
+// ENCRYPTION KEYS
+// ============================================
+
+model EncryptionKey {
+  id            String    @id @default(cuid())
+  userId        String
+  keyData       String
+  algorithm     String    @default("AES-256-GCM")
+  iv            String?
+  hmacSignature String?
+  purpose       String    @default("message")
+  targetId      String?
+  isActive      Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  expiresAt     DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+// ============================================
+// AUDIT LOGS
+// ============================================
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String
+  action    String
+  target    String?
+  details   String?
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([action])
+  @@index([createdAt])
+}

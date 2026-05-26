@@ -171,3 +171,36 @@ Stage Summary:
 - Clean navigation: tabs in header for switching between Chat and Admin
 - Removed redundant branding (SecureTeam appeared 3 times before)
 - Compact, professional layout
+---
+Task ID: 1
+Agent: main
+Task: Fix call between 2 peers - chat-service missing all call event handlers
+
+Work Log:
+- Read all source code: webrtc.ts, call-manager.tsx, call-screen.tsx, use-socket.ts, chat-service/index.ts, call-controls.tsx, call-store.ts, use-calls.ts
+- Discovered ROOT CAUSE: chat-service/index.ts had ZERO handlers for call events (call:invite, call:accept, call:signal, call:reject, call:cancel, call:join, call:leave, call:end, call:mute, call:screen-share, call:raise-hand, call:camera)
+- Server was silently dropping ALL call-related events between peers
+- Added complete call event forwarding system to chat-service:
+  - Call room management (callRooms Map, joinCallRoom/leaveCallRoom helpers)
+  - ConnectedUser now tracks calls: Set<string>
+  - call:invite → forward to user:${targetUserId}
+  - call:accept → broadcast to call room (caller gets notified)
+  - call:reject → forward to call room (caller)
+  - call:cancel → forward to target user
+  - call:join → broadcast to call room
+  - call:leave → notify call room, cleanup
+  - call:end → broadcast to call room, cleanup all
+  - call:signal → forward to user:${targetUserId} (CRITICAL for WebRTC)
+  - call:mute → broadcast to call room with userId
+  - call:screen-share → broadcast to call room with userId
+  - call:raise-hand → broadcast to call room with userId
+  - call:camera → broadcast to call room with userId
+  - Disconnect handler now also cleans up call rooms
+- Restarted chat-service and Next.js dev server
+- Both services confirmed running (3000, 3004)
+
+Stage Summary:
+- Root cause: chat-service had no call event handlers at all
+- Fix: Added 12 call event handlers with proper room-based broadcasting
+- Services are running and ready for testing
+

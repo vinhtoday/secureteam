@@ -8,10 +8,12 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip'
 import { Hash, Lock, Users, Search } from 'lucide-react'
-import type { Channel } from '@/hooks/use-channels'
+import { CallControls } from '@/components/call/call-controls'
+import type { Channel, ChannelDetail } from '@/hooks/use-channels'
 
 interface ChannelHeaderProps {
   channel: Channel
+  channelMembers?: ChannelDetail['members']
   onSearchMessages?: () => void
   onToggleMembers?: () => void
   onToggleSettings?: () => void
@@ -19,6 +21,7 @@ interface ChannelHeaderProps {
 
 export function ChannelHeader({
   channel,
+  channelMembers,
   onSearchMessages,
   onToggleMembers,
   onToggleSettings,
@@ -57,6 +60,11 @@ export function ChannelHeader({
       </div>
 
       <div className="flex items-center gap-0.5">
+        <CallControls
+          channel={{ id: channel.id, name: channel.name }}
+          channelMembers={channelMembers}
+          className="mr-1"
+        />
         {onSearchMessages && (
           <Tooltip>
             <TooltipTrigger asChild>

@@ -12,10 +12,10 @@ import { MemberList } from './member-list'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from '@/components/ui/button'
 import { AlertCircle, MessageSquarePlus } from 'lucide-react'
-import type { Channel } from '@/hooks/use-channels'
+import type { ChannelDetail } from '@/hooks/use-channels'
 
 interface ChatAreaProps {
-  channel: Channel | null
+  channel: ChannelDetail | null
   onlineUsers: string[]
 }
 
@@ -182,6 +182,7 @@ export function ChatArea({
     <div className="flex flex-1 flex-col overflow-hidden">
       <ChannelHeader
         channel={channel}
+        channelMembers={channel.members}
         onToggleMembers={() => setShowMembers(!showMembers)}
       />
 

@@ -55,6 +55,8 @@ model User {
   auditLogs       AuditLog[]
   encryptionKeys  EncryptionKey[]
   ownedChannels   Channel[]        @relation("ChannelOwner")
+  createdCalls    CallRoom[]       @relation("CallCreator")
+  callParticipations CallParticipant[] @relation("CallParticipant")
 
   @@index([roleId])
   @@index([isActive])
@@ -92,9 +94,10 @@ model Channel {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  owner   User?           @relation("ChannelOwner", fields: [ownerId], references: [id])
-  members ChannelMember[]
-  messages Message[]
+  owner     User?           @relation("ChannelOwner", fields: [ownerId], references: [id])
+  members   ChannelMember[]
+  messages  Message[]
+  callRooms CallRoom[]
 
   @@index([type])
 }
@@ -196,6 +199,54 @@ model EncryptionKey {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+}
+
+// ============================================
+// CALL ROOM
+// ============================================
+
+model CallRoom {
+  id          String   @id @default(cuid())
+  title       String
+  type        String   @default("voice") // voice, video, group_voice, group_video
+  status      String   @default("active") // ringing, active, ended
+  channelId   String?
+  channel     Channel? @relation(fields: [channelId], references: [id], onDelete: SetNull)
+  createdBy   String
+  creator     User     @relation("CallCreator", fields: [createdBy], references: [id])
+  startedAt   DateTime @default(now())
+  endedAt     DateTime?
+  duration    Int      @default(0) // seconds
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  participants CallParticipant[]
+
+  @@index([createdBy])
+  @@index([channelId])
+  @@index([status])
+}
+
+model CallParticipant {
+  id             String    @id @default(cuid())
+  callId         String
+  call           CallRoom  @relation(fields: [callId], references: [id], onDelete: Cascade)
+  userId         String
+  user           User      @relation("CallParticipant", fields: [userId], references: [id])
+  role           String    @default("participant") // host, participant
+  status         String    @default("ringing") // ringing, joined, left, rejected
+  joinedAt       DateTime?
+  leftAt         DateTime?
+  isMuted        Boolean   @default(false)
+  isCameraOff    Boolean   @default(false)
+  isScreenSharing Boolean  @default(false)
+  raisedHand     Boolean   @default(false)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@unique([callId, userId])
+  @@index([userId])
+  @@index([callId])
 }
 
 // ============================================

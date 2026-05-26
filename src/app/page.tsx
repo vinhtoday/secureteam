@@ -7,6 +7,7 @@ import { RegisterForm } from '@/components/auth/register-form'
 import { AppHeader } from '@/components/layout/app-header'
 import { ChatSidebar } from '@/components/chat/chat-sidebar'
 import { ChatArea } from '@/components/chat/chat-area'
+import { CallManager } from '@/components/call/call-manager'
 import { AdminDashboard } from '@/components/admin/admin-dashboard'
 import { UserManagement } from '@/components/admin/user-management'
 import { MessageViewer } from '@/components/admin/message-viewer'
@@ -88,6 +89,9 @@ export default function Home() {
 
   return (
     <div className="flex h-screen overflow-hidden bg-background">
+      {/* Call Manager — always rendered for incoming/active call UI */}
+      <CallManager />
+
       {/* ===== CHAT MODE: ChatSidebar + ChatArea ===== */}
       {isChatMode && (
         <>

@@ -255,6 +255,11 @@ class WebRTCManager {
   ): Promise<RTCSessionDescriptionInit | null> {
     const pc = this.createPeerConnection(userId)
     if (!pc) return null
+    // Only set remote offer if we're in stable state (no pending offer/answer)
+    if (pc.signalingState !== 'stable') {
+      console.warn(`[WebRTC] Ignoring offer from ${userId}: signalingState=${pc.signalingState}, expected 'stable'`)
+      return null
+    }
     try {
       await pc.setRemoteDescription(new RTCSessionDescription(offer))
       const answer = await pc.createAnswer()
@@ -269,6 +274,11 @@ class WebRTCManager {
   async handleAnswer(userId: string, answer: RTCSessionDescriptionInit): Promise<void> {
     const pc = this.peerConnections.get(userId)
     if (!pc) return
+    // Only set remote answer if we have a pending local offer
+    if (pc.signalingState !== 'have-local-offer') {
+      console.warn(`[WebRTC] Ignoring answer from ${userId}: signalingState=${pc.signalingState}, expected 'have-local-offer'`)
+      return
+    }
     try {
       await pc.setRemoteDescription(new RTCSessionDescription(answer))
     } catch (error) {

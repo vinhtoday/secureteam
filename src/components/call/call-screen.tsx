@@ -65,7 +65,7 @@ export function CallScreen() {
     toggleMute,
     toggleCamera,
     toggleScreenShare,
-    toggleRaiseHand,
+    toggleHandRaise,
     endCall,
     setShowParticipants,
     setShowCallChat,
@@ -226,11 +226,11 @@ export function CallScreen() {
   }, [toggleScreenShare, currentCall, emitCallScreenShare, isScreenSharing])
 
   const handleToggleRaiseHand = useCallback(() => {
-    toggleRaiseHand()
+    toggleHandRaise()
     if (currentCall) {
       emitCallRaiseHand({ callId: currentCall.id, raised: !isHandRaised })
     }
-  }, [toggleRaiseHand, currentCall, emitCallRaiseHand, isHandRaised])
+  }, [toggleHandRaise, currentCall, emitCallRaiseHand, isHandRaised])
 
   if (callStatus !== 'active' && callStatus !== 'ringing') return null
 

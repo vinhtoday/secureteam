@@ -438,3 +438,210 @@ NEXT_PUBLIC_APP_URL="http://localhost:3000"
 - `user:typing` / `user:stop-typing`
 - `new-message`
 - All call events echoed back
+
+---
+
+## Phase 5: Testing, Security & Production Deployment
+
+### Docker Production Architecture
+
+```
+                    Internet
+                       |
+                  [Nginx :80/:443]
+                  /              \
+            [App :3000]    [Chat :3004]
+                |               |
+           [SQLite DB]      [Redis :6379]
+                |
+          [Coturn TURN :3478]
+                |
+    [Prometheus :9090]  [Grafana :3001]
+```
+
+**7 Docker services:**
+| Service | Image | Port | Description |
+|---------|-------|------|-------------|
+| app | Custom (Node 20) | 3000 | Next.js app |
+| chat-service | Custom (Node 20) | 3004 | Socket.io server |
+| redis | redis:7-alpine | 6379 | Rate limiting, cache, pub/sub |
+| nginx | nginx:alpine | 80/443 | Reverse proxy + SSL |
+| coturn | coturn/coturn:4.6 | 3478/5349 | WebRTC TURN server |
+| prometheus | prom/prometheus | 9090 | Metrics collection |
+| grafana | grafana/grafana | 3001 | Dashboards & alerting |
+
+### Production Deploy (Docker Compose)
+
+```bash
+# 1. Chuẩn bị production environment
+cd docker/
+cp .env.production.example .env.production
+# Chỉnh sửa: JWT_SECRET, TURN credentials, domain, SSL certs
+
+# 2. Cài SSL certificates (Let's Encrypt)
+mkdir -p ssl
+certbot certonly --standalone -d secureteam.yourcompany.com
+cp /etc/letsencrypt/live/secureteam.yourcompany.com/fullchain.pem ssl/cert.pem
+cp /etc/letsencrypt/live/secureteam.yourcompany.com/privkey.pem ssl/key.pem
+
+# 3. Deploy
+docker compose --env-file .env.production up -d --build
+
+# 4. Seed database (first time only)
+docker compose exec app npx tsx prisma/seed.ts
+
+# 5. Verify
+docker compose ps
+curl http://localhost:3000/api/v1/health
+```
+
+### Security Hardening
+
+#### 1. Rate Limiting (`src/lib/rate-limit.ts`)
+- Per-IP per-endpoint rate limiting
+- Configurable window (default: 60s) and max requests (default: 100)
+- Auto-cleanup expired entries
+- Redis-ready for distributed deployment
+
+#### 2. Brute Force Protection (`src/lib/brute-force.ts`)
+- 5 failed attempts -> 15 minute lockout
+- Tracks by email AND IP
+- Auto-reset on successful login
+- Configurable thresholds
+
+#### 3. Security Headers (`src/middleware.ts`)
+- `X-Content-Type-Options: nosniff`
+- `X-Frame-Options: DENY`
+- `X-XSS-Protection: 1; mode=block`
+- `Strict-Transport-Security` (production)
+- `Content-Security-Policy`
+- `Referrer-Policy: strict-origin-when-cross-origin`
+- Block common attack paths (/.env, /.git, /wp-admin)
+
+#### 4. Nginx Security
+- TLSv1.2+ only
+- Rate limiting: 10 requests/second per IP
+- 20MB max upload size
+- Security headers on all responses
+- WebSocket upgrade support for Socket.io
+
+### Security Checklist
+
+- [x] JWT token authentication (15min access, 7d refresh)
+- [x] HttpOnly cookie for refresh token
+- [x] bcrypt 12 rounds password hashing
+- [x] RBAC (4 roles with permission hierarchy)
+- [x] 2FA (TOTP) support
+- [x] AES-256-GCM message encryption
+- [x] Rate limiting (per-IP, per-endpoint)
+- [x] Brute force protection (5 attempts, 15min lockout)
+- [x] Security headers (HSTS, CSP, X-Frame-Options)
+- [x] Input validation (Zod schemas on all endpoints)
+- [x] SQL injection prevention (Prisma ORM)
+- [x] CORS configuration
+- [x] Non-root Docker containers
+- [x] Docker resource limits
+- [x] Blocked attack paths (/.env, /.git, /wp-admin)
+- [ ] E2EE for all messages (partial - keys exist)
+- [ ] Redis session store (infrastructure ready)
+- [ ] Container security scanning (Trivy in CI/CD)
+- [ ] SSL certificate rotation automation
+- [ ] WAF (Web Application Firewall)
+
+### Testing Infrastructure
+
+**34 tests** across 6 test suites:
+
+#### Unit Tests (24 tests)
+| Suite | Tests | Description |
+|-------|-------|-------------|
+| auth.test.ts | 9 | Password hashing, JWT generation/verification, brute force |
+| api-response.test.ts | 10 | All API response helpers (200-500) |
+| rate-limit.test.ts | 5 | Rate limiting, isolation by IP/endpoint |
+
+#### Integration Tests (10 tests)
+| Suite | Tests | Description |
+|-------|-------|-------------|
+| auth-api.test.ts | 5 | Register, login, profile, auth failure |
+| channels-api.test.ts | 3 | List, create, detail |
+| health-api.test.ts | 2 | Health check, root API |
+
+```bash
+# Chay unit tests
+bunx vitest run tests/unit --reporter=verbose
+
+# Chay integration tests (can server dang chay)
+bunx vitest run tests/integration --reporter=verbose
+
+# Chay tat ca + coverage
+bunx vitest run --coverage
+
+# Chay single file
+bunx vitest run tests/unit/auth.test.ts
+```
+
+### CI/CD Pipeline (GitHub Actions)
+
+```
+Push to main/develop
+    |
+    v
+[Lint & Type Check] --> [Unit Tests] --> [Integration Tests + Redis]
+    |                       |                      |
+    v                       v                      v
+[Security Scan (Trivy)] --> [Build Docker Images] --> [Deploy to Production]
+```
+
+Stages:
+1. **Lint** - ESLint check
+2. **Unit Tests** - Vitest with V8 coverage
+3. **Integration Tests** - Redis service container
+4. **Security Scan** - Trivy vulnerability scanner (CRITICAL/HIGH)
+5. **Build** - Docker multi-arch images, push to GHCR
+6. **Deploy** - SSH to production server, docker compose up
+
+### Monitoring Stack
+
+**Grafana Dashboard panels:**
+- System Uptime (UP/DOWN)
+- HTTP Requests/sec
+- Response Time (p95)
+- Memory Usage (gauge)
+- Active Users / Active Calls / Socket Connections
+- Error Rate (5xx)
+- CPU Usage
+
+**Access:**
+- Grafana: `http://server:3001` (admin / configured password)
+- Prometheus: `http://server:9090`
+
+### Backup Strategy
+
+```bash
+# Manual backup
+./deploy/backup.sh
+
+# Cron (tu dong hang ngay 2AM)
+0 2 * * * /opt/secureteam/deploy/backup.sh >> /var/log/secureteam-backup.log
+
+# Restore
+cp /opt/secureteam-backups/db-YYYYMMDD-HHMMSS.bak.gz /opt/secureteam/db/
+gunzip /opt/secureteam/db/custom.db.gz
+```
+
+Retention: 30 days, auto-cleanup.
+
+### Go-Live Checklist
+
+- [ ] Change all default secrets (JWT, TURN, DB)
+- [ ] Configure real domain + SSL certificate
+- [ ] Set up DNS records
+- [ ] Configure TURN server external IP
+- [ ] Set up Redis for production
+- [ ] Configure Grafana alerting rules
+- [ ] Set up log rotation
+- [ ] Configure backup cron job
+- [ ] Run full security scan
+- [ ] Load test with expected user count
+- [ ] Document DR (Disaster Recovery) procedure
+- [ ] Create incident response runbook

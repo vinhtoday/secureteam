@@ -38,6 +38,7 @@ export async function GET(
           },
           members: {
             select: {
+              userId: true,
               role: true,
               joinedAt: true,
               muted: true,

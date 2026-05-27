@@ -1,15 +1,17 @@
 'use client'
 
-import React, { useState, useCallback, useEffect, useRef } from 'react'
+import React, { useState, useCallback, useEffect, useRef, useMemo } from 'react'
 import { cn } from '@/lib/utils'
 import { useAuthStore, type User } from '@/stores/auth-store'
 import { useMessages, useSendMessage, type Message } from '@/hooks/use-messages'
 import { useSocket } from '@/hooks/use-socket'
 import { useQueryClient } from '@tanstack/react-query'
+import { useBot } from '@/hooks/use-bot'
 import { MessageItem } from './message-item'
 import { MessageInput } from './message-input'
 import { ChannelHeader } from './channel-header'
 import { MemberList } from './member-list'
+import { BotTypingIndicator } from './bot-typing-indicator'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from '@/components/ui/button'
 import { AlertCircle, MessageSquarePlus, MessagesSquare, Sparkles } from 'lucide-react'
@@ -40,6 +42,19 @@ export function ChatArea({
   } = useSocket()
 
   const channelId = channel?.id || null
+
+  // SecureBot integration
+  const botChannelId = channelId
+  const isBotChannel = useMemo(() => {
+    if (!channel || !user) return false
+    if (channel.type !== 'direct') return false
+    const otherMember = channel.members?.find((m) => m.userId !== user.id)
+    return otherMember?.user?.isBot === true || otherMember?.userId === 'securebot-system'
+  }, [channel, user])
+
+  const { isThinking: botIsThinking, shouldTriggerBot, chatWithBot } = useBot(
+    isBotChannel ? channelId : channelId
+  )
 
   const {
     data: messagesPages,
@@ -133,13 +148,26 @@ export function ChatArea({
 
       setReplyTo(null)
 
+      // Check if SecureBot should respond
+      const triggerBot = shouldTriggerBot(content, isBotChannel)
+      if (triggerBot && channelId) {
+        // Clean @SecureBot mention from message content for bot processing
+        const cleanContent = content
+          .replace(/@SecureBot\s*/gi, '')
+          .replace(/@Secure_Bot\s*/gi, '')
+          .trim()
+        if (cleanContent) {
+          chatWithBot(cleanContent)
+        }
+      }
+
       setTimeout(() => {
         if (scrollRef.current) {
           scrollRef.current.scrollTop = scrollRef.current.scrollHeight
         }
       }, 50)
     },
-    [channelId, user, sendMessage, sendSocketMessage]
+    [channelId, user, sendMessage, sendSocketMessage, shouldTriggerBot, chatWithBot, isBotChannel]
   )
 
   const handleDelete = useCallback(
@@ -290,13 +318,17 @@ export function ChatArea({
             </div>
           )}
 
+          {/* Bot typing indicator */}
+          {botIsThinking && <BotTypingIndicator />}
+
           <MessageInput
             onSend={handleSend}
             onTyping={() => channelId && sendTyping(channelId)}
             onStopTyping={() => channelId && sendStopTyping(channelId)}
             replyTo={replyTo}
             onCancelReply={() => setReplyTo(null)}
-            disabled={sendMessage.isPending}
+            disabled={sendMessage.isPending || botIsThinking}
+            placeholder={isBotChannel ? 'Nhập tin nhắn cho SecureBot...' : undefined}
             typingUsers={channelTypingUsers.map((t) => ({
               userId: t.userId,
               name: t.userId,

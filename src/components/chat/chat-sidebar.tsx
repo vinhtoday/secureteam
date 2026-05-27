@@ -28,6 +28,7 @@ import {
   MessageSquare,
   UserPlus,
   Shield,
+  Bot,
 } from 'lucide-react'
 import { UserAvatar } from './user-status-badge'
 import { CreateChannelDialog } from './create-channel-dialog'
@@ -168,29 +169,62 @@ export function ChatSidebar({
           </span>
         </div>
 
-        <div className="px-2 space-y-0.5 pb-4">
-          {directChannels.length === 0 ? (
+        <div className="px-2 space-y-0.5">
+          {/* SecureBot quick access */}
+          <button
+            onClick={async () => {
+              try {
+                // Find or create bot user DM
+                const res = await api.post('/api/v1/channels/direct', { userId: 'securebot-system' })
+                const dmChannel = res.data as { id: string }
+                queryClient.invalidateQueries({ queryKey: ['channels'] })
+                onSelectChannel(dmChannel.id)
+              } catch {
+                // Silently fail
+              }
+            }}
+            className={cn(
+              'flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left transition-all duration-150',
+              'border-l-2 border-transparent hover:bg-emerald-50/80 dark:hover:bg-emerald-900/10 hover:border-emerald-300 dark:hover:border-emerald-700'
+            )}
+          >
+            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 shadow-sm">
+              <Bot className="h-3.5 w-3.5 text-white" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-1.5">
+                <span className="truncate text-sm font-medium text-emerald-700 dark:text-emerald-300">SecureBot</span>
+                <span className="rounded-full bg-emerald-100 dark:bg-emerald-900/30 px-1.5 py-0.5 text-[10px] font-medium text-emerald-600 dark:text-emerald-400">
+                  AI
+                </span>
+              </div>
+              <div className="truncate text-xs text-muted-foreground mt-0.5">
+                Trợ lý AI thông minh
+              </div>
+            </div>
+          </button>
+
+          {/* Regular DMs */}
+          {directChannels.length === 0 && (
             <div className="px-3 py-4 text-center text-xs text-muted-foreground">
               Chưa có tin nhắn riêng nào
             </div>
-          ) : (
-            directChannels.map((channel) => {
-              const otherMember = channel.members?.find((m) => m.userId !== user?.id)
-              const otherUserId = otherMember?.userId
-              const isOnline = otherUserId ? onlineUsers.includes(otherUserId) : false
-
-              return (
-                <DMItem
-                  key={channel.id}
-                  channel={channel}
-                  isActive={activeChannelId === channel.id}
-                  onClick={() => onSelectChannel(channel.id)}
-                  isOnline={isOnline}
-                  currentUserId={user?.id || ''}
-                />
-              )
-            })
           )}
+          {directChannels.length > 0 && directChannels.map((channel) => {
+            const otherMember = channel.members?.find((m) => m.userId !== user?.id)
+            const otherUserId = otherMember?.userId
+            const isOnline = otherUserId ? onlineUsers.includes(otherUserId) : false
+            return (
+              <DMItem
+                key={channel.id}
+                channel={channel}
+                isActive={activeChannelId === channel.id}
+                onClick={() => onSelectChannel(channel.id)}
+                isOnline={isOnline}
+                currentUserId={user?.id || ''}
+              />
+            )
+          })}
         </div>
       </ScrollArea>
 

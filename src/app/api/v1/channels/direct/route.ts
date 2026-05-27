@@ -40,10 +40,38 @@ export async function POST(request: NextRequest) {
         return conflictResponse('Cannot create a direct message with yourself');
       }
 
+      // Handle bot user auto-creation
+      let actualTargetUserId = targetUserId;
+      if (targetUserId === 'securebot-system') {
+        let botUser = await db.user.findFirst({ where: { isBot: true } });
+        if (!botUser) {
+          let botRole = await db.role.findFirst({ where: { name: 'BOT' } });
+          if (!botRole) {
+            botRole = await db.role.create({
+              data: { name: 'BOT', description: 'AI Bot assistant', permissions: JSON.stringify({ isBot: true }) },
+            });
+          }
+          botUser = await db.user.create({
+            data: {
+              email: 'securebot@secureteam.internal',
+              passwordHash: 'bot_no_login',
+              name: 'SecureBot',
+              bio: 'Trợ lý AI thông minh của SecureTeam',
+              roleId: botRole.id,
+              isBot: true,
+              isActive: true,
+              isEmailVerified: true,
+              onlineStatus: 'online',
+            },
+          });
+        }
+        actualTargetUserId = botUser.id;
+      }
+
       // Check if target user exists and is active
       const targetUser = await db.user.findUnique({
-        where: { id: targetUserId, isActive: true },
-        select: { id: true, name: true, avatar: true },
+        where: { id: actualTargetUserId, isActive: true },
+        select: { id: true, name: true, avatar: true, isBot: true },
       });
       if (!targetUser) {
         return notFoundResponse('User not found');
@@ -52,7 +80,7 @@ export async function POST(request: NextRequest) {
       // Check if a DM channel already exists between these two users
       const existingMemberships = await db.channelMember.findMany({
         where: {
-          userId: { in: [userId, targetUserId] },
+          userId: { in: [userId, actualTargetUserId] },
           channel: { type: 'direct' },
         },
         select: {
@@ -72,7 +100,7 @@ export async function POST(request: NextRequest) {
 
       let existingChannelId: string | undefined;
       for (const [channelId, members] of channelUserMap) {
-        if (members.has(userId) && members.has(targetUserId)) {
+        if (members.has(userId) && members.has(actualTargetUserId)) {
           existingChannelId = channelId;
           break;
         }
@@ -87,7 +115,7 @@ export async function POST(request: NextRequest) {
               select: {
                 role: true,
                 user: {
-                  select: { id: true, name: true, avatar: true, onlineStatus: true },
+                  select: { id: true, name: true, avatar: true, onlineStatus: true, isBot: true },
                 },
               },
             },
@@ -99,14 +127,14 @@ export async function POST(request: NextRequest) {
       // Create new DM channel
       const channel = await db.channel.create({
         data: {
-          name: `DM: ${userId.substring(0, 6)} & ${targetUserId.substring(0, 6)}`,
+          name: targetUser.isBot ? 'DM: SecureBot' : `DM: ${userId.substring(0, 6)} & ${actualTargetUserId.substring(0, 6)}`,
           type: 'direct',
           ownerId: userId,
           members: {
             createMany: {
               data: [
                 { userId, role: 'member' },
-                { userId: targetUserId, role: 'member' },
+                { userId: actualTargetUserId, role: 'member' },
               ],
             },
           },

@@ -18,6 +18,7 @@ import {
   Trash2,
   Paperclip,
   CornerDownRight,
+  Bot,
 } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import { vi } from 'date-fns/locale'
@@ -100,6 +101,48 @@ export const MessageItem = memo(
       const showAvatar = !isConsecutive
       const senderName = message.sender?.name || 'Người dùng'
       const isOwn = isOwnMessage || message.senderId === user?.id
+      const isBot = message.sender?.isBot === true || message.senderId === 'securebot-system' || senderName === 'SecureBot'
+
+      // Special styling for bot messages
+      if (isBot) {
+        return (
+          <div ref={ref} className={cn('group relative flex gap-2 px-4 py-0.5', isConsecutive ? 'pt-0.5' : 'pt-1.5')}>
+            <div className="flex-shrink-0 w-8 pt-0.5">
+              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 shadow-sm ring-2 ring-emerald-200 dark:ring-emerald-800">
+                <Bot className="h-3.5 w-3.5 text-white" />
+              </div>
+            </div>
+            <div className="max-w-[75%] min-w-0">
+              {showAvatar && (
+                <div className="mb-0.5 flex items-center gap-1.5 pl-1">
+                  <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">SecureBot</span>
+                  <Bot className="h-3 w-3 text-emerald-500" />
+                </div>
+              )}
+              <div className="relative">
+                <div className={cn(
+                  'rounded-2xl rounded-tl-sm px-3.5 py-2 shadow-sm',
+                  'bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/30 dark:to-teal-950/30',
+                  'border border-emerald-200/50 dark:border-emerald-800/30'
+                )}>
+                  <div className="text-sm leading-relaxed break-words whitespace-pre-wrap text-foreground">
+                    {message.content}
+                  </div>
+                  <div className="flex items-center gap-1.5 mt-0.5 justify-end text-muted-foreground">
+                    {message.isEdited && <span className="text-[10px] italic">đã chỉnh sửa</span>}
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <span className="text-[10px] leading-none cursor-default">{formatTime(message.createdAt)}</span>
+                      </TooltipTrigger>
+                      <TooltipContent>{formatRelativeTime(message.createdAt)}</TooltipContent>
+                    </Tooltip>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )
+      }
 
       // Bubble corner rounding based on consecutive grouping
       const bubbleRadius = isOwn
@@ -257,7 +300,7 @@ export const MessageItem = memo(
               </div>
 
               {/* Reply count indicator — only shown if replies exist via metadata */}
-              {(message as Record<string, unknown>)?.replies && Array.isArray((message as Record<string, unknown>).replies) && (message as Record<string, unknown>).replies.length > 0 && (
+              {(message as unknown as Record<string, unknown>)?.replies && Array.isArray((message as unknown as Record<string, unknown>).replies) && ((message as unknown as Record<string, unknown>).replies as unknown[]).length > 0 && (
                 <button
                   onClick={() => onThread?.(message)}
                   className={cn(
@@ -268,7 +311,7 @@ export const MessageItem = memo(
                   )}
                 >
                   <CornerDownRight className="h-3 w-3" />
-                  {(message as Record<string, unknown>).replies.length} phản hồi
+                  {((message as unknown as Record<string, unknown>).replies as unknown[]).length} phản hồi
                 </button>
               )}
 

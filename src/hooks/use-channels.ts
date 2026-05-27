@@ -2,7 +2,6 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api'
-import type { User } from '@/stores/auth-store'
 
 export interface Channel {
   id: string
@@ -34,7 +33,14 @@ export interface ChannelMember {
   role: string
   joinedAt: string
   muted: boolean
-  user?: User
+  user?: {
+    id: string
+    name: string
+    email: string
+    avatar?: string | null
+    onlineStatus: string
+    isBot?: boolean
+  }
 }
 
 export function useChannels(type?: string, search?: string) {

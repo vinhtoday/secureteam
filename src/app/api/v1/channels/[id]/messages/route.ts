@@ -74,6 +74,7 @@ export async function GET(
               name: true,
               avatar: true,
               onlineStatus: true,
+              isBot: true,
             },
           },
           replyTo: {
@@ -201,6 +202,7 @@ async function POST(
               name: true,
               avatar: true,
               onlineStatus: true,
+              isBot: true,
             },
           },
           replyTo: replyToId

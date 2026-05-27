@@ -25,6 +25,7 @@ export interface Message {
     id: string
     name: string
     avatar?: string | null
+    isBot?: boolean
   }
   replyTo?: Message
 }

@@ -37,6 +37,7 @@ model User {
   avatar            String?
   bio               String?
   roleId            String
+  isBot             Boolean   @default(false)
   isEmailVerified   Boolean   @default(false)
   isActive          Boolean   @default(true)
   isLocked          Boolean   @default(false)

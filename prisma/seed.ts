@@ -17,6 +17,17 @@ async function main() {
   await db.encryptionKey.deleteMany();
   await db.session.deleteMany();
   await db.channel.deleteMany();
+  await db.taskLabel.deleteMany();
+  await db.label.deleteMany();
+  await db.taskActivity.deleteMany();
+  await db.taskComment.deleteMany();
+  await db.taskAttachment.deleteMany();
+  await db.taskAssignment.deleteMany();
+  await db.task.deleteMany();
+  await db.callRecording.deleteMany();
+  await db.callParticipant.deleteMany();
+  await db.callRoom.deleteMany();
+  await db.notification.deleteMany();
   await db.user.deleteMany();
   await db.role.deleteMany();
 

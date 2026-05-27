@@ -2,8 +2,8 @@
 // DELETE /api/v1/calls/[id] — End a call
 import { NextRequest } from 'next/server'
 import { db } from '@/lib/db'
-import { withAuth, getUserId } from '@/lib/auth-middleware'
-import { successResponse, notFoundResponse, serverErrorResponse } from '@/lib/api-response'
+import { withAuth, getUserId, getUserRole } from '@/lib/auth-middleware'
+import { successResponse, notFoundResponse, forbiddenResponse, serverErrorResponse } from '@/lib/api-response'
 
 export async function GET(
   request: NextRequest,
@@ -47,12 +47,24 @@ export async function DELETE(
   return withAuth(async (req) => {
     try {
       const userId = getUserId(req)
+      const userRole = getUserRole(req)
       const { id } = await context.params
 
-      // Fetch existing call to compute duration
+      // Fetch existing call
       const existingCall = await db.callRoom.findUnique({ where: { id } })
       if (!existingCall) {
         return notFoundResponse('Call not found')
+      }
+
+      // Permission check: only host, admin, or SUPER_ADMIN can end call via DELETE
+      const participant = await db.callParticipant.findUnique({
+        where: { callId_userId: { callId: id, userId } },
+      })
+      const isHost = participant?.role === 'host' || participant?.role === 'co_host'
+      const isAdmin = ['SUPER_ADMIN', 'ADMIN'].includes(userRole || '')
+
+      if (!isHost && !isAdmin && existingCall.createdBy !== userId) {
+        return forbiddenResponse('Bạn không có quyền kết thúc cuộc gọi này')
       }
 
       const duration = Math.floor(

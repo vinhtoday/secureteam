@@ -2,7 +2,7 @@
 import { NextRequest } from 'next/server';
 import { z } from 'zod';
 import { db } from '@/lib/db';
-import { withAuth, getUserId, type AuthenticatedRequest } from '@/lib/auth-middleware';
+import { withAuth, type AuthenticatedRequest } from '@/lib/auth-middleware';
 import {
   successResponse,
   notFoundResponse,
@@ -37,14 +37,14 @@ export async function PATCH(
         return validationResponse(errors);
       }
 
-      const label = await db.taskLabel.findUnique({ where: { id } });
+      const label = await db.label.findUnique({ where: { id } });
       if (!label) {
         return notFoundResponse('Nhãn không tồn tại');
       }
 
       // Check for duplicate name if changing name
       if (result.data.name && result.data.name !== label.name) {
-        const existing = await db.taskLabel.findUnique({
+        const existing = await db.label.findUnique({
           where: { name: result.data.name },
         });
         if (existing) {
@@ -52,7 +52,7 @@ export async function PATCH(
         }
       }
 
-      const updated = await db.taskLabel.update({
+      const updated = await db.label.update({
         where: { id },
         data: result.data,
         select: {
@@ -64,12 +64,17 @@ export async function PATCH(
             select: { id: true, name: true },
           },
           _count: {
-            select: { assignments: true },
+            select: { taskLabels: true },
           },
         },
       });
 
-      return successResponse(updated);
+      const mapped = {
+        ...updated,
+        _count: { assignments: updated._count.taskLabels },
+      };
+
+      return successResponse(mapped);
     } catch (error) {
       console.error('Update label error:', error);
       return serverErrorResponse('Không thể cập nhật nhãn');
@@ -86,7 +91,7 @@ export async function DELETE(
     try {
       const { id } = await context.params;
 
-      const label = await db.taskLabel.findUnique({
+      const label = await db.label.findUnique({
         where: { id },
         select: { id: true, name: true },
       });
@@ -94,8 +99,8 @@ export async function DELETE(
         return notFoundResponse('Nhãn không tồn tại');
       }
 
-      // Cascade will delete TaskLabelAssignment records
-      await db.taskLabel.delete({ where: { id } });
+      // Cascade will delete TaskLabel junction records
+      await db.label.delete({ where: { id } });
 
       return successResponse({ id, name: label.name, deleted: true });
     } catch (error) {

@@ -449,7 +449,7 @@ export function useSocket() {
       socket.disconnect()
       socketRef.current = null
     }
-  }, [isAuthenticated, user])
+  }, [isAuthenticated, user?.id])
 
   return {
     isConnected,

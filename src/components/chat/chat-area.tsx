@@ -171,9 +171,8 @@ export function ChatArea({
     async (message: Message) => {
       if (confirm('Bạn có chắc muốn xóa tin nhắn này?')) {
         try {
-          await fetch(`/api/v1/channels/${channelId}/messages/${message.id}`, {
-            method: 'DELETE',
-          })
+          const { api } = await import('@/lib/api')
+          await api.delete(`/api/v1/channels/${channelId}/messages/${message.id}`)
           queryClient.invalidateQueries({ queryKey: ['messages', channelId] })
         } catch {
           // Silent fail

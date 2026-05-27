@@ -60,7 +60,7 @@ export async function POST(
           callId,
           type,
           status: 'processing',
-          startedBy: userId,
+          startedById: userId,
         },
         include: {
           starter: {

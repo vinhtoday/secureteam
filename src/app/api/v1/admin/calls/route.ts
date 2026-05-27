@@ -66,7 +66,7 @@ export async function GET(request: NextRequest) {
                 status: true,
                 duration: true,
                 createdAt: true,
-                startedBy: true,
+                startedById: true,
               },
             },
             channel: {

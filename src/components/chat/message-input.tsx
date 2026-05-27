@@ -190,11 +190,50 @@ export function MessageInput({
                 variant="ghost"
                 size="icon"
                 className="h-9 w-9 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-                disabled
+                disabled={disabled}
+                onClick={() => document.getElementById('file-upload-input')?.click()}
                 aria-label="Đính kèm tệp"
               >
                 <Paperclip className="h-5 w-5" />
               </Button>
+              <input
+                id="file-upload-input"
+                type="file"
+                className="hidden"
+                accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.zip,.rar,.txt,.csv"
+                max-size={10485760}
+                onChange={async (e) => {
+                  const file = e.target.files?.[0]
+                  if (!file) return
+                  if (file.size > 10 * 1024 * 1024) {
+                    if (typeof window !== 'undefined') {
+                      const { toast } = await import('sonner')
+                      toast.error('File quá lớn. Tối đa 10MB.')
+                    }
+                    e.target.value = ''
+                    return
+                  }
+                  // Call onSend with file metadata
+                  const formData = new FormData()
+                  formData.append('file', file)
+                  try {
+                    const { api } = await import('@/lib/api')
+                    const res = await api.post('/api/v1/upload', formData, {
+                      headers: { 'Content-Type': 'multipart/form-data' },
+                    })
+                    const fileData = res.data
+                    if (fileData?.url) {
+                      onSend(fileData.url, 'file')
+                    }
+                  } catch {
+                    if (typeof window !== 'undefined') {
+                      const { toast } = await import('sonner')
+                      toast.error('Không thể tải lên file.')
+                    }
+                  }
+                  e.target.value = ''
+                }}
+              />
             </TooltipTrigger>
             <TooltipContent>Tệp đính kèm (tối đa 10MB)</TooltipContent>
           </Tooltip>

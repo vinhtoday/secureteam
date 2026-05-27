@@ -59,8 +59,7 @@ export async function POST(request: NextRequest) {
         .digest('hex')
         .substring(0, 6);
 
-      // For demo purposes, also accept "123456" as a valid code
-      const isValid = code === expectedCode || code === '123456';
+      const isValid = code === expectedCode;
 
       if (!isValid) {
         return errorResponse(

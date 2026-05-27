@@ -41,12 +41,8 @@ export function CallParticipants({ onClose }: CallParticipantsProps) {
     const callId = useCallStore.getState().currentCall?.id
     if (!callId) return
     try {
-      await fetch(`/api/v1/calls/${callId}/mute`, {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: targetUserId, mute: true }),
-      })
+      const { api } = await import('@/lib/api')
+      await api.post(`/api/v1/calls/${callId}/mute`, { userId: targetUserId, mute: true })
     } catch {
       // Silent
     }

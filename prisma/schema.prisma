@@ -61,12 +61,14 @@ model User {
   createdCalls    CallRoom[]       @relation("CallCreator")
   callParticipations CallParticipant[] @relation("CallParticipant")
   taskCreated      Task[]            @relation("TaskCreator")
+  createdLabels    Label[]           @relation("LabelCreator")
   taskAssignments  TaskAssignment[]
   taskActivities   TaskActivity[]
   taskComments     TaskComment[]
   taskAttachments  TaskAttachment[]
   notifications    Notification[]    @relation("NotificationRecipient")
-  sentNotifications Notification[] @relation("NotificationSender")
+  sentNotifications  Notification[]     @relation("NotificationSender")
+  startedRecordings CallRecording[]   @relation("RecordingStarter")
 
   @@index([roleId])
   @@index([isActive])
@@ -266,33 +268,45 @@ model CallParticipant {
 // ============================================
 
 model Task {
-  id            String   @id @default(cuid())
-  title         String
-  description   String?
-  status        String   @default("todo") // todo, in_progress, done
-  priority      String   @default("medium") // low, medium, high, urgent
-  dueDate       DateTime?
-  channelId     String?
-  createdById   String
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id          String    @id @default(cuid())
+  title       String
+  description String?
+  status      String    @default("todo") // todo, in_progress, review, done, cancelled
+  priority    String    @default("medium") // low, medium, high, urgent
+  progress    Int       @default(0)
+  startDate   DateTime?
+  dueDate     DateTime?
+  completedAt DateTime?
+  channelId   String?
+  parentId    String?
+  position    Int       @default(0)
+  isArchived  Boolean   @default(false)
+  createdBy   String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
-  creator       User     @relation("TaskCreator", fields: [createdById], references: [id])
-  assignees     TaskAssignment[]
-  comments      TaskComment[]
-  activities    TaskActivity[]
-  attachments   TaskAttachment[]
-  labels        TaskLabel[]
+  parent       Task?           @relation("TaskSubtask", fields: [parentId], references: [id], onDelete: SetNull)
+  children     Task[]          @relation("TaskSubtask")
+  creator      User            @relation("TaskCreator", fields: [createdBy], references: [id])
+  assignees    TaskAssignment[]
+  comments     TaskComment[]
+  activities   TaskActivity[]
+  attachments  TaskAttachment[]
+  labels       TaskLabel[]
 
   @@index([status])
-  @@index([createdById])
+  @@index([createdBy])
   @@index([channelId])
+  @@index([parentId])
+  @@index([position])
+  @@index([isArchived])
 }
 
 model TaskAssignment {
-  id        String   @id @default(cuid())
-  taskId    String
-  userId    String
+  id         String   @id @default(cuid())
+  taskId     String
+  userId     String
+  assignedBy String?
   assignedAt DateTime @default(now())
 
   task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
@@ -308,6 +322,7 @@ model TaskComment {
   taskId    String
   userId    String
   content   String
+  mentions  String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -322,8 +337,11 @@ model TaskActivity {
   id        String   @id @default(cuid())
   taskId    String
   userId    String
-  action    String // created, updated, status_changed, assigned, commented
+  action    String // created, updated, status_changed, assigned, commented, reordered, bulk_updated
+  oldValue   String?
+  newValue   String?
   details   String?
+  metadata  String?
   createdAt DateTime @default(now())
 
   task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
@@ -348,15 +366,32 @@ model TaskAttachment {
   @@index([taskId])
 }
 
+// Label (standalone entity)
+model Label {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  color     String   @default("#6366f1")
+  createdBy String
+  createdAt DateTime @default(now())
+
+  creator     User        @relation("LabelCreator", fields: [createdBy], references: [id])
+  taskLabels TaskLabel[] @relation("LabelTaskLabels")
+
+  @@index([createdBy])
+}
+
+// TaskLabel junction table
 model TaskLabel {
-  id     String @id @default(cuid())
-  name   String
-  color  String @default("#6366f1")
-  taskId String
+  id      String @id @default(cuid())
+  taskId  String
+  labelId String
 
-  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  task  Task  @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  label Label @relation("LabelTaskLabels", fields: [labelId], references: [id], onDelete: Cascade)
 
+  @@unique([taskId, labelId])
   @@index([taskId])
+  @@index([labelId])
 }
 
 // ============================================
@@ -364,19 +399,21 @@ model TaskLabel {
 // ============================================
 
 model CallRecording {
-  id        String   @id @default(cuid())
-  callId    String
-  type      String   @default("audio") // audio, video
-  status    String   @default("active") // active, stopped, processing
-  startedBy String
-  duration  Int      @default(0)
- fileUrl   String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String   @id @default(cuid())
+  callId      String
+  type        String   @default("audio") // audio, video
+  status      String   @default("active") // active, stopped, processing
+  startedById String
+  duration    Int      @default(0)
+  fileUrl     String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-  call CallRoom @relation(fields: [callId], references: [id], onDelete: Cascade)
+  call    CallRoom @relation(fields: [callId], references: [id], onDelete: Cascade)
+  starter User    @relation("RecordingStarter", fields: [startedById], references: [id])
 
   @@index([callId])
+  @@index([startedById])
 }
 
 // ============================================

@@ -230,24 +230,31 @@ async function getChannelInfo(args: Record<string, unknown>, context: ToolContex
 async function getMyTasks(args: Record<string, unknown>, context: ToolContext): Promise<ToolResult> {
   const status = args.status as string | undefined
 
-  // Check if Task model exists in the DB
   try {
     const where: Record<string, unknown> = { assignees: { some: { userId: context.userId } } }
-    if (status && ['todo', 'in_progress', 'done'].includes(status)) {
+    if (status && ['todo', 'in_progress', 'review', 'done', 'cancelled'].includes(status)) {
       where.status = status
     }
+    where.isArchived = false
 
-    // Use raw query to check for Task model
-    const tasks = await db.$queryRawUnsafe(`
-      SELECT t.id, t.title, t.description, t.status, t.priority, t.dueDate, t.createdAt,
-             (SELECT COUNT(*) FROM TaskAssignment WHERE taskId = t.id) as assigneeCount
-      FROM Task t
-      INNER JOIN TaskAssignment ta ON t.id = ta.taskId
-      WHERE ta.userId = '${context.userId}'
-      ${status ? `AND t.status = '${status}'` : ''}
-      ORDER BY t.updatedAt DESC
-      LIMIT 20
-    `) as Array<Record<string, unknown>>
+    const tasks = await db.task.findMany({
+      where,
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        status: true,
+        priority: true,
+        progress: true,
+        dueDate: true,
+        createdAt: true,
+        _count: {
+          select: { assignees: true },
+        },
+      },
+      orderBy: { updatedAt: 'desc' },
+      take: 20,
+    })
 
     return {
       success: true,
@@ -256,15 +263,17 @@ async function getMyTasks(args: Record<string, unknown>, context: ToolContext): 
         tasks: tasks.map((t) => ({
           id: t.id,
           title: t.title,
+          description: t.description,
           status: t.status,
           priority: t.priority,
+          progress: t.progress,
           dueDate: t.dueDate,
+          assigneeCount: t._count.assignees,
           createdAt: t.createdAt,
         })),
       },
     }
   } catch {
-    // Task model might not exist yet
     return {
       success: true,
       data: { message: 'Tính năng Task Management chưa được thiết lập trong hệ thống.' },
@@ -279,26 +288,48 @@ async function createTask(args: Record<string, unknown>, context: ToolContext): 
   }
 
   try {
-    // Try to create task via raw SQL (in case Task model exists)
-    const taskId = `task_${Date.now()}`
     const assigneeId = (args.assignee_id as string) || context.userId
     const priority = (args.priority as string) || 'medium'
     const description = (args.description as string) || ''
 
-    await db.$executeRawUnsafe(`
-      INSERT INTO Task (id, title, description, status, priority, createdById, createdAt, updatedAt)
-      VALUES ('${taskId}', '${title.replace(/'/g, "''")}', '${description.replace(/'/g, "''")}', 'todo', '${priority}', '${context.userId}', datetime('now'), datetime('now'))
-    `)
-
-    await db.$executeRawUnsafe(`
-      INSERT INTO TaskAssignment (id, taskId, userId, assignedAt)
-      VALUES ('ta_${Date.now()}', '${taskId}', '${assigneeId}', datetime('now'))
-    `)
-
-    // Get assignee name
+    // Validate assignee exists
     const assignee = await db.user.findUnique({
       where: { id: assigneeId },
-      select: { name: true },
+      select: { id: true, name: true },
+    })
+
+    const task = await db.task.create({
+      data: {
+        title,
+        description: description || null,
+        status: 'todo',
+        priority,
+        createdBy: context.userId,
+        assignees: {
+          create: {
+            userId: assigneeId,
+            assignedBy: context.userId,
+          },
+        },
+      },
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        status: true,
+        priority: true,
+        createdAt: true,
+      },
+    })
+
+    // Create activity log
+    await db.taskActivity.create({
+      data: {
+        taskId: task.id,
+        userId: context.userId,
+        action: 'created',
+        newValue: JSON.stringify({ title, status: 'todo', priority }),
+      },
     })
 
     return {
@@ -306,7 +337,7 @@ async function createTask(args: Record<string, unknown>, context: ToolContext): 
       data: {
         message: `Đã tạo task thành công!`,
         task: {
-          id: taskId,
+          id: task.id,
           title,
           description,
           status: 'todo',

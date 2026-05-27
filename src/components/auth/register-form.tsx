@@ -87,13 +87,13 @@ export function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
   }
 
   return (
-    <Card className="w-full max-w-md border border-border/50 shadow-xl sm:shadow-lg sm:border bg-card/80 backdrop-blur-sm">
+    <Card className="w-full max-w-md glass-card shadow-2xl rounded-3xl glow-purple p-2 animate-in fade-in zoom-in duration-300">
       <CardHeader className="text-center pb-2">
-        <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-400 to-emerald-600 shadow-lg shadow-emerald-500/25">
+        <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-500 to-indigo-600 shadow-lg shadow-violet-500/20 transition-all hover:scale-105 duration-300">
           <Shield className="h-8 w-8 text-white" />
         </div>
-        <CardTitle className="text-2xl font-bold tracking-tight">Tạo tài khoản</CardTitle>
-        <CardDescription className="mt-1.5">
+        <CardTitle className="text-3xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-violet-600 to-indigo-600 dark:from-violet-400 dark:to-indigo-400">Tạo tài khoản</CardTitle>
+        <CardDescription className="mt-1.5 text-muted-foreground/80">
           Đăng ký để tham gia SecureTeam
         </CardDescription>
       </CardHeader>
@@ -114,7 +114,7 @@ export function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
               onChange={(e) => setName(e.target.value)}
               disabled={isLoading}
               autoComplete="name"
-              className="h-11 rounded-xl border-border/60 bg-background/50"
+              className="h-11 rounded-xl border-border/60 bg-background/50 focus-visible:ring-violet-500/30 focus-visible:border-violet-500"
             />
           </div>
           <div className="space-y-2">
@@ -127,7 +127,7 @@ export function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
               onChange={(e) => setEmail(e.target.value)}
               disabled={isLoading}
               autoComplete="email"
-              className="h-11 rounded-xl border-border/60 bg-background/50"
+              className="h-11 rounded-xl border-border/60 bg-background/50 focus-visible:ring-violet-500/30 focus-visible:border-violet-500"
             />
           </div>
           <div className="space-y-2">
@@ -141,7 +141,7 @@ export function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
                 onChange={(e) => setPassword(e.target.value)}
                 disabled={isLoading}
                 autoComplete="new-password"
-                className="h-11 rounded-xl border-border/60 bg-background/50 pr-10"
+                className="h-11 rounded-xl border-border/60 bg-background/50 pr-10 focus-visible:ring-violet-500/30 focus-visible:border-violet-500"
               />
               <button
                 type="button"
@@ -191,13 +191,13 @@ export function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
               onChange={(e) => setConfirmPassword(e.target.value)}
               disabled={isLoading}
               autoComplete="new-password"
-              className="h-11 rounded-xl border-border/60 bg-background/50"
+              className="h-11 rounded-xl border-border/60 bg-background/50 focus-visible:ring-violet-500/30 focus-visible:border-violet-500"
             />
             {confirmPassword && password !== confirmPassword && (
               <p className="text-xs text-destructive">Mật khẩu không khớp</p>
             )}
           </div>
-          <Button type="submit" className="w-full h-11 rounded-xl font-semibold shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/30 transition-all" disabled={isLoading}>
+          <Button type="submit" className="w-full h-11 rounded-xl font-semibold bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 hover:scale-[1.01] active:scale-[0.99] text-white shadow-md shadow-violet-500/20 hover:shadow-lg hover:shadow-violet-500/30 transition-all duration-200" disabled={isLoading}>
             {isLoading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />

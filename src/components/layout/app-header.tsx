@@ -68,8 +68,8 @@ export function AppHeader({
           </Button>
         )}
         <div className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-100 dark:bg-emerald-900/30">
-            <Shield className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-100 dark:bg-violet-900/30">
+            <Shield className="h-4 w-4 text-violet-600 dark:text-violet-400" />
           </div>
           <span className="hidden font-bold text-sm sm:inline-block tracking-tight">SecureTeam</span>
         </div>
@@ -90,7 +90,7 @@ export function AppHeader({
                   className={cn(
                     'flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-all duration-200',
                     isActive
-                      ? 'bg-background text-foreground shadow-sm'
+                      ? 'bg-background text-violet-600 dark:text-violet-400 shadow-sm'
                       : 'text-muted-foreground hover:text-foreground'
                   )}
                 >
@@ -134,7 +134,7 @@ export function AppHeader({
             <Button variant="ghost" className="relative h-9 gap-2 rounded-full pl-1 pr-3 hover:bg-muted">
               <Avatar className="h-7 w-7 ring-2 ring-background shadow-sm">
                 <AvatarImage src={user?.avatar || undefined} alt={user?.name} />
-                <AvatarFallback className="bg-emerald-100 text-emerald-700 text-[10px] dark:bg-emerald-900/30 dark:text-emerald-400">
+                <AvatarFallback className="bg-violet-100 text-violet-700 text-[10px] dark:bg-violet-900/30 dark:text-violet-400">
                   {user?.name ? getInitials(user.name) : '?'}
                 </AvatarFallback>
               </Avatar>

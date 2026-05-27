@@ -59,10 +59,8 @@ export async function runAgent(
   try {
     zai = await ZAI.create()
   } catch (error) {
-    console.error('[SecureBot] Failed to initialize ZAI:', error)
-    return {
-      content: 'Xin lỗi, tôi đang gặp sự cố kết nối. Vui lòng thử lại sau ít phút.',
-    }
+    console.warn('[SecureBot] ZAI SDK failed to initialize. Falling back to local agent loop.', error)
+    return runLocalFallbackAgent(userMessage, context)
   }
 
   // Agent loop
@@ -163,4 +161,184 @@ export async function runAgent(
     content: 'Xin lỗi, việc xử lý đã vượt quá giới hạn. Vui lòng thử lại.',
     toolCalls: toolCallsLog.length > 0 ? toolCallsLog : undefined,
   }
+}
+
+async function runLocalFallbackAgent(
+  userMessage: string,
+  context: AgentContext
+): Promise<AgentResponse> {
+  const text = userMessage.trim();
+  
+  // 1. Online Users
+  if (/^\s*(?:online|trực tuyến|ai online)\s*$/i.test(text)) {
+    const res = await executeTool('get_online_users', {}, { userId: context.userId, channelId: context.channelId });
+    if (res.success && res.data) {
+      const data = res.data as { message: string; users: Array<{ id: string; name: string; email: string; role: string }> };
+      if (data.users && data.users.length > 0) {
+        const usersStr = data.users.map(u => `- 🟢 **${u.name}** (${u.email}) - *${u.role}*`).join('\n');
+        return {
+          content: `🤖 **SecureBot** - Danh sách người dùng trực tuyến:\n\nHiện có **${data.users.length}** người đang online:\n${usersStr}`,
+          toolCalls: [{ name: 'get_online_users', args: {}, result: res.data }]
+        };
+      }
+      return {
+        content: `🤖 **SecureBot** - Danh sách người dùng trực tuyến:\n\nHiện tại không có người dùng nào khác đang trực tuyến.`,
+        toolCalls: [{ name: 'get_online_users', args: {}, result: res.data }]
+      };
+    }
+    return {
+      content: `🤖 **SecureBot**: Đã xảy ra lỗi khi lấy danh sách người dùng online: ${res.error || 'Lỗi không xác định'}`
+    };
+  }
+
+  // 2. Search User
+  const searchMatch = text.match(/^\s*(?:tìm nhân viên|tìm người|tìm kiếm|tìm)\s+(.+)$/i);
+  if (searchMatch) {
+    const query = searchMatch[1].trim();
+    const res = await executeTool('search_user', { query }, { userId: context.userId, channelId: context.channelId });
+    if (res.success && res.data) {
+      const data = res.data as { message: string; users: Array<{ id: string; name: string; email: string; online: boolean; role: string }> };
+      if (data.users && data.users.length > 0) {
+        const usersStr = data.users.map(u => `- **${u.name}** (${u.email}) - Vai trò: *${u.role}* - Trạng thái: ${u.online ? '🟢 Trực tuyến' : '⚫ Ngoại tuyến'}`).join('\n');
+        return {
+          content: `🤖 **SecureBot** - Kết quả tìm kiếm cho từ khóa "${query}":\n\nTìm thấy **${data.users.length}** người dùng:\n${usersStr}`,
+          toolCalls: [{ name: 'search_user', args: { query }, result: res.data }]
+        };
+      }
+      return {
+        content: `🤖 **SecureBot**: Không tìm thấy nhân viên nào khớp với từ khóa "${query}".`,
+        toolCalls: [{ name: 'search_user', args: { query }, result: res.data }]
+      };
+    }
+    return {
+      content: `🤖 **SecureBot**: Yêu cầu tìm kiếm thất bại. ${res.error || 'Từ khóa phải từ 2 ký tự trở lên.'}`
+    };
+  }
+
+  // 3. My Info / Profile
+  if (/^\s*(?:profile|thông tin của tôi|thông tin cá nhân|thông tin)\s*$/i.test(text)) {
+    const res = await executeTool('get_my_info', {}, { userId: context.userId, channelId: context.channelId });
+    if (res.success && res.data) {
+      const data = res.data as {
+        id: string;
+        name: string;
+        email: string;
+        bio?: string;
+        online: boolean;
+        role: string;
+        channelCount: number;
+        messageCount: number;
+        twoFactorEnabled: boolean;
+        joinedAt: Date | string;
+      };
+      const dateStr = new Date(data.joinedAt).toLocaleDateString('vi-VN');
+      const infoStr = `🤖 **SecureBot** - Thông tin tài khoản của bạn:
+- 👤 **Họ và tên:** ${data.name}
+- 📧 **Email:** ${data.email}
+- 🛡️ **Vai trò:** ${data.role}
+- 🟢 **Trạng thái:** ${data.online ? 'Trực tuyến' : 'Ngoại tuyến'}
+- 📝 **Tiểu sử:** ${data.bio || 'Chưa thiết lập'}
+- 💬 **Số kênh tham gia:** ${data.channelCount}
+- ✉️ **Số tin nhắn đã gửi:** ${data.messageCount}
+- 🔑 **Bảo mật 2FA:** ${data.twoFactorEnabled ? '🔒 Đã kích hoạt' : '🔓 Chưa kích hoạt'}
+- 📅 **Ngày tham gia:** ${dateStr}`;
+      return {
+        content: infoStr,
+        toolCalls: [{ name: 'get_my_info', args: {}, result: res.data }]
+      };
+    }
+    return {
+      content: `🤖 **SecureBot**: Lỗi khi truy vấn thông tin cá nhân: ${res.error || 'Lỗi không xác định'}`
+    };
+  }
+
+  // 4. List Channels
+  if (/^\s*(?:kênh của tôi|danh sách kênh|kênh)\s*$/i.test(text)) {
+    const res = await executeTool('list_channels', {}, { userId: context.userId, channelId: context.channelId });
+    if (res.success && res.data) {
+      const data = res.data as { message: string; channels: Array<{ id: string; name: string; description: string; type: string; memberCount: number; messageCount: number }> };
+      if (data.channels && data.channels.length > 0) {
+        const channelsStr = data.channels.map(ch => `- **#${ch.name}** (${ch.type === 'public' ? '📢 Công khai' : ch.type === 'private' ? '🔒 Riêng tư' : '💬 Tin nhắn trực tiếp'}) - *${ch.description || 'Không có mô tả'}* (${ch.memberCount} thành viên, ${ch.messageCount} tin nhắn)`).join('\n');
+        return {
+          content: `🤖 **SecureBot** - Kênh bạn tham gia:\n\nBạn đang có mặt trong **${data.channels.length}** kênh:\n${channelsStr}`,
+          toolCalls: [{ name: 'list_channels', args: {}, result: res.data }]
+        };
+      }
+      return {
+        content: `🤖 **SecureBot**: Bạn hiện không tham gia kênh nào.`,
+        toolCalls: [{ name: 'list_channels', args: {}, result: res.data }]
+      };
+    }
+    return {
+      content: `🤖 **SecureBot**: Không thể lấy danh sách kênh. ${res.error || 'Lỗi hệ thống'}`
+    };
+  }
+
+  // 5. My Tasks
+  if (/^\s*(?:task của tôi|danh sách task|công việc của tôi|task)\s*$/i.test(text)) {
+    const res = await executeTool('get_my_tasks', {}, { userId: context.userId, channelId: context.channelId });
+    if (res.success && res.data) {
+      const data = res.data as { message?: string; tasks?: Array<{ id: string; title: string; description: string; status: string; priority: string; progress: number; dueDate: string | null; assigneeCount: number }> };
+      if (data.tasks) {
+        if (data.tasks.length > 0) {
+          const priorityMap: Record<string, string> = { low: '🟢 Thấp', medium: '🟡 Trung bình', high: '🟠 Cao', urgent: '🔴 Khẩn cấp' };
+          const statusMap: Record<string, string> = { todo: 'Cần làm', in_progress: 'Đang làm', review: 'Đang duyệt', done: 'Hoàn thành', cancelled: 'Đã hủy' };
+          const tasksStr = data.tasks.map(t => {
+            const dueDateStr = t.dueDate ? new Date(t.dueDate).toLocaleDateString('vi-VN') : 'Không giới hạn';
+            return `- **${t.title}**\n  - Mức độ ưu tiên: ${priorityMap[t.priority] || t.priority}\n  - Trạng thái: \`${statusMap[t.status] || t.status}\` (Tiến độ: ${t.progress || 0}%)\n  - Hạn chót: ${dueDateStr}${t.description ? `\n  - Mô tả: *${t.description}*` : ''}`;
+          }).join('\n');
+          return {
+            content: `🤖 **SecureBot** - Danh sách công việc của bạn:\n\nBạn được gán **${data.tasks.length}** công việc:\n${tasksStr}`,
+            toolCalls: [{ name: 'get_my_tasks', args: {}, result: res.data }]
+          };
+        }
+        return {
+          content: `🤖 **SecureBot**: Bạn hiện không có công việc nào được giao.`,
+          toolCalls: [{ name: 'get_my_tasks', args: {}, result: res.data }]
+        };
+      }
+      return {
+        content: `🤖 **SecureBot**: ${data.message || 'Chức năng quản lý công việc chưa khả dụng.'}`,
+        toolCalls: [{ name: 'get_my_tasks', args: {}, result: res.data }]
+      };
+    }
+    return {
+      content: `🤖 **SecureBot**: Lỗi khi lấy danh sách công việc. ${res.error || 'Lỗi hệ thống'}`
+    };
+  }
+
+  // 6. Create Task
+  const createTaskMatch = text.match(/^\s*(?:tạo task|tạo công việc)\s+(.+)$/i);
+  if (createTaskMatch) {
+    const title = createTaskMatch[1].trim();
+    const res = await executeTool('create_task', { title }, { userId: context.userId, channelId: context.channelId });
+    if (res.success && res.data) {
+      const data = res.data as { message: string; task: { id: string; title: string; description: string; status: string; priority: string; assignee: string } };
+      const t = data.task;
+      const priorityStr = t.priority === 'low' ? '🟢 Thấp' : t.priority === 'medium' ? '🟡 Trung bình' : t.priority === 'high' ? '🟠 Cao' : '🔴 Khẩn cấp';
+      return {
+        content: `🤖 **SecureBot** - Tạo công việc thành công!\n\n🎉 **Thông tin công việc:**\n- 📋 **Tiêu đề:** ${t.title}\n- 👤 **Người thực hiện:** ${t.assignee}\n- ⚡ **Độ ưu tiên:** ${priorityStr}\n- ⚙️ **Trạng thái:** Cần làm`,
+        toolCalls: [{ name: 'create_task', args: { title }, result: res.data }]
+      };
+    }
+    return {
+      content: `🤖 **SecureBot**: Không thể tạo công việc. ${res.error || 'Lỗi hệ thống'}`
+    };
+  }
+
+  // Default Fallback / Greetings
+  return {
+    content: `Xin chào **${context.userName}**! Tôi là **SecureBot** 🤖, trợ lý ảo bảo mật của bạn tại SecureTeam.
+   
+Do hệ thống hiện đang chạy ở chế độ tối giản (Local Fallback), tôi sẽ hỗ trợ bạn thực hiện các thao tác thông qua danh sách lệnh nhanh sau:
+   
+- 👤 \`thông tin\` hoặc \`profile\`: Xem thông tin tài khoản cá nhân của bạn.
+- 🟢 \`online\` hoặc \`trực tuyến\`: Xem danh sách người dùng đang online.
+- 🔍 \`tìm [tên hoặc email]\`: Tìm kiếm nhân viên nhanh (Ví dụ: \`tìm Nam\`, \`tìm admin\`).
+- 💬 \`kênh\` hoặc \`danh sách kênh\`: Liệt kê các kênh bạn đã tham gia.
+- 📋 \`task\` hoặc \`danh sách task\`: Xem các công việc đang được gán cho bạn.
+- ➕ \`tạo task [tên task]\`: Tạo một công việc mới nhanh (Ví dụ: \`tạo task Viết báo cáo\`).
+   
+Hãy gõ một lệnh bất kỳ ở trên để tôi hỗ trợ nhé!`
+  };
 }

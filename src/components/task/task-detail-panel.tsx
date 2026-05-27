@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useMemo } from 'react'
 import { cn } from '@/lib/utils'
 import { useTaskStore } from '@/stores/task-store'
 import { useAuthStore } from '@/stores/auth-store'
+import { useAllUsers } from '@/hooks/use-auth'
 import {
   useTask,
   useTaskComments,
@@ -12,7 +13,6 @@ import {
   useCreateTaskComment,
   useAssignTask,
   useUnassignTask,
-  useAllUsers,
   useTaskLabels,
   type TaskComment,
   type TaskActivity,
@@ -61,37 +61,11 @@ import {
   Activity,
   ListTodo,
 } from 'lucide-react'
+import { getInitials, formatRelativeDate, isOverdue, PRIORITY_LABELS, PRIORITY_COLORS, STATUS_LABELS } from '@/lib/helpers'
 
 // ============================================
 // Helpers
 // ============================================
-
-function getInitials(name: string): string {
-  return name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2)
-}
-
-function formatRelativeDate(dateStr: string): string {
-  const date = new Date(dateStr)
-  const now = new Date()
-  const diffMs = now.getTime() - date.getTime()
-  const diffSec = Math.floor(diffMs / 1000)
-  const diffMin = Math.floor(diffSec / 60)
-  const diffHr = Math.floor(diffMin / 60)
-  const diffDay = Math.floor(diffHr / 24)
-
-  if (diffSec < 60) return 'Vừa xong'
-  if (diffMin < 60) return `${diffMin} phút trước`
-  if (diffHr < 24) return `${diffHr} giờ trước`
-  if (diffDay < 7) return `${diffDay} ngày trước`
-  return date.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })
-}
-
-function isOverdue(dateStr: string): boolean {
-  const date = new Date(dateStr)
-  const today = new Date()
-  today.setHours(23, 59, 59, 999)
-  return date < today
-}
 
 function highlightMentions(text: string): (string | { name: string })[] {
   const parts: (string | { name: string })[] = []
@@ -109,28 +83,6 @@ function highlightMentions(text: string): (string | { name: string })[] {
     parts.push(text.slice(lastIndex))
   }
   return parts
-}
-
-const STATUS_LABELS: Record<string, string> = {
-  todo: 'Cần làm',
-  in_progress: 'Đang làm',
-  review: 'Xem xét',
-  done: 'Hoàn thành',
-  cancelled: 'Đã hủy',
-}
-
-const PRIORITY_LABELS: Record<string, string> = {
-  urgent: 'Khẩn cấp',
-  high: 'Cao',
-  medium: 'Trung bình',
-  low: 'Thấp',
-}
-
-const PRIORITY_COLORS: Record<string, string> = {
-  urgent: 'bg-red-500',
-  high: 'bg-orange-500',
-  medium: 'bg-yellow-500',
-  low: 'bg-green-500',
 }
 
 function getActivityLabel(action: string, oldValue?: string, newValue?: string): string {

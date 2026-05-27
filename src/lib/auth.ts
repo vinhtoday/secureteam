@@ -4,8 +4,15 @@ import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import { JWT_EXPIRES_IN, REFRESH_TOKEN_EXPIRES_IN } from './constants';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'default-secret-change-in-production';
-const REFRESH_SECRET = process.env.REFRESH_TOKEN_SECRET || 'default-refresh-secret-change-in-production';
+const JWT_SECRET = process.env.JWT_SECRET || '';
+const REFRESH_SECRET = process.env.REFRESH_TOKEN_SECRET || '';
+
+if (!JWT_SECRET) {
+  throw new Error('[SecureTeam] JWT_SECRET environment variable is required. Set it in .env file.');
+}
+if (!REFRESH_SECRET) {
+  throw new Error('[SecureTeam] REFRESH_TOKEN_SECRET environment variable is required. Set it in .env file.');
+}
 
 /**
  * Hash a password using bcrypt with 12 salt rounds

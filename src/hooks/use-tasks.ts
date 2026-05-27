@@ -381,22 +381,6 @@ export function useTaskLabels() {
 }
 
 /**
- * Get all users for assignee search
- */
-export function useAllUsers(params?: { search?: string; limit?: number }) {
-  return useQuery({
-    queryKey: ['users', 'all', params],
-    queryFn: async () => {
-      const sp = new URLSearchParams()
-      if (params?.search) sp.set('search', params.search)
-      if (params?.limit) sp.set('limit', String(params.limit))
-      const res = await api.get<Array<{ id: string; name: string; avatar?: string | null; email?: string; department?: string }>>(`/api/v1/users?${sp.toString()}`)
-      return res
-    },
-  })
-}
-
-/**
  * Create a new label
  */
 export function useCreateLabel() {

@@ -55,35 +55,31 @@
 
 - Node.js 20+ or Bun
 - SQLite (included via Prisma)
+- TURN server credentials (get free ones at [metered.ca](https://www.metered.ca/tools/openrelay))
 
 ### Installation
 
 ```bash
 # 1. Clone and install dependencies
-git clone https://github.com/your-username/secureteam.git
+git clone https://github.com/vinhtoday/secureteam.git
 cd secureteam
 bun install
 
 # 2. Configure environment
 cp .env.example .env
-# Edit .env with your JWT secrets and settings
+# Edit .env — set JWT secrets and TURN credentials
 
 # 3. Initialize database
 npx prisma generate
 npx prisma db push
 
 # 4. Seed sample data
-npx tsx prisma/seed.ts
+bun run seed
 ```
 
 ### Development
 
 ```bash
-# Option A: Run both servers (Next.js + Socket.io)
-chmod +x run-servers.sh
-./run-servers.sh
-
-# Option B: Run individually
 # Terminal 1 — Next.js (port 3000)
 bun run dev
 
@@ -99,9 +95,8 @@ bun run index.ts
 # Build
 bun run build
 
-# Run
-chmod +x start.sh
-./start.sh
+# Run (standalone)
+bun run start
 ```
 
 ### Docker
@@ -148,17 +143,18 @@ secureteam/
 │   │   └── providers.tsx           # Theme, QueryClient, Toaster
 │   ├── hooks/                      # React Query hooks (auth, channels, messages, tasks, calls, etc.)
 │   ├── stores/                     # Zustand stores (auth, call, task)
-│   └── lib/
-│       ├── db.ts                   # Prisma singleton
-│       ├── api.ts                  # Client API wrapper (auto token refresh)
-│       ├── auth.ts                 # JWT, bcrypt, TOTP
-│       ├── auth-middleware.ts      # Route handler auth wrapper
-│       ├── rbac-middleware.ts      # Role-based access control
-│       ├── webrtc.ts               # WebRTC manager (ICE, peer connections, signaling)
-│       ├── notification-helper.ts  # Notification helpers
-│       ├── constants.ts            # Error codes, limits
-│       ├── utils.ts                # cn() utility
-│       └── bot/                    # SecureBot AI agent
+│   ├── lib/
+│   │   ├── db.ts                   # Prisma singleton
+│   │   ├── api.ts                  # Client API wrapper (auto token refresh)
+│   │   ├── auth.ts                 # JWT, bcrypt, TOTP
+│   │   ├── auth-middleware.ts      # Route handler auth wrapper
+│   │   ├── rbac-middleware.ts      # Role-based access control
+│   │   ├── webrtc.ts               # WebRTC manager (ICE, peer connections, signaling)
+│   │   ├── helpers.ts              # Shared UI helpers (getInitials, priorities, dates)
+│   │   ├── notification-helper.ts  # Notification helpers
+│   │   ├── constants.ts            # Error codes, limits
+│   │   ├── utils.ts                # cn() utility
+│   │   └── bot/                    # SecureBot AI agent
 ├── mini-services/
 │   └── chat-service/index.ts       # Socket.io server (12 call event handlers)
 ├── prisma/
@@ -312,17 +308,17 @@ See source code for full endpoint listing.
 # Database
 DATABASE_URL=file:./db/custom.db
 
-# JWT Secrets (MUST change in production)
+# JWT Secrets (MUST set in production)
 JWT_SECRET=your-super-secret-jwt-key
 REFRESH_TOKEN_SECRET=your-super-secret-refresh-key
 
 # App
 NEXT_PUBLIC_APP_URL=http://localhost:3000
-NEXT_PUBLIC_SOCKET_PORT=3004
+SOCKET_PORT=3004
 
-# TURN Server (for WebRTC)
-TURN_SERVER_USERNAME=
-TURN_SERVER_CREDENTIAL=
+# TURN Server (for WebRTC — get free credentials at metered.ca)
+NEXT_PUBLIC_TURN_USERNAME=
+NEXT_PUBLIC_TURN_CREDENTIAL=
 ```
 
 ---
@@ -371,4 +367,4 @@ TURN_SERVER_CREDENTIAL=
 
 ## License
 
-Private — SecureTeam Enterprise
+MIT

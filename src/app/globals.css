@@ -143,10 +143,7 @@
     line-height: 1.5;
     border-radius: 8px;
   }
-}
-
-/* Custom scrollbar */
-@layer base {
+  /* Custom scrollbar */
   ::-webkit-scrollbar {
     width: 6px;
     height: 6px;

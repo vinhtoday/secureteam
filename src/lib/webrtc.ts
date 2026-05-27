@@ -1,27 +1,25 @@
 // SecureTeam - WebRTC Manager (Simplified & Robust)
 import type { Socket } from 'socket.io-client'
 
+// Build ICE servers from environment variables with STUN fallbacks
+const TURN_USERNAME = process.env.NEXT_PUBLIC_TURN_USERNAME || ''
+const TURN_CREDENTIAL = process.env.NEXT_PUBLIC_TURN_CREDENTIAL || ''
+
+const iceServers: RTCIceServer[] = [
+  { urls: 'stun:stun.l.google.com:19302' },
+  { urls: 'stun:stun1.l.google.com:19302' },
+]
+
+if (TURN_USERNAME && TURN_CREDENTIAL) {
+  iceServers.push(
+    { urls: 'turn:a.relay.metered.ca:80', username: TURN_USERNAME, credential: TURN_CREDENTIAL },
+    { urls: 'turn:a.relay.metered.ca:443', username: TURN_USERNAME, credential: TURN_CREDENTIAL },
+    { urls: 'turn:a.relay.metered.ca:443?transport=tcp', username: TURN_USERNAME, credential: TURN_CREDENTIAL },
+  )
+}
+
 const ICE_SERVERS: RTCConfiguration = {
-  iceServers: [
-    { urls: 'stun:stun.l.google.com:19302' },
-    { urls: 'stun:stun1.l.google.com:19302' },
-    { urls: 'stun:stun.relay.metered.ca:80' },
-    {
-      urls: 'turn:a.relay.metered.ca:80',
-      username: 'e2daa6e6b42c37e1bf43a34f',
-      credential: 'dQRmFNHvT1F0iI8A',
-    },
-    {
-      urls: 'turn:a.relay.metered.ca:443',
-      username: 'e2daa6e6b42c37e1bf43a34f',
-      credential: 'dQRmFNHvT1F0iI8A',
-    },
-    {
-      urls: 'turn:a.relay.metered.ca:443?transport=tcp',
-      username: 'e2daa6e6b42c37e1bf43a34f',
-      credential: 'dQRmFNHvT1F0iI8A',
-    },
-  ],
+  iceServers,
   iceCandidatePoolSize: 10,
 }
 
@@ -53,6 +51,21 @@ class WebRTCManager {
   private negotiationRole = new Map<string, 'caller' | 'callee'>()
   // Track local user ID to prevent self-signaling
   private localUserId: string = ''
+
+  /**
+   * Destroy all state for a peer connection.
+   * Closes the PC (if provided or found) and removes from all tracking maps.
+   */
+  private destroyPeer(userId: string, pc?: RTCPeerConnection | null) {
+    const conn = pc || this.peerConnections.get(userId)
+    if (conn) {
+      try { conn.close() } catch { /* already closed */ }
+    }
+    this.peerConnections.delete(userId)
+    this.remoteStreamsMap.delete(userId)
+    this.negotiationRole.delete(userId)
+    this.pendingIceCandidates.delete(userId)
+  }
 
   initSocket(socket: Socket) {
     this.socket = socket
@@ -264,20 +277,11 @@ class WebRTCManager {
     const existing = this.peerConnections.get(userId)
     if (existing) {
       if (existing.signalingState === 'closed') {
-        existing.close()
-        this.peerConnections.delete(userId)
-        this.remoteStreamsMap.delete(userId)
-        this.negotiationRole.delete(userId)
-        this.pendingIceCandidates.delete(userId)
+        this.destroyPeer(userId, existing)
       } else if (existing.signalingState === 'have-remote-offer') {
         // Glare: remote side also sent an offer. Politeness: the offer from the side that didn't go through createOffer wins.
-        // Since we're being asked to create an offer, close the existing PC and create fresh.
         console.warn(`[WebRTC] Glare for ${userId}: we have remote offer but creating new offer. Closing old PC.`)
-        existing.close()
-        this.peerConnections.delete(userId)
-        this.remoteStreamsMap.delete(userId)
-        this.negotiationRole.delete(userId)
-        this.pendingIceCandidates.delete(userId)
+        this.destroyPeer(userId, existing)
       } else if (existing.signalingState === 'stable') {
         // Already stable (previous negotiation completed) — this is an ICE restart or re-negotiation
         // Safe to create a new offer on the existing PC
@@ -322,44 +326,14 @@ class WebRTCManager {
     const existing = this.peerConnections.get(userId)
     if (existing) {
       const state = existing.signalingState
-      if (state === 'closed') {
-        existing.close()
-        this.peerConnections.delete(userId)
-        this.remoteStreamsMap.delete(userId)
-        this.negotiationRole.delete(userId)
-        this.pendingIceCandidates.delete(userId)
-      } else if (state === 'have-local-offer') {
-        // Glare: we also sent an offer. Be polite: accept the remote offer, discard ours.
-        console.warn(`[WebRTC] Glare for ${userId}: we have local offer but received remote offer. Accepting remote, discarding ours.`)
-        existing.close()
-        this.peerConnections.delete(userId)
-        this.remoteStreamsMap.delete(userId)
-        this.negotiationRole.delete(userId)
-        this.pendingIceCandidates.delete(userId)
-      } else if (state === 'have-remote-pranswer') {
-        // We're already in the middle of answering — close and restart
-        console.warn(`[WebRTC] PC for ${userId} in have-remote-pranswer, recreating`)
-        existing.close()
-        this.peerConnections.delete(userId)
-        this.remoteStreamsMap.delete(userId)
-        this.negotiationRole.delete(userId)
-        this.pendingIceCandidates.delete(userId)
-      } else if (state === 'have-remote-offer') {
-        // Already have a remote offer — just recreate the answer (duplicate offer)
-        console.warn(`[WebRTC] Duplicate offer for ${userId}, recreating answer`)
-        existing.close()
-        this.peerConnections.delete(userId)
-        this.remoteStreamsMap.delete(userId)
-        this.negotiationRole.delete(userId)
-        this.pendingIceCandidates.delete(userId)
-      } else if (state === 'stable') {
+      if (state !== 'stable') {
+        // Any non-stable state: close and recreate
+        console.warn(`[WebRTC] Closing PC for ${userId} (state=${state}), recreating for new offer`)
+        this.destroyPeer(userId, existing)
+      } else {
         // Already stable from a previous negotiation — close and start fresh
         console.log(`[WebRTC] PC for ${userId} stable, closing for new offer`)
-        existing.close()
-        this.peerConnections.delete(userId)
-        this.remoteStreamsMap.delete(userId)
-        this.negotiationRole.delete(userId)
-        this.pendingIceCandidates.delete(userId)
+        this.destroyPeer(userId, existing)
       }
     }
 
@@ -411,28 +385,14 @@ class WebRTCManager {
         console.log(`[WebRTC] Answer set for ${userId}, state=${pc.signalingState}`)
       } else if (pc.signalingState === 'stable') {
         // PC is already stable — this means the offer was lost or the PC was recreated
-        console.warn(`[WebRTC] PC for ${userId} is 'stable' when receiving answer. This means the offer was not properly set. Recreating PC...`)
-        // Nuclear option: destroy and recreate the PC, then we'll need a new offer/answer cycle
-        pc.close()
-        this.peerConnections.delete(userId)
-        this.remoteStreamsMap.delete(userId)
-        this.negotiationRole.delete(userId)
-        this.pendingIceCandidates.delete(userId)
-        // The caller side will need to re-negotiate. We can't do anything here without a new offer.
-        // The connection may recover via ICE restart or the user can re-join.
+        console.warn(`[WebRTC] PC for ${userId} is 'stable' when receiving answer. Recreating PC...`)
+        this.destroyPeer(userId, pc)
       } else if (pc.signalingState === 'have-remote-offer') {
         // We somehow have a remote offer — this means both sides think they're the caller (glare)
-        console.warn(`[WebRTC] Glare detected for ${userId}: we have a remote offer but received an answer. Closing and recreating.`)
-        pc.close()
-        this.peerConnections.delete(userId)
-        this.remoteStreamsMap.delete(userId)
-        this.negotiationRole.delete(userId)
-        this.pendingIceCandidates.delete(userId)
+        console.warn(`[WebRTC] Glare detected for ${userId}: we have a remote offer but received an answer.`)
+        this.destroyPeer(userId, pc)
       } else if (pc.signalingState === 'closed') {
-        this.peerConnections.delete(userId)
-        this.remoteStreamsMap.delete(userId)
-        this.negotiationRole.delete(userId)
-      } else {
+        this.destroyPeer(userId, pc) } else {
         console.warn(`[WebRTC] Unexpected signaling state ${pc.signalingState} for ${userId} when handling answer`)
       }
     } catch (error) {

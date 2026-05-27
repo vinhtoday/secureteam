@@ -5,6 +5,7 @@ import { useAuthStore } from '@/stores/auth-store'
 import { LoginForm } from '@/components/auth/login-form'
 import { RegisterForm } from '@/components/auth/register-form'
 import { AppHeader } from '@/components/layout/app-header'
+import { AdminSidebar, navItems, type NavItem } from '@/components/layout/admin-sidebar'
 import { ChatSidebar } from '@/components/chat/chat-sidebar'
 import { ChatArea } from '@/components/chat/chat-area'
 import { CallManager } from '@/components/call/call-manager'
@@ -14,30 +15,9 @@ import { MessageViewer } from '@/components/admin/message-viewer'
 import { AuditLogViewer } from '@/components/admin/audit-log-viewer'
 import { useSocket } from '@/hooks/use-socket'
 import { useChannel } from '@/hooks/use-channels'
-import { Button } from '@/components/ui/button'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { Separator } from '@/components/ui/separator'
-import {
-  MessageSquare,
-  LayoutDashboard,
-  Users,
-  Search,
-  FileText,
-  LogOut,
-  Shield,
-} from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 type AuthView = 'login' | 'register'
-type NavItem = 'chat' | 'admin-dashboard' | 'user-management' | 'message-viewer' | 'audit-logs'
-
-const navItems: { id: NavItem; label: string; icon: React.ElementType; adminOnly: boolean }[] = [
-  { id: 'chat', label: 'Tin nhắn', icon: MessageSquare, adminOnly: false },
-  { id: 'admin-dashboard', label: 'Thống kê', icon: LayoutDashboard, adminOnly: true },
-  { id: 'user-management', label: 'Người dùng', icon: Users, adminOnly: true },
-  { id: 'message-viewer', label: 'Xem tin nhắn', icon: Search, adminOnly: true },
-  { id: 'audit-logs', label: 'Nhật ký', icon: FileText, adminOnly: true },
-]
 
 export default function Home() {
   const [authView, setAuthView] = useState<AuthView>('login')
@@ -197,65 +177,5 @@ export default function Home() {
         </div>
       )}
     </div>
-  )
-}
-
-/* ===== Admin Sidebar Component ===== */
-function AdminSidebar({
-  activeItem,
-  onNavigate,
-  onLogout,
-  isAdmin,
-}: {
-  activeItem: NavItem
-  onNavigate: (item: NavItem) => void
-  onLogout: () => void
-  isAdmin: boolean
-}) {
-  const availableItems = navItems.filter(
-    (item) => !item.adminOnly || isAdmin
-  )
-
-  return (
-    <aside className="flex h-full w-60 flex-col border-r bg-sidebar">
-      <div className="flex h-14 items-center gap-2.5 border-b px-4">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-100 dark:bg-emerald-900/30">
-          <Shield className="h-4.5 w-4.5 text-emerald-600 dark:text-emerald-400" />
-        </div>
-        <span className="font-bold text-sm tracking-tight">SecureTeam</span>
-      </div>
-      <ScrollArea className="flex-1 py-2">
-        <nav className="flex flex-col gap-1 px-3">
-          {availableItems.map((item) => (
-            <Button
-              key={item.id}
-              variant="ghost"
-              className={cn(
-                'h-9 justify-start gap-2.5 px-3 text-sm font-normal rounded-lg transition-colors',
-                activeItem === item.id
-                  ? 'bg-emerald-50 text-emerald-700 font-medium dark:bg-emerald-900/20 dark:text-emerald-400'
-                  : 'text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
-              )}
-              onClick={() => onNavigate(item.id)}
-            >
-              <item.icon className="h-4 w-4" />
-              {item.label}
-            </Button>
-          ))}
-        </nav>
-      </ScrollArea>
-      <Separator />
-      <div className="p-3">
-        <Button
-          variant="ghost"
-          size="sm"
-          className="w-full justify-start gap-2 text-muted-foreground hover:text-destructive rounded-lg"
-          onClick={onLogout}
-        >
-          <LogOut className="h-4 w-4" />
-          Đăng xuất
-        </Button>
-      </div>
-    </aside>
   )
 }

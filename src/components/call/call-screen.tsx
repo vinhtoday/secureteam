@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { cn } from '@/lib/utils'
+import { getInitials, getAvatarColor } from '@/lib/helpers'
 import {
   Mic,
   MicOff,
@@ -24,30 +25,7 @@ import { useSocket } from '@/hooks/use-socket'
 import { useLeaveCall, useEndCall } from '@/hooks/use-calls'
 import { toast } from 'sonner'
 
-function getInitials(name: string): string {
-  return name
-    .split(' ')
-    .map((n) => n[0])
-    .join('')
-    .toUpperCase()
-    .slice(0, 2)
-}
 
-const AVATAR_COLORS = [
-  'from-violet-500 to-purple-600',
-  'from-blue-500 to-cyan-600',
-  'from-emerald-500 to-teal-600',
-  'from-amber-500 to-orange-600',
-  'from-rose-500 to-pink-600',
-  'from-indigo-500 to-blue-600',
-]
-
-function getAvatarColor(id: string): string {
-  const index =
-    id.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0) %
-    AVATAR_COLORS.length
-  return AVATAR_COLORS[index]
-}
 
 export function CallScreen() {
   const {
@@ -642,7 +620,6 @@ function ParticipantVideoTile({
         autoPlay
         playsInline
         muted={isSelf}
-        playsInline={true}
         className={cn('absolute inset-0 w-full h-full object-cover', !hasVideo && 'hidden')}
       />
       {!hasVideo && (

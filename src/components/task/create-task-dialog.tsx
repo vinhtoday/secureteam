@@ -3,8 +3,10 @@
 import { useState, useMemo } from 'react'
 import { cn } from '@/lib/utils'
 import { useTaskStore } from '@/stores/task-store'
-import { useCreateTask, useAllUsers, useTaskLabels } from '@/hooks/use-tasks'
+import { useCreateTask, useTaskLabels } from '@/hooks/use-tasks'
+import { useAllUsers } from '@/hooks/use-auth'
 import { useAuthStore } from '@/stores/auth-store'
+import { getInitials, PRIORITY_LABELS, PRIORITY_COLORS } from '@/lib/helpers'
 import {
   Dialog,
   DialogContent,
@@ -26,28 +28,6 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { CalendarDays, X, Plus, Users, Tag, Search, Loader2 } from 'lucide-react'
-
-// ============================================
-// Helpers
-// ============================================
-
-function getInitials(name: string): string {
-  return name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2)
-}
-
-const PRIORITY_LABELS: Record<string, string> = {
-  urgent: 'Khẩn cấp',
-  high: 'Cao',
-  medium: 'Trung bình',
-  low: 'Thấp',
-}
-
-const PRIORITY_COLORS: Record<string, string> = {
-  urgent: 'bg-red-500',
-  high: 'bg-orange-500',
-  medium: 'bg-yellow-500',
-  low: 'bg-green-500',
-}
 
 // ============================================
 // Component

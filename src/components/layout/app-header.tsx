@@ -13,6 +13,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { cn } from '@/lib/utils'
+import { getInitials, getRoleBadgeColor, getRoleLabel } from '@/lib/helpers'
 import {
   Shield,
   Sun,
@@ -34,40 +35,7 @@ interface AppHeaderProps {
   isAdmin?: boolean
 }
 
-function getInitials(name: string): string {
-  return name
-    .split(' ')
-    .map((n) => n[0])
-    .join('')
-    .toUpperCase()
-    .slice(0, 2)
-}
 
-function getRoleBadgeColor(role: string): string {
-  switch (role) {
-    case 'SUPER_ADMIN':
-      return 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
-    case 'ADMIN':
-      return 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
-    case 'LEADER':
-      return 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
-    default:
-      return 'bg-muted text-muted-foreground'
-  }
-}
-
-function getRoleLabel(role: string): string {
-  switch (role) {
-    case 'SUPER_ADMIN':
-      return 'Super Admin'
-    case 'ADMIN':
-      return 'Admin'
-    case 'LEADER':
-      return 'Leader'
-    default:
-      return 'Member'
-  }
-}
 
 export function AppHeader({
   onToggleSidebar,

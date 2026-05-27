@@ -3,46 +3,12 @@
 import { cn } from '@/lib/utils'
 import { type Task } from '@/hooks/use-tasks'
 import { useTaskStore } from '@/stores/task-store'
+import { getInitials, formatRelativeDate, isOverdue, PRIORITY_CONFIG } from '@/lib/helpers'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { CalendarDays, MessageSquare, GripVertical } from 'lucide-react'
 import { useMemo } from 'react'
-
-// ============================================
-// Helpers
-// ============================================
-
-const PRIORITY_CONFIG: Record<string, { label: string; color: string; borderColor: string; bgClass: string }> = {
-  urgent: { label: 'Khẩn cấp', color: 'text-red-700 dark:text-red-400', borderColor: 'border-l-red-500', bgClass: 'bg-red-100 dark:bg-red-900/30' },
-  high: { label: 'Cao', color: 'text-orange-700 dark:text-orange-400', borderColor: 'border-l-orange-500', bgClass: 'bg-orange-100 dark:bg-orange-900/30' },
-  medium: { label: 'Trung bình', color: 'text-yellow-700 dark:text-yellow-400', borderColor: 'border-l-yellow-500', bgClass: 'bg-yellow-100 dark:bg-yellow-900/30' },
-  low: { label: 'Thấp', color: 'text-green-700 dark:text-green-400', borderColor: 'border-l-green-500', bgClass: 'bg-green-100 dark:bg-green-900/30' },
-}
-
-function getInitials(name: string): string {
-  return name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2)
-}
-
-function formatRelativeDate(dateStr: string): string {
-  const date = new Date(dateStr)
-  const now = new Date()
-  const diffMs = now.getTime() - date.getTime()
-  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
-
-  if (diffDays === 0) return 'Hôm nay'
-  if (diffDays === 1) return 'Hôm qua'
-  if (diffDays < 7) return `${diffDays} ngày trước`
-  if (diffDays < 30) return `${Math.floor(diffDays / 7)} tuần trước`
-  return date.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' })
-}
-
-function isOverdue(dateStr: string): boolean {
-  const date = new Date(dateStr)
-  const today = new Date()
-  today.setHours(23, 59, 59, 999)
-  return date < today
-}
 
 // ============================================
 // Component

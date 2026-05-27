@@ -208,7 +208,7 @@ export const MessageItem = memo(
                   bubbleRadius,
                   'px-3.5 py-2 shadow-sm',
                   isOwn
-                    ? 'bg-primary text-primary-foreground rounded-tr-sm'
+                    ? 'bg-gradient-to-r from-violet-600 to-indigo-600 text-white rounded-tr-sm'
                     : 'bg-muted dark:bg-muted/80 text-foreground rounded-tl-sm'
                 )}
               >
@@ -222,13 +222,13 @@ export const MessageItem = memo(
                   )}>
                     <div className={cn(
                       'text-[11px] font-semibold',
-                      isOwn ? 'text-primary-foreground/80' : 'text-primary dark:text-primary/80'
+                      isOwn ? 'text-white/80' : 'text-primary dark:text-primary/80'
                     )}>
                       {message.replyTo.sender?.name}
                     </div>
                     <div className={cn(
                       'text-xs truncate',
-                      isOwn ? 'text-primary-foreground/70' : 'text-muted-foreground'
+                      isOwn ? 'text-white/70' : 'text-muted-foreground'
                     )}>
                       {message.replyTo.content?.substring(0, 80) || '(tệp đính kèm)'}
                     </div>
@@ -243,7 +243,7 @@ export const MessageItem = memo(
                 {/* File attachment — inside bubble */}
                 {message.fileUrl && (
                   <div className={cn(
-                    'mt-2 flex items-center gap-2.5 rounded-lg px-3 py-2',
+                    'margin-top-2 flex items-center gap-2.5 rounded-lg px-3 py-2',
                     isOwn
                       ? 'bg-white/15'
                       : 'bg-muted/80 dark:bg-muted/60'
@@ -276,7 +276,7 @@ export const MessageItem = memo(
                 {/* Timestamp + edited indicator */}
                 <div className={cn(
                   'flex items-center gap-1.5 mt-0.5 justify-end',
-                  isOwn ? 'text-primary-foreground/60' : 'text-muted-foreground'
+                  isOwn ? 'text-white/70' : 'text-muted-foreground'
                 )}>
                   {message.isEdited && (
                     <span className="text-[10px] italic">đã chỉnh sửa</span>
@@ -304,7 +304,7 @@ export const MessageItem = memo(
                   className={cn(
                     'mt-0.5 flex items-center gap-1 text-xs transition-colors px-1 rounded-md',
                     isOwn
-                      ? 'text-primary-foreground/60 hover:text-primary-foreground/80'
+                      ? 'text-white/60 hover:text-white/80'
                       : 'text-muted-foreground hover:text-foreground'
                   )}
                 >
@@ -351,20 +351,6 @@ export const MessageItem = memo(
               )}
             </div>
           </div>
-
-          {/* Own message avatar — small, on the right, only first in group */}
-          {isOwn && showAvatar && (
-            <div className="flex-shrink-0 w-8 pt-0.5">
-              <UserAvatar
-                name={user?.name || 'Bạn'}
-                avatar={user?.avatar}
-                size="sm"
-              />
-            </div>
-          )}
-          {isOwn && !showAvatar && (
-            <div className="w-8 flex-shrink-0" />
-          )}
         </div>
       )
     }

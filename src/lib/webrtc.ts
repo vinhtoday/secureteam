@@ -49,9 +49,17 @@ class WebRTCManager {
   private pendingIceCandidates = new Map<string, RTCIceCandidateInit[]>()
   // Accumulate remote tracks per user into a single MediaStream
   private remoteStreamsMap = new Map<string, MediaStream>()
+  // Track what role this peer has for each remote user: 'caller' = we sent offer, 'callee' = we received offer
+  private negotiationRole = new Map<string, 'caller' | 'callee'>()
+  // Track local user ID to prevent self-signaling
+  private localUserId: string = ''
 
   initSocket(socket: Socket) {
     this.socket = socket
+  }
+
+  setLocalUserId(userId: string) {
+    this.localUserId = userId
   }
 
   setCallId(callId: string) {
@@ -246,8 +254,41 @@ class WebRTCManager {
    * Call this AFTER local stream is ready.
    */
   async createOffer(userId: string): Promise<RTCSessionDescriptionInit | null> {
+    // Prevent self-signaling
+    if (userId === this.localUserId) {
+      console.warn(`[WebRTC] Skipping offer creation for self (${userId})`)
+      return null
+    }
+
+    // Close any existing PC that's in a bad state
+    const existing = this.peerConnections.get(userId)
+    if (existing) {
+      if (existing.signalingState === 'closed') {
+        existing.close()
+        this.peerConnections.delete(userId)
+        this.remoteStreamsMap.delete(userId)
+        this.negotiationRole.delete(userId)
+        this.pendingIceCandidates.delete(userId)
+      } else if (existing.signalingState === 'have-remote-offer') {
+        // Glare: remote side also sent an offer. Politeness: the offer from the side that didn't go through createOffer wins.
+        // Since we're being asked to create an offer, close the existing PC and create fresh.
+        console.warn(`[WebRTC] Glare for ${userId}: we have remote offer but creating new offer. Closing old PC.`)
+        existing.close()
+        this.peerConnections.delete(userId)
+        this.remoteStreamsMap.delete(userId)
+        this.negotiationRole.delete(userId)
+        this.pendingIceCandidates.delete(userId)
+      } else if (existing.signalingState === 'stable') {
+        // Already stable (previous negotiation completed) — this is an ICE restart or re-negotiation
+        // Safe to create a new offer on the existing PC
+        console.log(`[WebRTC] Re-negotiating with ${userId} (existing PC stable)`)
+      }
+    }
+
     const pc = this.createPeerConnection(userId)
     if (!pc) return null
+
+    this.negotiationRole.set(userId, 'caller')
 
     try {
       const offer = await pc.createOffer({
@@ -259,6 +300,7 @@ class WebRTCManager {
       return offer
     } catch (error) {
       console.error('[WebRTC] Failed to create offer:', error)
+      this.negotiationRole.delete(userId)
       return null
     }
   }
@@ -270,24 +312,61 @@ class WebRTCManager {
     userId: string,
     offer: RTCSessionDescriptionInit
   ): Promise<RTCSessionDescriptionInit | null> {
-    // Close any existing broken connection for this user and start fresh
+    // Prevent self-signaling
+    if (userId === this.localUserId) {
+      console.warn(`[WebRTC] Skipping answer creation for self (${userId})`)
+      return null
+    }
+
+    // Close any existing connection and start fresh for the new offer
     const existing = this.peerConnections.get(userId)
     if (existing) {
-      if (existing.signalingState === 'closed') {
+      const state = existing.signalingState
+      if (state === 'closed') {
         existing.close()
         this.peerConnections.delete(userId)
         this.remoteStreamsMap.delete(userId)
-      } else if (existing.signalingState !== 'stable') {
-        // Not in stable state — close and recreate to accept the new offer
-        console.warn(`[WebRTC] PC for ${userId} in state ${existing.signalingState}, recreating for new offer`)
+        this.negotiationRole.delete(userId)
+        this.pendingIceCandidates.delete(userId)
+      } else if (state === 'have-local-offer') {
+        // Glare: we also sent an offer. Be polite: accept the remote offer, discard ours.
+        console.warn(`[WebRTC] Glare for ${userId}: we have local offer but received remote offer. Accepting remote, discarding ours.`)
         existing.close()
         this.peerConnections.delete(userId)
         this.remoteStreamsMap.delete(userId)
+        this.negotiationRole.delete(userId)
+        this.pendingIceCandidates.delete(userId)
+      } else if (state === 'have-remote-pranswer') {
+        // We're already in the middle of answering — close and restart
+        console.warn(`[WebRTC] PC for ${userId} in have-remote-pranswer, recreating`)
+        existing.close()
+        this.peerConnections.delete(userId)
+        this.remoteStreamsMap.delete(userId)
+        this.negotiationRole.delete(userId)
+        this.pendingIceCandidates.delete(userId)
+      } else if (state === 'have-remote-offer') {
+        // Already have a remote offer — just recreate the answer (duplicate offer)
+        console.warn(`[WebRTC] Duplicate offer for ${userId}, recreating answer`)
+        existing.close()
+        this.peerConnections.delete(userId)
+        this.remoteStreamsMap.delete(userId)
+        this.negotiationRole.delete(userId)
+        this.pendingIceCandidates.delete(userId)
+      } else if (state === 'stable') {
+        // Already stable from a previous negotiation — close and start fresh
+        console.log(`[WebRTC] PC for ${userId} stable, closing for new offer`)
+        existing.close()
+        this.peerConnections.delete(userId)
+        this.remoteStreamsMap.delete(userId)
+        this.negotiationRole.delete(userId)
+        this.pendingIceCandidates.delete(userId)
       }
     }
 
     const pc = this.createPeerConnection(userId)
     if (!pc) return null
+
+    this.negotiationRole.set(userId, 'callee')
 
     try {
       await pc.setRemoteDescription(new RTCSessionDescription(offer))
@@ -297,6 +376,7 @@ class WebRTCManager {
       return answer
     } catch (error) {
       console.error('[WebRTC] Failed to create answer:', error)
+      this.negotiationRole.delete(userId)
       return null
     }
   }
@@ -305,18 +385,58 @@ class WebRTCManager {
    * Caller: handle the callee's answer.
    */
   async handleAnswer(userId: string, answer: RTCSessionDescriptionInit): Promise<void> {
-    const pc = this.peerConnections.get(userId)
+    // Prevent self-signaling
+    if (userId === this.localUserId) {
+      console.warn(`[WebRTC] Ignoring answer from self (${userId})`)
+      return
+    }
+
+    let pc = this.peerConnections.get(userId)
     if (!pc) {
-      console.warn(`[WebRTC] No PC for ${userId} when handling answer`)
+      console.warn(`[WebRTC] No PC for ${userId} when handling answer, ignoring`)
+      return
+    }
+
+    // Verify we are the caller (we should have sent an offer)
+    const role = this.negotiationRole.get(userId)
+    if (role !== 'caller') {
+      console.warn(`[WebRTC] Received answer for ${userId} but our role is '${role}', not 'caller'. State=${pc.signalingState}. Ignoring.`)
       return
     }
 
     try {
-      await pc.setRemoteDescription(new RTCSessionDescription(answer))
-      console.log(`[WebRTC] Answer set for ${userId}, state=${pc.signalingState}`)
+      // Check if PC is in the correct state to receive an answer
+      if (pc.signalingState === 'have-local-offer') {
+        await pc.setRemoteDescription(new RTCSessionDescription(answer))
+        console.log(`[WebRTC] Answer set for ${userId}, state=${pc.signalingState}`)
+      } else if (pc.signalingState === 'stable') {
+        // PC is already stable — this means the offer was lost or the PC was recreated
+        console.warn(`[WebRTC] PC for ${userId} is 'stable' when receiving answer. This means the offer was not properly set. Recreating PC...`)
+        // Nuclear option: destroy and recreate the PC, then we'll need a new offer/answer cycle
+        pc.close()
+        this.peerConnections.delete(userId)
+        this.remoteStreamsMap.delete(userId)
+        this.negotiationRole.delete(userId)
+        this.pendingIceCandidates.delete(userId)
+        // The caller side will need to re-negotiate. We can't do anything here without a new offer.
+        // The connection may recover via ICE restart or the user can re-join.
+      } else if (pc.signalingState === 'have-remote-offer') {
+        // We somehow have a remote offer — this means both sides think they're the caller (glare)
+        console.warn(`[WebRTC] Glare detected for ${userId}: we have a remote offer but received an answer. Closing and recreating.`)
+        pc.close()
+        this.peerConnections.delete(userId)
+        this.remoteStreamsMap.delete(userId)
+        this.negotiationRole.delete(userId)
+        this.pendingIceCandidates.delete(userId)
+      } else if (pc.signalingState === 'closed') {
+        this.peerConnections.delete(userId)
+        this.remoteStreamsMap.delete(userId)
+        this.negotiationRole.delete(userId)
+      } else {
+        console.warn(`[WebRTC] Unexpected signaling state ${pc.signalingState} for ${userId} when handling answer`)
+      }
     } catch (error) {
       console.error(`[WebRTC] Failed to set answer for ${userId} (state=${pc.signalingState}):`, error)
-      // Don't crash — ICE restart will recover if connection fails
     }
   }
 
@@ -346,10 +466,36 @@ class WebRTCManager {
     }
   }
 
+  /**
+   * Replace a track on all peer connections (used for screen share toggle)
+   */
+  async replaceTrackOnAllPeers(newTrack: MediaStreamTrack): Promise<void> {
+    const senders: RTCRtpSender[] = []
+    for (const pc of this.peerConnections.values()) {
+      senders.push(...pc.getSenders())
+    }
+    for (const sender of senders) {
+      if (sender.track && sender.track.kind === newTrack.kind) {
+        try {
+          await sender.replaceTrack(newTrack)
+          console.log(`[WebRTC] Replaced ${newTrack.kind} track on sender`)
+        } catch (error) {
+          console.error('[WebRTC] Failed to replace track:', error)
+        }
+      }
+    }
+  }
+
   async restartIce(userId: string) {
     const pc = this.peerConnections.get(userId)
     if (!pc) return
     try {
+      // Only restart ICE if we're the caller
+      const role = this.negotiationRole.get(userId)
+      if (role !== 'caller') {
+        console.warn(`[WebRTC] Not restarting ICE for ${userId}: we are '${role}', not 'caller'`)
+        return
+      }
       const offer = await pc.createOffer({ iceRestart: true })
       await pc.setLocalDescription(offer)
       if (this.socket) {
@@ -401,6 +547,8 @@ class WebRTCManager {
     this.peerConnections.clear()
     this.pendingIceCandidates.clear()
     this.remoteStreamsMap.clear()
+    this.negotiationRole.clear()
+    this.localUserId = ''
     this.socket = null
     this.currentCallId = ''
     this.onRemoteStreamCallback = null

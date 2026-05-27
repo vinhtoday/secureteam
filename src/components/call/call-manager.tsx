@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useCallStore } from '@/stores/call-store'
+import { useAuthStore } from '@/stores/auth-store'
 import { api } from '@/lib/api'
 import { useSocket } from '@/hooks/use-socket'
 import type { CallRoom, CallParticipant } from '@/hooks/use-calls'
@@ -55,6 +56,10 @@ export function CallManager() {
         const { webrtcManager } = await import('@/lib/webrtc')
         const isVideo = localIncomingCall.callType.includes('video')
         webrtcManager.setCallId(localIncomingCall.callId)
+
+        // Set local user ID for self-signaling prevention
+        const currentUser = useAuthStore.getState().user
+        if (currentUser?.id) webrtcManager.setLocalUserId(currentUser.id)
 
         // Set callbacks BEFORE creating stream
         webrtcManager.onRemoteStream((userId, stream) => {

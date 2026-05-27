@@ -266,6 +266,12 @@ export function useSocket() {
       'call:accept',
       async (data: { callId: string; userId: string; userName: string }) => {
         const callStore = useCallStore.getState()
+        // CRITICAL: Skip if this is our own accept event (server uses socket.to() which excludes sender,
+        // but we add this guard for safety in case of reconnection/re-join)
+        if (data.userId === user?.id) {
+          console.log(`[Socket] Ignoring own call:accept event`)
+          return
+        }
         if (callStore.currentCall?.id === data.callId) {
           callStore.updateParticipant(data.userId, { status: 'joined' })
           if (callStore.callStatus === 'ringing') callStore.setCallStatus('active')
@@ -275,6 +281,7 @@ export function useSocket() {
             const { webrtcManager } = await import('@/lib/webrtc')
             if (webrtcManager.getLocalStream()) {
               webrtcManager.setCallId(data.callId)
+              webrtcManager.setLocalUserId(user?.id || '')
               const offer = await webrtcManager.createOffer(data.userId)
               if (offer) {
                 webrtcManager.sendSignal(data.callId, data.userId, {
@@ -394,7 +401,7 @@ export function useSocket() {
       }
     })
 
-    // WebRTC signaling — simple fire-and-forget with try-catch
+    // WebRTC signaling — with self-check and role tracking
     socket.on(
       'call:signal',
       async (data: {
@@ -403,6 +410,11 @@ export function useSocket() {
         signal: unknown
       }) => {
         try {
+          // CRITICAL: Ignore signals from ourselves
+          if (data.fromUserId === user?.id) {
+            return
+          }
+
           const callStore = useCallStore.getState()
           // Only drop if we have a different active call
           if (data.callId && callStore.currentCall?.id && callStore.currentCall.id !== data.callId) {
@@ -417,15 +429,21 @@ export function useSocket() {
             candidate?: RTCIceCandidateInit
           }
           if (data.callId) webrtcManager.setCallId(data.callId)
+          // Ensure localUserId is set for self-signaling prevention
+          if (!webrtcManager['localUserId'] && user?.id) {
+            webrtcManager.setLocalUserId(user.id)
+          }
 
           switch (signal.type) {
             case 'offer':
+              console.log(`[Socket] Received offer from ${data.fromUserId}`)
               await handleOffer(data.fromUserId, {
                 type: 'offer',
                 sdp: signal.sdp!,
               })
               break
             case 'answer':
+              console.log(`[Socket] Received answer from ${data.fromUserId}`)
               await handleAnswer(data.fromUserId, {
                 type: 'answer',
                 sdp: signal.sdp!,
@@ -441,10 +459,11 @@ export function useSocket() {
       }
     )
 
-    // Init WebRTC with socket
-    import('@/lib/webrtc').then(({ webrtcManager }) =>
+    // Init WebRTC with socket and localUserId
+    import('@/lib/webrtc').then(({ webrtcManager }) => {
       webrtcManager.initSocket(socket)
-    )
+      if (user?.id) webrtcManager.setLocalUserId(user.id)
+    })
 
     socketRef.current = socket
 

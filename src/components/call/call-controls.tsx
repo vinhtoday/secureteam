@@ -111,6 +111,7 @@ export function CallControls({
         try {
           const { webrtcManager } = await import('@/lib/webrtc')
           webrtcManager.setCallId(callRoom.id)
+          webrtcManager.setLocalUserId(user.id)
           const localStream = await webrtcManager.createLocalStream(
             type === 'video'
           )

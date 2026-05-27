@@ -403,7 +403,12 @@ export function useSocket() {
         signal: unknown
       }) => {
         const callStore = useCallStore.getState()
-        if (data.callId && callStore.currentCall?.id !== data.callId) return
+        // Only drop if we have a different active call (not if currentCall is null
+        // — it might be in the process of being set during join/accept)
+        if (data.callId && callStore.currentCall?.id && callStore.currentCall.id !== data.callId) {
+          console.log(`[Socket] Dropping signal for different call: ${data.callId} vs ${callStore.currentCall.id}`)
+          return
+        }
 
         try {
           const { handleOffer, handleAnswer, handleIceCandidate, webrtcManager } =

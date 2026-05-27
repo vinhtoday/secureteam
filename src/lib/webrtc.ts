@@ -47,6 +47,8 @@ class WebRTCManager {
   private onRemoteStreamCallback: RemoteStreamCallback | null = null
   private onRemoteStreamRemoveCallback: RemoteStreamRemoveCallback | null = null
   private pendingIceCandidates = new Map<string, RTCIceCandidateInit[]>()
+  // Accumulate remote tracks per user into a single MediaStream
+  private remoteStreamsMap = new Map<string, MediaStream>()
 
   initSocket(socket: Socket) {
     this.socket = socket
@@ -166,17 +168,34 @@ class WebRTCManager {
       console.warn(`[WebRTC] No local stream when creating peer connection for ${userId}`)
     }
 
-    // Handle remote stream
+    // Handle remote stream — accumulate ALL tracks into a single MediaStream per user
     pc.ontrack = (event) => {
       console.log(
         `[WebRTC] Remote track from ${userId}: ${event.track.kind}, streams: ${event.streams?.length || 0}`
       )
-      if (event.streams && event.streams[0]) {
-        this.onRemoteStreamCallback?.(userId, event.streams[0])
-      } else if (event.track) {
-        const remoteStream = new MediaStream([event.track])
-        this.onRemoteStreamCallback?.(userId, remoteStream)
+      // Always use a persistent MediaStream to accumulate all tracks (audio + video)
+      if (!this.remoteStreamsMap.has(userId)) {
+        this.remoteStreamsMap.set(userId, new MediaStream())
       }
+      const remoteStream = this.remoteStreamsMap.get(userId)!
+      if (event.track) {
+        // Don't add duplicate tracks
+        const existing = remoteStream.getTracks().find(t => t.id === event.track.id)
+        if (!existing) {
+          remoteStream.addTrack(event.track)
+          console.log(`[WebRTC] Added ${event.track.kind} track to remote stream for ${userId}, total tracks: ${remoteStream.getTracks().length}`)
+        }
+      }
+      // Also sync from event.streams if available (some browsers populate this)
+      if (event.streams && event.streams[0]) {
+        for (const track of event.streams[0].getTracks()) {
+          const exists = remoteStream.getTracks().find(t => t.id === track.id)
+          if (!exists) {
+            remoteStream.addTrack(track)
+          }
+        }
+      }
+      this.onRemoteStreamCallback?.(userId, remoteStream)
     }
 
     pc.onicecandidate = (event) => {
@@ -366,6 +385,7 @@ class WebRTCManager {
     this.peerConnections.forEach((pc) => pc.close())
     this.peerConnections.clear()
     this.pendingIceCandidates.clear()
+    this.remoteStreamsMap.clear()
     this.socket = null
     this.currentCallId = ''
     this.onRemoteStreamCallback = null

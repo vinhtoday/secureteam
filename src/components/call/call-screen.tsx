@@ -589,16 +589,44 @@ function ParticipantVideoTile({
   isSelf: boolean
 }) {
   const videoRef = useRef<HTMLVideoElement>(null)
-  const hasVideo = !!stream && !isCameraOff
+  // Check for ACTUAL video tracks that are enabled, not just stream existence
+  const hasVideo = !!stream && !isCameraOff && stream.getVideoTracks().filter(t => t.enabled && t.readyState !== 'ended').length > 0
 
   useEffect(() => {
     const el = videoRef.current
     if (!el) return
-    el.srcObject = (stream && !isCameraOff) ? stream : null
-    return () => {
+    if (stream && hasVideo) {
+      el.srcObject = stream
+      // Attempt to play — some browsers block autoplay without user gesture
+      el.play().catch(() => {
+        console.warn(`[VideoTile] Autoplay blocked for ${name}, waiting for user interaction`)
+      })
+    } else {
       el.srcObject = null
     }
-  }, [stream, isCameraOff])
+    return () => {
+      if (el) el.srcObject = null
+    }
+  }, [stream, hasVideo, name])
+
+  // Re-check video tracks when stream changes (new tracks may arrive after initial connection)
+  useEffect(() => {
+    if (!stream) return
+    const handler = () => {
+      // Force re-render by triggering a state update via the video element
+      const el = videoRef.current
+      if (el && stream.getVideoTracks().filter(t => t.enabled && t.readyState !== 'ended').length > 0) {
+        el.srcObject = stream
+        el.play().catch(() => {})
+      }
+    }
+    stream.addEventListener('addtrack', handler)
+    stream.addEventListener('removetrack', handler)
+    return () => {
+      stream.removeEventListener('addtrack', handler)
+      stream.removeEventListener('removetrack', handler)
+    }
+  }, [stream])
 
   return (
     <div
@@ -612,6 +640,7 @@ function ParticipantVideoTile({
         autoPlay
         playsInline
         muted={isSelf}
+        playsInline={true}
         className={cn('absolute inset-0 w-full h-full object-cover', !hasVideo && 'hidden')}
       />
       {!hasVideo && (

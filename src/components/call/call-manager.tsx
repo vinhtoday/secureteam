@@ -42,9 +42,15 @@ export function CallManager() {
       )
       const callRoom = res.data
 
-      // 2. Create local media stream FIRST — CRITICAL: before emitting call:accept
+      // 2. Set call state FIRST — CRITICAL: before emitting any socket events
+      // This ensures incoming signals (offer/answer/ice) won't be dropped
+      // by the signal guard that checks currentCall?.id
+      setCurrentCall(callRoom)
+      setCallStatus('active')
+      setShowCallUI(true)
+
+      // 3. Create local media stream — before emitting call:accept
       // This ensures when the caller's offer arrives, our local tracks are ready
-      // to be added to the peer connection.
       try {
         const { webrtcManager } = await import('@/lib/webrtc')
         const isVideo = localIncomingCall.callType.includes('video')
@@ -64,18 +70,13 @@ export function CallManager() {
         console.warn('[CallManager] Could not get media:', mediaError)
       }
 
-      // 3. NOW emit socket events (after local stream is ready)
+      // 4. NOW emit socket events (after currentCall is set AND local stream is ready)
       emitCallAccept({ callId: localIncomingCall.callId })
       emitCallJoin({ callId: localIncomingCall.callId })
 
-      // 4. Clear incoming call dialog
+      // 5. Clear incoming call dialog
       setIncomingCall(null)
       setLocalIncomingCall(null)
-
-      // 5. Set call state
-      setCurrentCall(callRoom)
-      setCallStatus('active')
-      setShowCallUI(true)
 
       // 6. Set participants
       if (callRoom.participants) {

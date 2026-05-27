@@ -252,9 +252,39 @@ class WebRTCManager {
     }
   }
 
+  // Per-user signal lock to prevent concurrent processing for the same user
+  private signalLocks = new Map<string, Promise<void>>() // unused
+  private signalingUsers = new Set<string>() // users currently processing a signal
+
   async createOffer(userId: string): Promise<RTCSessionDescriptionInit | null> {
-    const pc = this.createPeerConnection(userId)
+    let pc = this.peerConnections.get(userId)
+
+    if (pc) {
+      // If we already have a remote offer (glare), defer to it
+      if (pc.signalingState === 'have-remote-offer') {
+        console.warn(`[WebRTC] Glare with ${userId}: have remote offer, deferring`)
+        return null
+      }
+      // If already have local offer, don't create another
+      if (pc.signalingState === 'have-local-offer') {
+        console.warn(`[WebRTC] Already have local offer for ${userId}, skipping`)
+        return null
+      }
+      // If in unexpected state, close and recreate
+      if (pc.signalingState !== 'stable') {
+        console.warn(`[WebRTC] PC in unexpected state ${pc.signalingState} for ${userId}, recreating`)
+        pc.close()
+        this.peerConnections.delete(userId)
+        this.remoteStreamsMap.delete(userId)
+        pc = null
+      }
+    }
+
+    if (!pc) {
+      pc = this.createPeerConnection(userId)
+    }
     if (!pc) return null
+
     try {
       const offer = await pc.createOffer({
         offerToReceiveAudio: true,
@@ -272,13 +302,42 @@ class WebRTCManager {
     userId: string,
     offer: RTCSessionDescriptionInit
   ): Promise<RTCSessionDescriptionInit | null> {
-    const pc = this.createPeerConnection(userId)
-    if (!pc) return null
-    // Only set remote offer if we're in stable state (no pending offer/answer)
-    if (pc.signalingState !== 'stable') {
-      console.warn(`[WebRTC] Ignoring offer from ${userId}: signalingState=${pc.signalingState}, expected 'stable'`)
-      return null
+    let pc = this.peerConnections.get(userId)
+
+    if (pc) {
+      // Handle glare: if we have a local offer, rollback to accept remote offer
+      if (pc.signalingState === 'have-local-offer') {
+        console.warn(`[WebRTC] Glare with ${userId}: rolling back local offer to accept remote`)
+        try {
+          await pc.setLocalDescription({ type: 'rollback' } as RTCSessionDescriptionInit)
+        } catch {
+          // Rollback failed, close and recreate
+          pc.close()
+          this.peerConnections.delete(userId)
+          this.remoteStreamsMap.delete(userId)
+          pc = null
+        }
+      }
+      // Already processing a remote offer — skip duplicate
+      else if (pc.signalingState === 'have-remote-offer') {
+        console.warn(`[WebRTC] Already have remote offer from ${userId}, ignoring duplicate`)
+        return null
+      }
+      // Unexpected state — close and recreate
+      else if (pc.signalingState !== 'stable') {
+        console.warn(`[WebRTC] PC in unexpected state ${pc.signalingState} for ${userId}, recreating`)
+        pc.close()
+        this.peerConnections.delete(userId)
+        this.remoteStreamsMap.delete(userId)
+        pc = null
+      }
     }
+
+    if (!pc) {
+      pc = this.createPeerConnection(userId)
+    }
+    if (!pc) return null
+
     try {
       await pc.setRemoteDescription(new RTCSessionDescription(offer))
       const answer = await pc.createAnswer()
@@ -286,6 +345,10 @@ class WebRTCManager {
       return answer
     } catch (error) {
       console.error('[WebRTC] Failed to create answer:', error)
+      // If anything goes wrong, close and cleanup so next attempt starts fresh
+      pc.close()
+      this.peerConnections.delete(userId)
+      this.remoteStreamsMap.delete(userId)
       return null
     }
   }

@@ -394,10 +394,11 @@ export function useSocket() {
       }
     })
 
-    // WebRTC signaling
+    // WebRTC signaling — with per-user queue to prevent concurrent processing
+    const signalQueue = new Map<string, Promise<void>>()
     socket.on(
       'call:signal',
-      async (data: {
+      (data: {
         callId: string
         fromUserId: string
         signal: unknown
@@ -410,36 +411,46 @@ export function useSocket() {
           return
         }
 
-        try {
-          const { handleOffer, handleAnswer, handleIceCandidate, webrtcManager } =
-            await import('@/lib/webrtc')
-          const signal = data.signal as {
-            type: string
-            sdp?: string
-            candidate?: RTCIceCandidateInit
-          }
-          if (data.callId) webrtcManager.setCallId(data.callId)
+        // Queue signals per-user to ensure sequential processing
+        const userId = data.fromUserId
+        const prev = signalQueue.get(userId) || Promise.resolve()
+        const next = prev.then(async () => {
+          try {
+            const { handleOffer, handleAnswer, handleIceCandidate, webrtcManager } =
+              await import('@/lib/webrtc')
+            const signal = data.signal as {
+              type: string
+              sdp?: string
+              candidate?: RTCIceCandidateInit
+            }
+            if (data.callId) webrtcManager.setCallId(data.callId)
 
-          switch (signal.type) {
-            case 'offer':
-              await handleOffer(data.fromUserId, {
-                type: 'offer',
-                sdp: signal.sdp!,
-              })
-              break
-            case 'answer':
-              await handleAnswer(data.fromUserId, {
-                type: 'answer',
-                sdp: signal.sdp!,
-              })
-              break
-            case 'ice-candidate':
-              await handleIceCandidate(data.fromUserId, signal.candidate!)
-              break
+            switch (signal.type) {
+              case 'offer':
+                await handleOffer(userId, {
+                  type: 'offer',
+                  sdp: signal.sdp!,
+                })
+                break
+              case 'answer':
+                await handleAnswer(userId, {
+                  type: 'answer',
+                  sdp: signal.sdp!,
+                })
+                break
+              case 'ice-candidate':
+                await handleIceCandidate(userId, signal.candidate!)
+                break
+            }
+          } catch (error) {
+            console.error('[Socket] Failed to handle signal:', error)
           }
-        } catch (error) {
-          console.error('[Socket] Failed to handle signal:', error)
-        }
+        })
+        signalQueue.set(userId, next)
+        // Clean up when done
+        next.finally(() => {
+          if (signalQueue.get(userId) === next) signalQueue.delete(userId)
+        })
       }
     )
 

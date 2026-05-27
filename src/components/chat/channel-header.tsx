@@ -28,11 +28,11 @@ export function ChannelHeader({
 }: ChannelHeaderProps) {
   const typeIcon =
     channel.type === 'direct' ? (
-      <Users className="h-4 w-4" />
+      <Users className="h-4.5 w-4.5" />
     ) : channel.type === 'private' ? (
-      <Lock className="h-4 w-4" />
+      <Lock className="h-4.5 w-4.5" />
     ) : (
-      <Hash className="h-4 w-4" />
+      <Hash className="h-4.5 w-4.5" />
     )
 
   const typeLabel =
@@ -43,23 +43,24 @@ export function ChannelHeader({
         : 'Kênh công khai'
 
   return (
-    <div className="flex h-12 items-center gap-2 border-b bg-background px-4">
+    <div className="flex h-14 items-center gap-3 border-b bg-background/80 backdrop-blur-sm px-5">
       <span className="text-muted-foreground">{typeIcon}</span>
       <div className="min-w-0 flex-1">
-        <div className="flex items-center gap-2">
-          <h2 className="truncate font-semibold text-sm">{channel.name}</h2>
-          <Badge variant="outline" className="h-4 px-1.5 text-[10px] font-normal shrink-0">
+        <div className="flex items-center gap-2.5">
+          <h2 className="truncate text-base font-bold">{channel.name}</h2>
+          <Badge variant="outline" className="h-5 px-2 text-[11px] font-medium rounded-full shrink-0 border-muted-foreground/20 text-muted-foreground">
             {typeLabel}
           </Badge>
           {channel.memberCount > 0 && (
-            <span className="text-xs text-muted-foreground hidden sm:inline">
-              {channel.memberCount} thành viên
+            <span className="text-xs text-muted-foreground hidden sm:inline-flex items-center gap-1">
+              <Users className="h-3 w-3" />
+              {channel.memberCount}
             </span>
           )}
         </div>
       </div>
 
-      <div className="flex items-center gap-0.5">
+      <div className="flex items-center gap-1">
         <CallControls
           channel={{ id: channel.id, name: channel.name }}
           channelMembers={channelMembers}
@@ -68,7 +69,7 @@ export function ChannelHeader({
         {onSearchMessages && (
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={onSearchMessages}>
+              <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg hover:bg-muted" onClick={onSearchMessages}>
                 <Search className="h-4 w-4" />
               </Button>
             </TooltipTrigger>
@@ -78,7 +79,7 @@ export function ChannelHeader({
         {onToggleMembers && (
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={onToggleMembers}>
+              <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg hover:bg-muted" onClick={onToggleMembers}>
                 <Users className="h-4 w-4" />
               </Button>
             </TooltipTrigger>

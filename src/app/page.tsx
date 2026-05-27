@@ -27,6 +27,7 @@ import {
   Shield,
   Menu,
   X,
+  MessageCircle,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -78,11 +79,18 @@ export default function Home() {
   if (!isAuthenticated) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-emerald-50 via-white to-teal-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 p-4">
-        {authView === 'login' ? (
-          <LoginForm onSwitchToRegister={() => setAuthView('register')} />
-        ) : (
-          <RegisterForm onSwitchToLogin={() => setAuthView('login')} />
-        )}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute -top-40 -right-40 w-80 h-80 rounded-full bg-emerald-200/30 dark:bg-emerald-800/10 blur-3xl" />
+          <div className="absolute -bottom-40 -left-40 w-96 h-96 rounded-full bg-teal-200/30 dark:bg-teal-800/10 blur-3xl" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-emerald-100/20 dark:bg-emerald-900/5 blur-3xl" />
+        </div>
+        <div className="relative z-10">
+          {authView === 'login' ? (
+            <LoginForm onSwitchToRegister={() => setAuthView('register')} />
+          ) : (
+            <RegisterForm onSwitchToLogin={() => setAuthView('login')} />
+          )}
+        </div>
       </div>
     )
   }
@@ -99,10 +107,10 @@ export default function Home() {
           {chatSidebarOpen && (
             <div className="fixed inset-0 z-40 md:hidden">
               <div
-                className="absolute inset-0 bg-black/50"
+                className="absolute inset-0 bg-black/40 backdrop-blur-[2px]"
                 onClick={() => setChatSidebarOpen(false)}
               />
-              <div className="relative z-50 h-full w-72">
+              <div className="relative z-50 h-full w-80 animate-in slide-in-from-left duration-200">
                 <ChatSidebar
                   activeChannelId={activeChannelId}
                   onSelectChannel={handleSelectChannel}
@@ -114,8 +122,8 @@ export default function Home() {
 
           {/* Desktop chat sidebar */}
           <div className={cn(
-            'hidden md:flex shrink-0 flex-col border-r bg-sidebar transition-all duration-200',
-            chatSidebarOpen ? 'w-64' : 'w-0 overflow-hidden border-r-0'
+            'hidden md:flex shrink-0 flex-col border-r bg-sidebar transition-all duration-300 ease-in-out',
+            chatSidebarOpen ? 'w-72' : 'w-0 overflow-hidden border-r-0'
           )}>
             <ChatSidebar
               activeChannelId={activeChannelId}
@@ -157,10 +165,10 @@ export default function Home() {
             {adminNavOpen && (
               <div className="fixed inset-0 z-40 lg:hidden">
                 <div
-                  className="absolute inset-0 bg-black/50"
+                  className="absolute inset-0 bg-black/40 backdrop-blur-[2px]"
                   onClick={() => setAdminNavOpen(false)}
                 />
-                <div className="relative z-50 h-full w-60">
+                <div className="relative z-50 h-full w-72 animate-in slide-in-from-left duration-200">
                   <AdminSidebar
                     activeItem={navItem}
                     onNavigate={(item) => { handleNavigate(item); setAdminNavOpen(false) }}
@@ -172,7 +180,7 @@ export default function Home() {
             )}
 
             {/* Desktop admin sidebar */}
-            <div className="hidden lg:flex w-56 shrink-0">
+            <div className="hidden lg:flex w-60 shrink-0">
               <AdminSidebar
                 activeItem={navItem}
                 onNavigate={handleNavigate}
@@ -212,22 +220,24 @@ function AdminSidebar({
   )
 
   return (
-    <aside className="flex h-full w-56 flex-col border-r bg-sidebar">
-      <div className="flex h-14 items-center gap-2 border-b px-4">
-        <Shield className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
-        <span className="font-bold text-sm">SecureTeam</span>
+    <aside className="flex h-full w-60 flex-col border-r bg-sidebar">
+      <div className="flex h-14 items-center gap-2.5 border-b px-4">
+        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-100 dark:bg-emerald-900/30">
+          <Shield className="h-4.5 w-4.5 text-emerald-600 dark:text-emerald-400" />
+        </div>
+        <span className="font-bold text-sm tracking-tight">SecureTeam</span>
       </div>
       <ScrollArea className="flex-1 py-2">
-        <nav className="flex flex-col gap-1 px-2">
+        <nav className="flex flex-col gap-1 px-3">
           {availableItems.map((item) => (
             <Button
               key={item.id}
               variant="ghost"
               className={cn(
-                'h-9 justify-start gap-2 px-3 text-sm font-normal',
+                'h-9 justify-start gap-2.5 px-3 text-sm font-normal rounded-lg transition-colors',
                 activeItem === item.id
-                  ? 'bg-sidebar-accent text-sidebar-accent-foreground font-medium'
-                  : 'text-sidebar-foreground/70'
+                  ? 'bg-emerald-50 text-emerald-700 font-medium dark:bg-emerald-900/20 dark:text-emerald-400'
+                  : 'text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
               )}
               onClick={() => onNavigate(item.id)}
             >
@@ -238,11 +248,11 @@ function AdminSidebar({
         </nav>
       </ScrollArea>
       <Separator />
-      <div className="p-2">
+      <div className="p-3">
         <Button
           variant="ghost"
           size="sm"
-          className="w-full justify-start gap-2 text-muted-foreground hover:text-destructive"
+          className="w-full justify-start gap-2 text-muted-foreground hover:text-destructive rounded-lg"
           onClick={onLogout}
         >
           <LogOut className="h-4 w-4" />

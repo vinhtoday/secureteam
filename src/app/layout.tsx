@@ -1,17 +1,19 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Plus_Jakarta_Sans, Roboto_Mono } from 'next/font/google'
 import "./globals.css";
 import { Providers } from "@/components/providers";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
+const plusJakarta = Plus_Jakarta_Sans({ 
+  variable: '--font-plus-jakarta', 
+  subsets: ['latin', 'vietnamese'],
+  weight: ['200', '300', '400', '500', '600', '700', '800'],
+})
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+const robotoMono = Roboto_Mono({ 
+  variable: '--font-roboto-mono', 
+  subsets: ['latin'],
+  weight: ['100', '200', '300', '400', '500', '600', '700'],
+})
 
 export const metadata: Metadata = {
   title: "SecureTeam - Hệ thống nhắn tin nội bộ",
@@ -30,7 +32,7 @@ export default function RootLayout({
     <html lang="vi" suppressHydrationWarning>
       <body
         suppressHydrationWarning
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background text-foreground`}
+        className={`${plusJakarta.variable} ${robotoMono.variable} antialiased bg-background text-foreground`}
       >
         <Providers>{children}</Providers>
       </body>

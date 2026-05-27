@@ -17,6 +17,13 @@ const statusColors: Record<string, string> = {
   offline: 'bg-gray-400 dark:bg-gray-600',
 }
 
+const statusShadowColors: Record<string, string> = {
+  online: 'shadow-emerald-500/50',
+  away: 'shadow-amber-500/50',
+  busy: 'shadow-red-500/50',
+  offline: '',
+}
+
 const sizeClasses = {
   sm: 'h-2.5 w-2.5',
   md: 'h-3 w-3',
@@ -28,12 +35,15 @@ export const UserStatusBadge = React.memo(function UserStatusBadge({
   size = 'md',
   className,
 }: UserStatusBadgeProps) {
+  const isOnline = status === 'online'
   return (
     <span
       className={cn(
         'inline-block rounded-full ring-2 ring-background',
         statusColors[status] || statusColors.offline,
         sizeClasses[size],
+        isOnline && 'shadow-sm',
+        statusShadowColors[status],
         className
       )}
       title={
@@ -63,6 +73,12 @@ const avatarSizes = {
   lg: 'h-11 w-11 text-sm',
 }
 
+const statusPosition = {
+  sm: 'absolute -bottom-0.5 -right-0.5',
+  md: 'absolute -bottom-0.5 -right-0.5',
+  lg: 'absolute -bottom-0.5 -right-0.5',
+}
+
 function getInitials(name: string) {
   return name
     .split(' ')
@@ -81,15 +97,15 @@ export function UserAvatar({
 }: UserAvatarProps) {
   return (
     <div className={cn('relative inline-flex', className)}>
-      <Avatar className={avatarSizes[size]}>
+      <Avatar className={cn(avatarSizes[size], 'ring-2 ring-background')}>
         <AvatarImage src={avatar || undefined} alt={name} />
-        <AvatarFallback className="bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
+        <AvatarFallback className="bg-gradient-to-br from-emerald-100 to-teal-100 text-emerald-700 dark:from-emerald-900/40 dark:to-teal-900/40 dark:text-emerald-400">
           {getInitials(name)}
         </AvatarFallback>
       </Avatar>
       {status && (
-        <span className="absolute -bottom-0.5 -right-0.5">
-          <UserStatusBadge status={status} size={size === 'lg' ? 'sm' : size === 'md' ? 'sm' : 'sm'} />
+        <span className={statusPosition[size]}>
+          <UserStatusBadge status={status} size={size === 'lg' ? 'sm' : 'sm'} />
         </span>
       )}
     </div>

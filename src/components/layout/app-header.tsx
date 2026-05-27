@@ -1,7 +1,7 @@
 'use client'
 
 import { useTheme } from 'next-themes'
-import { useAuthStore, type User } from '@/stores/auth-store'
+import { useAuthStore, type User as AuthUser } from '@/stores/auth-store'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import {
@@ -77,7 +77,7 @@ export function AppHeader({
   isAdmin,
 }: AppHeaderProps) {
   const { theme, setTheme } = useTheme()
-  const user = useAuthStore((s) => s.user) as User | null
+  const user = useAuthStore((s) => s.user) as AuthUser | null
   const logout = useAuthStore((s) => s.logout)
 
   const handleLogout = async () => {
@@ -85,27 +85,31 @@ export function AppHeader({
   }
 
   return (
-    <header className="sticky top-0 z-40 flex h-12 items-center gap-2 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-3">
+    <header className="sticky top-0 z-40 flex h-14 items-center gap-3 border-b bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/60 px-4">
       {/* Left: Hamburger + Logo */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2.5">
         {onToggleSidebar && (
           <Button
             variant="ghost"
             size="icon"
-            className="h-8 w-8"
+            className="h-9 w-9 rounded-lg hover:bg-muted"
             onClick={onToggleSidebar}
             aria-label="Toggle sidebar"
           >
-            <Menu className="h-4 w-4" />
+            <Menu className="h-4.5 w-4.5" />
           </Button>
         )}
-        <Shield className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
-        <span className="hidden font-bold text-sm sm:inline-block">SecureTeam</span>
+        <div className="flex items-center gap-2">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-100 dark:bg-emerald-900/30">
+            <Shield className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+          </div>
+          <span className="hidden font-bold text-sm sm:inline-block tracking-tight">SecureTeam</span>
+        </div>
       </div>
 
-      {/* Center: Nav tabs */}
+      {/* Center: Nav tabs - pill style */}
       {navItems && onNavigate && (
-        <nav className="hidden md:flex items-center gap-0.5 mx-4 bg-muted/50 rounded-lg p-0.5">
+        <nav className="hidden md:flex items-center gap-1 mx-2 bg-muted/60 rounded-xl p-1">
           {navItems
             .filter((item) => !item.adminOnly || isAdmin)
             .map((item) => {
@@ -116,7 +120,7 @@ export function AppHeader({
                   key={item.id}
                   onClick={() => onNavigate(item.id)}
                   className={cn(
-                    'flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors',
+                    'flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-all duration-200',
                     isActive
                       ? 'bg-background text-foreground shadow-sm'
                       : 'text-muted-foreground hover:text-foreground'
@@ -134,11 +138,11 @@ export function AppHeader({
       <div className="flex-1" />
 
       {/* Right section */}
-      <div className="flex items-center gap-1">
+      <div className="flex items-center gap-1.5">
         {/* Dark mode toggle */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="Theme">
+            <Button variant="ghost" size="icon" className="h-9 w-9 rounded-lg hover:bg-muted" aria-label="Theme">
               <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
               <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
             </Button>
@@ -159,8 +163,8 @@ export function AppHeader({
         {/* User menu */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="relative h-8 gap-1.5 rounded-full pl-1.5 pr-2.5">
-              <Avatar className="h-6 w-6">
+            <Button variant="ghost" className="relative h-9 gap-2 rounded-full pl-1 pr-3 hover:bg-muted">
+              <Avatar className="h-7 w-7 ring-2 ring-background shadow-sm">
                 <AvatarImage src={user?.avatar || undefined} alt={user?.name} />
                 <AvatarFallback className="bg-emerald-100 text-emerald-700 text-[10px] dark:bg-emerald-900/30 dark:text-emerald-400">
                   {user?.name ? getInitials(user.name) : '?'}
@@ -171,7 +175,7 @@ export function AppHeader({
               </span>
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-52" align="end" forceMount>
+          <DropdownMenuContent className="w-56" align="end" forceMount>
             <DropdownMenuLabel className="font-normal">
               <div className="flex flex-col space-y-1">
                 <p className="text-sm font-medium leading-none">{user?.name}</p>

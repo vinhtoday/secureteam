@@ -27,6 +27,7 @@ import {
   Search,
   MessageSquare,
   UserPlus,
+  Shield,
 } from 'lucide-react'
 import { UserAvatar } from './user-status-badge'
 import { CreateChannelDialog } from './create-channel-dialog'
@@ -64,7 +65,7 @@ export function ChatSidebar({
   const handleCreateDM = async (userId: string) => {
     try {
       const res = await api.post('/api/v1/channels/direct', { userId })
-      const dmChannel = res.data
+      const dmChannel = res.data as { id: string }
       queryClient.invalidateQueries({ queryKey: ['channels'] })
       onSelectChannel(dmChannel.id)
       setShowNewDM(false)
@@ -80,28 +81,33 @@ export function ChatSidebar({
   }).filter(Boolean))
 
   return (
-    <div className={cn('flex h-full w-64 flex-col border-r bg-sidebar', className)}>
-      {/* Header */}
-      <div className="flex h-12 items-center justify-between border-b px-3">
-        <h3 className="font-semibold text-sm">Kênh</h3>
-        <div className="flex gap-1">
-          <CreateChannelDialog
-            trigger={
-              <Button variant="ghost" size="icon" className="h-7 w-7" title="Tạo kênh mới" aria-label="Tạo kênh mới">
-                <Plus className="h-3.5 w-3.5" />
-              </Button>
-            }
-          />
+    <div className={cn('flex h-full w-72 flex-col border-r bg-sidebar', className)}>
+      {/* Header with gradient accent */}
+      <div className="flex h-14 items-center justify-between px-4">
+        <div className="flex items-center gap-2.5">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-100 dark:bg-emerald-900/30">
+            <Shield className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+          </div>
+          <div>
+            <h3 className="font-bold text-sm leading-tight">SecureTeam</h3>
+          </div>
         </div>
+        <CreateChannelDialog
+          trigger={
+            <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg hover:bg-muted" title="Tạo kênh mới" aria-label="Tạo kênh mới">
+              <Plus className="h-4 w-4" />
+            </Button>
+          }
+        />
       </div>
 
       {/* Search */}
-      <div className="p-2">
+      <div className="px-3 pb-2">
         <div className="relative">
-          <Search className="absolute top-1/2 left-2.5 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+          <Search className="absolute top-1/2 left-3 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
           <Input
             placeholder="Tìm kênh..."
-            className="h-8 pl-8 text-xs"
+            className="h-9 pl-9 text-sm rounded-lg bg-muted/60 border-transparent focus:bg-background focus:border-input"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -110,29 +116,35 @@ export function ChatSidebar({
 
       <ScrollArea className="flex-1">
         {/* New DM button */}
-        <div className="px-2 pb-2">
+        <div className="px-3 pb-2">
           <button
             onClick={() => setShowNewDM(true)}
-            className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-xs text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
+            className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/15 hover:bg-emerald-100 dark:hover:bg-emerald-900/25 transition-colors shadow-sm"
           >
-            <UserPlus className="h-3.5 w-3.5" />
+            <UserPlus className="h-4 w-4" />
             Tin nhắn mới
           </button>
         </div>
 
-        <Separator className="mx-2 w-auto" />
+        <Separator className="mx-3 w-auto" />
 
         {/* Channels section */}
+        <div className="px-3 pt-3 pb-1">
+          <span className="flex items-center gap-1.5 px-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+            Kênh
+          </span>
+        </div>
+
         <div className="px-2 space-y-0.5">
           {channelsLoading ? (
             Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="flex items-center gap-2 rounded-md px-2 py-2">
-                <Skeleton className="h-4 w-4" />
-                <Skeleton className="h-4 flex-1" />
+              <div key={i} className="flex items-center gap-2.5 rounded-lg px-3 py-2.5">
+                <Skeleton className="h-4 w-4 rounded" />
+                <Skeleton className="h-4 flex-1 rounded" />
               </div>
             ))
           ) : groupChannels.length === 0 ? (
-            <div className="px-2 py-3 text-center text-xs text-muted-foreground">
+            <div className="px-3 py-4 text-center text-xs text-muted-foreground">
               {search ? 'Không tìm thấy kênh' : 'Chưa có kênh nào'}
             </div>
           ) : (
@@ -147,18 +159,18 @@ export function ChatSidebar({
           )}
         </div>
 
-        <Separator className="mx-2 my-2 w-auto" />
+        <Separator className="mx-3 my-3 w-auto" />
 
         {/* Direct Messages */}
-        <div className="px-2 pb-1">
-          <span className="flex items-center gap-1.5 px-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+        <div className="px-3 pb-1">
+          <span className="flex items-center gap-1.5 px-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
             Tin nhắn riêng
           </span>
         </div>
 
-        <div className="px-2 space-y-0.5">
+        <div className="px-2 space-y-0.5 pb-4">
           {directChannels.length === 0 ? (
-            <div className="px-2 py-3 text-center text-xs text-muted-foreground">
+            <div className="px-3 py-4 text-center text-xs text-muted-foreground">
               Chưa có tin nhắn riêng nào
             </div>
           ) : (
@@ -190,10 +202,10 @@ export function ChatSidebar({
           </SheetHeader>
           <div className="mt-4 space-y-2">
             <div className="relative">
-              <Search className="absolute top-1/2 left-2.5 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 placeholder="Tìm người dùng..."
-                className="pl-9"
+                className="pl-9 rounded-lg"
                 value={dmSearch}
                 onChange={(e) => setDmSearch(e.target.value)}
               />
@@ -205,7 +217,7 @@ export function ChatSidebar({
                   .map((u) => (
                     <button
                       key={u.id}
-                      className="flex w-full items-center gap-3 rounded-md px-3 py-2 hover:bg-muted transition-colors"
+                      className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 hover:bg-muted transition-colors"
                       onClick={() => handleCreateDM(u.id)}
                     >
                       <UserAvatar name={u.name} avatar={u.avatar} size="sm" />
@@ -241,18 +253,18 @@ function ChannelItem({ channel, isActive, onClick }: ChannelItemProps) {
   return (
     <button
       className={cn(
-        'flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left transition-colors',
+        'flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left transition-all duration-150',
         isActive
-          ? 'bg-sidebar-accent text-sidebar-accent-foreground'
-          : 'text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground'
+          ? 'border-l-2 border-primary bg-emerald-50/80 dark:bg-emerald-900/15 text-foreground font-medium shadow-sm'
+          : 'border-l-2 border-transparent text-sidebar-foreground/70 hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground'
       )}
       onClick={onClick}
     >
       {icon}
       <div className="flex-1 min-w-0">
-        <div className="truncate text-sm font-medium">{channel.name}</div>
+        <div className="truncate text-sm">{channel.name}</div>
         {channel.lastMessage && (
-          <div className="truncate text-xs text-muted-foreground">
+          <div className="truncate text-xs text-muted-foreground mt-0.5">
             <span className="font-medium">{channel.lastMessage.sender.name}: </span>
             {channel.lastMessage.content}
           </div>
@@ -272,33 +284,31 @@ interface DMItemProps {
 
 function DMItem({ channel, isActive, onClick, isOnline, currentUserId }: DMItemProps) {
   const otherMember = channel.members?.find((m) => m.userId !== currentUserId)
-  const displayName = otherMember?.user?.name || channel.name
+  const displayName = channel.name
 
   return (
     <button
       className={cn(
-        'flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left transition-colors',
+        'flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left transition-all duration-150',
         isActive
-          ? 'bg-sidebar-accent text-sidebar-accent-foreground'
-          : 'text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground'
+          ? 'border-l-2 border-primary bg-emerald-50/80 dark:bg-emerald-900/15 text-foreground font-medium shadow-sm'
+          : 'border-l-2 border-transparent text-sidebar-foreground/70 hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground'
       )}
       onClick={onClick}
     >
       <div className="relative">
-        <div className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-100 text-[10px] font-medium text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
-          {displayName.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2)}
-        </div>
+        <UserAvatar name={displayName} size="sm" />
         <span
           className={cn(
-            'absolute -bottom-0.5 -right-0.5 h-2 w-2 rounded-full ring-2 ring-sidebar',
-            isOnline ? 'bg-emerald-500' : 'bg-gray-400 dark:bg-gray-600'
+            'absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full ring-2 ring-sidebar',
+            isOnline ? 'bg-emerald-500 shadow-sm shadow-emerald-500/50' : 'bg-gray-400 dark:bg-gray-600'
           )}
         />
       </div>
       <div className="flex-1 min-w-0">
-        <div className="truncate text-sm">{displayName}</div>
+        <div className={cn('truncate text-sm', isOnline && 'font-medium')}>{displayName}</div>
         {channel.lastMessage && (
-          <div className="truncate text-xs text-muted-foreground">
+          <div className="truncate text-xs text-muted-foreground mt-0.5">
             {channel.lastMessage.content}
           </div>
         )}

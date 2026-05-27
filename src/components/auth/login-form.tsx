@@ -51,25 +51,25 @@ export function LoginForm({ onSwitchToRegister }: LoginFormProps) {
   }
 
   return (
-    <Card className="w-full max-w-md border-0 shadow-lg sm:border sm:shadow-none">
-      <CardHeader className="text-center">
-        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/30">
-          <Shield className="h-7 w-7 text-emerald-600 dark:text-emerald-400" />
+    <Card className="w-full max-w-md border border-border/50 shadow-xl sm:shadow-lg sm:border bg-card/80 backdrop-blur-sm">
+      <CardHeader className="text-center pb-2">
+        <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-400 to-emerald-600 shadow-lg shadow-emerald-500/25">
+          <Shield className="h-8 w-8 text-white" />
         </div>
-        <CardTitle className="text-2xl font-bold">SecureTeam</CardTitle>
-        <CardDescription>
+        <CardTitle className="text-2xl font-bold tracking-tight">SecureTeam</CardTitle>
+        <CardDescription className="mt-1.5">
           Đăng nhập để truy cập hệ thống nhắn tin nội bộ
         </CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && (
-            <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive" role="alert">
+            <div className="rounded-lg bg-destructive/10 border border-destructive/20 p-3 text-sm text-destructive" role="alert">
               {error}
             </div>
           )}
           <div className="space-y-2">
-            <Label htmlFor="login-email">Email</Label>
+            <Label htmlFor="login-email" className="text-sm font-medium">Email</Label>
             <Input
               id="login-email"
               type="email"
@@ -78,10 +78,11 @@ export function LoginForm({ onSwitchToRegister }: LoginFormProps) {
               onChange={(e) => setEmail(e.target.value)}
               disabled={isLoading}
               autoComplete="email"
+              className="h-11 rounded-xl border-border/60 bg-background/50"
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="login-password">Mật khẩu</Label>
+            <Label htmlFor="login-password" className="text-sm font-medium">Mật khẩu</Label>
             <div className="relative">
               <Input
                 id="login-password"
@@ -91,12 +92,12 @@ export function LoginForm({ onSwitchToRegister }: LoginFormProps) {
                 onChange={(e) => setPassword(e.target.value)}
                 disabled={isLoading}
                 autoComplete="current-password"
-                className="pr-10"
+                className="h-11 rounded-xl border-border/60 bg-background/50 pr-10"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute top-1/2 right-3 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                className="absolute top-1/2 right-3 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                 tabIndex={-1}
                 aria-label={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
               >
@@ -114,7 +115,7 @@ export function LoginForm({ onSwitchToRegister }: LoginFormProps) {
               Ghi nhớ đăng nhập
             </Label>
           </div>
-          <Button type="submit" className="w-full" disabled={isLoading}>
+          <Button type="submit" className="w-full h-11 rounded-xl font-semibold shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/30 transition-all" disabled={isLoading}>
             {isLoading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -126,12 +127,12 @@ export function LoginForm({ onSwitchToRegister }: LoginFormProps) {
           </Button>
         </form>
       </CardContent>
-      <CardFooter className="justify-center">
+      <CardFooter className="justify-center pb-6">
         <p className="text-sm text-muted-foreground">
           Chưa có tài khoản?{' '}
           <button
             onClick={onSwitchToRegister}
-            className="font-medium text-primary hover:underline"
+            className="font-semibold text-primary hover:underline underline-offset-2"
           >
             Đăng ký ngay
           </button>

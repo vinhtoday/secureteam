@@ -14,6 +14,7 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover'
 import { Smile, Paperclip, X, Send, Loader2 } from 'lucide-react'
+import { cn } from '@/lib/utils'
 import type { Message } from '@/hooks/use-messages'
 
 interface MessageInputProps {
@@ -48,7 +49,7 @@ export function MessageInput({
   const [isSending, setIsSending] = useState(false)
   const [showEmoji, setShowEmoji] = useState(false)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
-  const typingTimeoutRef = useRef<ReturnType<typeof setTimeout>>()
+  const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const handleSend = useCallback(async () => {
     const trimmed = content.trim()
@@ -111,23 +112,25 @@ export function MessageInput({
     }
   }, [])
 
+  const hasContent = content.trim().length > 0
+
   return (
     <div className="border-t bg-background">
       {/* Reply preview */}
       {replyTo && (
-        <div className="flex items-center gap-2 border-b px-4 py-2 bg-muted/30">
-          <div className="border-l-2 border-emerald-500 pl-2 flex-1 min-w-0">
-            <div className="text-xs font-medium text-muted-foreground">
+        <div className="flex items-center gap-2 border-b px-4 py-2.5 bg-muted/20">
+          <div className="border-l-2 border-primary pl-3 flex-1 min-w-0">
+            <div className="text-xs font-semibold text-muted-foreground">
               Phản hồi {replyTo.sender?.name}
             </div>
-            <div className="text-xs truncate text-muted-foreground/80">
+            <div className="text-xs truncate text-muted-foreground/70 mt-0.5">
               {replyTo.content?.substring(0, 100)}
             </div>
           </div>
           <Button
             variant="ghost"
             size="icon"
-            className="h-6 w-6 shrink-0"
+            className="h-6 w-6 shrink-0 rounded-full hover:bg-muted"
             onClick={onCancelReply}
             aria-label="Hủy phản hồi"
           >
@@ -136,36 +139,43 @@ export function MessageInput({
         </div>
       )}
 
-      {/* Typing indicator */}
+      {/* Typing indicator with animated dots */}
       {typingUsers.length > 0 && (
-        <div className="px-4 py-1.5 text-xs text-muted-foreground">
-          {typingUsers.length === 1
-            ? `${typingUsers[0].name} đang nhập...`
-            : `${typingUsers.length} người đang nhập...`}
+        <div className="px-4 py-1.5 flex items-center gap-2">
+          <div className="flex items-center gap-0.5">
+            <span className="h-1 w-1 rounded-full bg-muted-foreground/60 animate-bounce" style={{ animationDelay: '0ms' }} />
+            <span className="h-1 w-1 rounded-full bg-muted-foreground/60 animate-bounce" style={{ animationDelay: '150ms' }} />
+            <span className="h-1 w-1 rounded-full bg-muted-foreground/60 animate-bounce" style={{ animationDelay: '300ms' }} />
+          </div>
+          <span className="text-xs text-muted-foreground">
+            {typingUsers.length === 1
+              ? `${typingUsers[0].name} đang nhập...`
+              : `${typingUsers.length} người đang nhập...`}
+          </span>
         </div>
       )}
 
       {/* Input area */}
-      <div className="flex items-end gap-2 p-3">
-        <div className="flex gap-1">
+      <div className="flex items-end gap-2 px-4 py-3">
+        <div className="flex gap-0.5 pb-0.5">
           <Popover open={showEmoji} onOpenChange={setShowEmoji}>
             <PopoverTrigger asChild>
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-9 w-9 text-muted-foreground"
+                className="h-9 w-9 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
                 disabled={disabled}
                 aria-label="Chọn emoji"
               >
                 <Smile className="h-5 w-5" />
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-64 p-2" align="start">
-              <div className="grid grid-cols-8 gap-1">
+            <PopoverContent className="w-72 p-2.5" align="start">
+              <div className="grid grid-cols-8 gap-0.5">
                 {EMOJI_LIST.map((emoji) => (
                   <button
                     key={emoji}
-                    className="flex h-8 w-8 items-center justify-center rounded-md text-lg hover:bg-muted transition-colors"
+                    className="flex h-9 w-9 items-center justify-center rounded-lg text-lg hover:bg-muted transition-colors"
                     onClick={() => insertEmoji(emoji)}
                   >
                     {emoji}
@@ -179,7 +189,7 @@ export function MessageInput({
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-9 w-9 text-muted-foreground"
+                className="h-9 w-9 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
                 disabled
                 aria-label="Đính kèm tệp"
               >
@@ -198,15 +208,20 @@ export function MessageInput({
             onKeyDown={handleKeyDown}
             placeholder={placeholder}
             disabled={disabled || isSending}
-            className="min-h-[40px] max-h-[150px] resize-none rounded-xl pr-10 text-sm"
+            className="min-h-[42px] max-h-[150px] resize-none rounded-xl border-muted-foreground/20 bg-muted/40 px-4 py-2.5 text-sm shadow-sm focus:bg-background focus:shadow-md focus:border-primary/50 transition-all"
             rows={1}
           />
         </div>
 
         <Button
           size="icon"
-          className="h-9 w-9 rounded-xl shrink-0 disabled:opacity-40"
-          disabled={!content.trim() || isSending || disabled}
+          className={cn(
+            'h-10 w-10 rounded-full shrink-0 transition-all duration-200 mb-0.5',
+            hasContent && !disabled
+              ? 'bg-primary text-primary-foreground shadow-md shadow-primary/25 hover:shadow-lg hover:shadow-primary/30 hover:scale-105'
+              : 'bg-muted text-muted-foreground disabled:opacity-40'
+          )}
+          disabled={!hasContent || isSending || disabled}
           onClick={handleSend}
           aria-label="Gửi tin nhắn"
         >

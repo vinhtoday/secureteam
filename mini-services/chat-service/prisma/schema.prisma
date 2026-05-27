@@ -1,0 +1,230 @@
+// SecureTeam - Chat Service Schema (subset of main schema)
+// Only includes models used by the chat/call socket.io service
+// Shares the same SQLite database as the main backend
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// ROLES (RBAC System)
+// ============================================
+
+model Role {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  permissions String   @default("{}")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  users User[]
+}
+
+// ============================================
+// USER & AUTHENTICATION
+// ============================================
+
+model User {
+  id                String    @id @default(cuid())
+  email             String    @unique
+  passwordHash      String
+  name              String
+  avatar            String?
+  bio               String?
+  department        String?
+  position          String?
+  roleId            String
+  isEmailVerified   Boolean   @default(false)
+  isActive          Boolean   @default(true)
+  isLocked          Boolean   @default(false)
+  twoFactorEnabled  Boolean   @default(false)
+  twoFactorSecret   String?
+  lastSeen          DateTime?
+  onlineStatus      String    @default("offline")
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  role               Role             @relation(fields: [roleId], references: [id])
+  sessions           Session[]
+  memberships        ChannelMember[]
+  messages           Message[]        @relation("MessageSender")
+  ownedChannels      Channel[]        @relation("ChannelOwner")
+  createdCalls       CallRoom[]       @relation("CallCreator")
+  callParticipations CallParticipant[]
+  startedRecordings  CallRecording[]  @relation("RecordingStarter")
+
+  @@index([roleId])
+  @@index([isActive])
+  @@index([department])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  userId       String
+  tokenHash    String   @unique
+  refreshToken String   @unique
+  deviceInfo   String?
+  ipAddress    String?
+  userAgent    String?
+  expiresAt    DateTime
+  lastActiveAt DateTime @default(now())
+  createdAt    DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+// ============================================
+// CHANNELS & GROUPS
+// ============================================
+
+model Channel {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  type        String   @default("public")
+  avatar      String?
+  ownerId     String?
+  isArchived  Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  owner     User?           @relation("ChannelOwner", fields: [ownerId], references: [id])
+  members   ChannelMember[]
+  messages  Message[]
+  callRooms CallRoom[]       @relation("CallChannel")
+
+  @@index([type])
+}
+
+model ChannelMember {
+  id         String   @id @default(cuid())
+  userId     String
+  channelId  String
+  role       String   @default("member")
+  joinedAt   DateTime @default(now())
+  muted      Boolean  @default(false)
+  lastReadAt DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  channel Channel @relation(fields: [channelId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, channelId])
+  @@index([channelId])
+}
+
+// ============================================
+// MESSAGES
+// ============================================
+
+model Message {
+  id              String   @id @default(cuid())
+  channelId       String
+  senderId        String
+  content         String?
+  contentType     String   @default("text")
+  replyToId       String?
+  isPinned        Boolean  @default(false)
+  isEdited        Boolean  @default(false)
+  editedAt        DateTime?
+  fileUrl         String?
+  fileName        String?
+  fileSize        Int?
+  fileMimeType    String?
+  isEncrypted     Boolean  @default(false)
+  encryptedContent String?
+  iv              String?
+  hmacSignature   String?
+  metadata        String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  channel Channel          @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  sender  User             @relation("MessageSender", fields: [senderId], references: [id])
+  replyTo Message?         @relation("MessageReply", fields: [replyToId], references: [id])
+  replies Message[]        @relation("MessageReply")
+
+  @@index([channelId, createdAt])
+  @@index([senderId])
+  @@index([replyToId])
+}
+
+// ============================================
+// VOICE & VIDEO CALLS
+// ============================================
+
+model CallRoom {
+  id             String   @id @default(cuid())
+  title          String?
+  type           String
+  status         String   @default("waiting")
+  channelId      String?
+  createdBy      String
+  startedAt      DateTime?
+  endedAt        DateTime?
+  duration       Int?
+  maxParticipants Int     @default(30)
+  metadata       String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  creator       User              @relation("CallCreator", fields: [createdBy], references: [id])
+  participants  CallParticipant[]
+  recordings    CallRecording[]
+  channelId_rel Channel?          @relation("CallChannel", fields: [channelId], references: [id])
+
+  @@index([createdBy])
+  @@index([status])
+  @@index([channelId])
+}
+
+model CallParticipant {
+  id              String    @id @default(cuid())
+  callId          String
+  userId          String
+  role            String    @default("participant")
+  status          String    @default("ringing")
+  joinedAt        DateTime?
+  leftAt          DateTime?
+  isMuted         Boolean   @default(false)
+  isCameraOff     Boolean   @default(false)
+  isScreenSharing Boolean   @default(false)
+  raisedHand      Boolean   @default(false)
+  metadata        String?
+
+  call       CallRoom        @relation(fields: [callId], references: [id], onDelete: Cascade)
+  user       User            @relation(fields: [userId], references: [id])
+  recordings CallRecording[]
+
+  @@unique([callId, userId])
+  @@index([callId])
+  @@index([userId])
+}
+
+model CallRecording {
+  id            String   @id @default(cuid())
+  callId        String
+  participantId String?
+  type          String   @default("audio")
+  status        String   @default("processing")
+  fileUrl       String?
+  fileName      String?
+  fileSize      Int?
+  duration      Int?
+  startedBy     String
+  createdAt     DateTime @default(now())
+
+  call        CallRoom         @relation(fields: [callId], references: [id], onDelete: Cascade)
+  participant CallParticipant? @relation(fields: [participantId], references: [id])
+  starter     User             @relation("RecordingStarter", fields: [startedBy], references: [id])
+
+  @@index([callId])
+  @@index([startedBy])
+}

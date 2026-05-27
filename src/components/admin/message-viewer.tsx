@@ -62,13 +62,13 @@ export function MessageViewer() {
   }
 
   return (
-    <div className="space-y-4 p-6">
+    <div className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h2 className="text-2xl font-bold">Xem tin nhắn</h2>
+          <h2 className="text-2xl font-bold tracking-tight bg-gradient-to-r from-violet-600 to-indigo-600 dark:from-violet-400 dark:to-indigo-400 bg-clip-text text-transparent">Xem tin nhắn</h2>
           <p className="text-sm text-muted-foreground">Xem và tìm kiếm tất cả tin nhắn trong hệ thống</p>
         </div>
-        <Button variant="outline" size="sm" className="gap-2" onClick={handleExport} disabled={exportData.isPending}>
+        <Button variant="outline" size="sm" className="gap-2 rounded-lg bg-muted/30 border-border/40 hover:bg-muted/50" onClick={handleExport} disabled={exportData.isPending}>
           <Download className="h-4 w-4" />
           Xuất dữ liệu
         </Button>
@@ -80,13 +80,13 @@ export function MessageViewer() {
           <Search className="absolute top-1/2 left-2.5 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             placeholder="Tìm nội dung tin nhắn..."
-            className="pl-9"
+            className="pl-9 bg-muted/30 focus:bg-background rounded-lg border-border/40"
             value={search}
             onChange={(e) => { setSearch(e.target.value); setPage(1) }}
           />
         </div>
         <Select value={channelFilter} onValueChange={(v) => { setChannelFilter(v); setPage(1) }}>
-          <SelectTrigger className="w-48">
+          <SelectTrigger className="w-48 rounded-lg bg-muted/30 border-border/40">
             <SelectValue placeholder="Tất cả kênh" />
           </SelectTrigger>
           <SelectContent>
@@ -101,7 +101,7 @@ export function MessageViewer() {
       </div>
 
       {/* Table */}
-      <div className="rounded-lg border">
+      <div className="rounded-xl border border-border/40 overflow-hidden glass-card shadow-sm">
         <Table>
           <TableHeader>
             <TableRow>

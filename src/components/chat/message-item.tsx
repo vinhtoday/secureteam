@@ -106,22 +106,22 @@ export const MessageItem = memo(
         return (
           <div ref={ref} className={cn('group relative flex gap-2 px-4 py-0.5', isConsecutive ? 'pt-0.5' : 'pt-1.5')}>
             <div className="flex-shrink-0 w-8 pt-0.5">
-              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 shadow-sm ring-2 ring-emerald-200 dark:ring-emerald-800">
+              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-indigo-600 shadow-sm ring-2 ring-violet-200 dark:ring-violet-900/50">
                 <Bot className="h-3.5 w-3.5 text-white" />
               </div>
             </div>
             <div className="max-w-[75%] min-w-0">
               {showAvatar && (
                 <div className="mb-0.5 flex items-center gap-1.5 pl-1">
-                  <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">SecureBot</span>
-                  <Bot className="h-3 w-3 text-emerald-500" />
+                  <span className="text-xs font-semibold text-violet-600 dark:text-violet-400">SecureBot</span>
+                  <Bot className="h-3 w-3 text-violet-500" />
                 </div>
               )}
               <div className="relative">
                 <div className={cn(
                   'rounded-2xl rounded-tl-sm px-3.5 py-2 shadow-sm',
-                  'bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/30 dark:to-teal-950/30',
-                  'border border-emerald-200/50 dark:border-emerald-800/30'
+                  'bg-gradient-to-br from-violet-50/40 to-indigo-50/40 dark:from-violet-950/15 dark:to-indigo-950/15',
+                  'border border-violet-200/30 dark:border-violet-900/20'
                 )}>
                   <div className="text-sm leading-relaxed break-words whitespace-pre-wrap text-foreground">
                     {message.content}

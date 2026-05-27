@@ -104,7 +104,7 @@ export function ThreadPanel({
         <div className="flex gap-2">
           <Avatar className="h-7 w-7 shrink-0">
             <AvatarImage src={parentMessage.sender?.avatar || undefined} />
-            <AvatarFallback className="bg-emerald-100 text-emerald-700 text-[10px] dark:bg-emerald-900/30 dark:text-emerald-400">
+            <AvatarFallback className="bg-violet-100 text-violet-700 text-[10px] dark:bg-violet-900/30 dark:text-violet-400">
               {parentMessage.sender?.name ? getInitials(parentMessage.sender.name) : '?'}
             </AvatarFallback>
           </Avatar>

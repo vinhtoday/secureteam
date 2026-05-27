@@ -189,13 +189,13 @@ export function ChatArea({
   // No channel selected
   if (!channel) {
     return (
-      <div className="flex flex-1 items-center justify-center bg-gradient-to-b from-background to-muted/20">
+      <div className="flex flex-1 items-center justify-center bg-gradient-to-b from-background to-violet-500/5">
         <div className="text-center max-w-sm px-6">
           <div className="relative inline-flex mx-auto mb-6">
-            <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-100 to-teal-100 dark:from-emerald-900/30 dark:to-teal-900/30 shadow-lg shadow-emerald-500/10">
-              <MessagesSquare className="h-10 w-10 text-emerald-500 dark:text-emerald-400" />
+            <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-100 to-indigo-100 dark:from-violet-900/20 dark:to-indigo-900/20 shadow-lg shadow-violet-500/10">
+              <MessagesSquare className="h-10 w-10 text-violet-600 dark:text-violet-400" />
             </div>
-            <div className="absolute -top-1 -right-1 flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 shadow-md">
+            <div className="absolute -top-1 -right-1 flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-indigo-600 shadow-md">
               <Sparkles className="h-3.5 w-3.5 text-white" />
             </div>
           </div>

@@ -51,25 +51,25 @@ export function AuditLogViewer() {
 
   const getActionBadge = (action: string) => {
     if (action.startsWith('USER')) {
-      return <Badge variant="outline" className="text-[10px] bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400">{action}</Badge>
+      return <Badge className="text-[10px] bg-violet-50 text-violet-700 dark:bg-violet-950/30 dark:text-violet-400 border-none font-semibold tracking-wide">{action}</Badge>
     }
     if (action.startsWith('CHANNEL')) {
-      return <Badge variant="outline" className="text-[10px] bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400">{action}</Badge>
+      return <Badge className="text-[10px] bg-indigo-50 text-indigo-700 dark:bg-indigo-950/30 dark:text-indigo-400 border-none font-semibold tracking-wide">{action}</Badge>
     }
-    return <Badge variant="outline" className="text-[10px]">{action}</Badge>
+    return <Badge variant="outline" className="text-[10px] border-border/40">{action}</Badge>
   }
 
   return (
-    <div className="space-y-4 p-6">
+    <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold">Nhật ký kiểm soát</h2>
+        <h2 className="text-2xl font-bold tracking-tight bg-gradient-to-r from-violet-600 to-indigo-600 dark:from-violet-400 dark:to-indigo-400 bg-clip-text text-transparent">Nhật ký kiểm soát</h2>
         <p className="text-sm text-muted-foreground">Theo dõi mọi hoạt động trong hệ thống</p>
       </div>
 
       {/* Filters */}
       <div className="flex flex-wrap items-center gap-3">
         <Select value={actionFilter} onValueChange={(v) => { setActionFilter(v); setPage(1) }}>
-          <SelectTrigger className="w-48">
+          <SelectTrigger className="w-48 rounded-lg bg-muted/30 border-border/40">
             <SelectValue placeholder="Loại hoạt động" />
           </SelectTrigger>
           <SelectContent>
@@ -82,7 +82,7 @@ export function AuditLogViewer() {
       </div>
 
       {/* Table */}
-      <div className="rounded-lg border">
+      <div className="rounded-xl border border-border/40 overflow-hidden glass-card shadow-sm">
         <Table>
           <TableHeader>
             <TableRow>

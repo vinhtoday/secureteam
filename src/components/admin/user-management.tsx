@@ -116,30 +116,30 @@ export function UserManagement() {
   const getRoleBadge = (role: string) => {
     switch (role) {
       case 'SUPER_ADMIN':
-        return <Badge variant="destructive" className="text-[10px]">QT tối cao</Badge>
+        return <Badge variant="destructive" className="text-[10px] uppercase font-bold tracking-wider">QT tối cao</Badge>
       case 'ADMIN':
-        return <Badge className="bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 text-[10px]">QT viên</Badge>
+        return <Badge className="bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-400 text-[10px] border-none uppercase font-bold tracking-wider">QT viên</Badge>
       case 'LEADER':
-        return <Badge className="bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 text-[10px]">Trưởng nhóm</Badge>
+        return <Badge className="bg-violet-100 text-violet-800 dark:bg-violet-950/40 dark:text-violet-400 text-[10px] border-none uppercase font-bold tracking-wider">Trưởng nhóm</Badge>
       default:
-        return <Badge variant="secondary" className="text-[10px]">Thành viên</Badge>
+        return <Badge variant="secondary" className="text-[10px] uppercase font-bold tracking-wider">Thành viên</Badge>
     }
   }
 
   const getStatusBadge = (user: AdminUser) => {
     if (!user.isActive) {
-      return <Badge variant="outline" className="text-[10px] text-muted-foreground">Vô hiệu</Badge>
+      return <Badge variant="outline" className="text-[10px] text-muted-foreground/60 border-muted-foreground/20">Vô hiệu</Badge>
     }
     if (user.isLocked) {
-      return <Badge variant="outline" className="text-[10px] text-destructive">Khóa</Badge>
+      return <Badge variant="outline" className="text-[10px] text-destructive border-destructive/20 bg-destructive/5">Khóa</Badge>
     }
-    return <Badge variant="outline" className="text-[10px] text-emerald-600 dark:text-emerald-400">Hoạt động</Badge>
+    return <Badge className="bg-emerald-500/10 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400 text-[10px] border-none">Hoạt động</Badge>
   }
 
   return (
-    <div className="space-y-4 p-6">
+    <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold">Quản lý người dùng</h2>
+        <h2 className="text-2xl font-bold tracking-tight bg-gradient-to-r from-violet-600 to-indigo-600 dark:from-violet-400 dark:to-indigo-400 bg-clip-text text-transparent">Quản lý người dùng</h2>
         <p className="text-sm text-muted-foreground">Quản lý tài khoản và phân quyền</p>
       </div>
 
@@ -149,13 +149,13 @@ export function UserManagement() {
           <Search className="absolute top-1/2 left-2.5 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             placeholder="Tìm tên, email..."
-            className="pl-9"
+            className="pl-9 bg-muted/30 focus:bg-background rounded-lg border-border/40"
             value={search}
             onChange={(e) => { setSearch(e.target.value); setPage(1) }}
           />
         </div>
         <Select value={roleFilter} onValueChange={(v) => { setRoleFilter(v); setPage(1) }}>
-          <SelectTrigger className="w-40">
+          <SelectTrigger className="w-40 rounded-lg bg-muted/30 border-border/40">
             <SelectValue placeholder="Vai trò" />
           </SelectTrigger>
           <SelectContent>
@@ -167,7 +167,7 @@ export function UserManagement() {
           </SelectContent>
         </Select>
         <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v); setPage(1) }}>
-          <SelectTrigger className="w-36">
+          <SelectTrigger className="w-36 rounded-lg bg-muted/30 border-border/40">
             <SelectValue placeholder="Trạng thái" />
           </SelectTrigger>
           <SelectContent>
@@ -180,7 +180,7 @@ export function UserManagement() {
       </div>
 
       {/* Table */}
-      <div className="rounded-lg border">
+      <div className="rounded-xl border border-border/40 overflow-hidden glass-card shadow-sm">
         <Table>
           <TableHeader>
             <TableRow>

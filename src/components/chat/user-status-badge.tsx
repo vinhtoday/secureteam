@@ -99,7 +99,7 @@ export function UserAvatar({
     <div className={cn('relative inline-flex', className)}>
       <Avatar className={cn(avatarSizes[size], 'ring-2 ring-background')}>
         <AvatarImage src={avatar || undefined} alt={name} />
-        <AvatarFallback className="bg-gradient-to-br from-emerald-100 to-teal-100 text-emerald-700 dark:from-emerald-900/40 dark:to-teal-900/40 dark:text-emerald-400">
+        <AvatarFallback className="bg-gradient-to-br from-violet-100 to-indigo-100 text-violet-700 dark:from-violet-900/40 dark:to-indigo-900/40 dark:text-violet-400">
           {getInitials(name)}
         </AvatarFallback>
       </Avatar>

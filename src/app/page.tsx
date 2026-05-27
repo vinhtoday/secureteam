@@ -23,8 +23,7 @@ export default function Home() {
   const [authView, setAuthView] = useState<AuthView>('login')
   const [navItem, setNavItem] = useState<NavItem>('chat')
   const [activeChannelId, setActiveChannelId] = useState<string | null>(null)
-  const [chatSidebarOpen, setChatSidebarOpen] = useState(true)
-  const [adminNavOpen, setAdminNavOpen] = useState(false)
+  const [sidebarOpen, setSidebarOpen] = useState(true)
 
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
   const user = useAuthStore((s) => s.user)
@@ -40,12 +39,18 @@ export default function Home() {
 
   const handleSelectChannel = useCallback((channelId: string) => {
     setActiveChannelId(channelId)
-    setChatSidebarOpen(false)
+    // On mobile, close sidebar after selecting a channel
+    if (typeof window !== 'undefined' && window.innerWidth < 768) {
+      setSidebarOpen(false)
+    }
   }, [])
 
   const handleNavigate = useCallback((item: NavItem) => {
     setNavItem(item)
-    setAdminNavOpen(false)
+    // On mobile, close sidebar after navigating
+    if (typeof window !== 'undefined' && window.innerWidth < 1024) {
+      setSidebarOpen(false)
+    }
   }, [])
 
   const handleLogout = async () => {
@@ -55,11 +60,11 @@ export default function Home() {
   // Auth screens
   if (!isAuthenticated) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-emerald-50 via-white to-teal-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 p-4">
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-violet-50/50 via-white to-indigo-50/50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 p-4">
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute -top-40 -right-40 w-80 h-80 rounded-full bg-emerald-200/30 dark:bg-emerald-800/10 blur-3xl" />
-          <div className="absolute -bottom-40 -left-40 w-96 h-96 rounded-full bg-teal-200/30 dark:bg-teal-800/10 blur-3xl" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-emerald-100/20 dark:bg-emerald-900/5 blur-3xl" />
+          <div className="absolute -top-40 -right-40 w-80 h-80 rounded-full bg-violet-200/20 dark:bg-violet-900/10 blur-3xl" />
+          <div className="absolute -bottom-40 -left-40 w-96 h-96 rounded-full bg-indigo-200/20 dark:bg-indigo-900/10 blur-3xl" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-violet-100/10 dark:bg-violet-900/5 blur-3xl" />
         </div>
         <div className="relative z-10">
           {authView === 'login' ? (
@@ -73,109 +78,87 @@ export default function Home() {
   }
 
   return (
-    <div className="flex h-screen overflow-hidden bg-background">
+    <div className="flex h-screen flex-col overflow-hidden bg-background">
       {/* Call Manager — always rendered for incoming/active call UI */}
       <CallManager />
 
-      {/* ===== CHAT MODE: ChatSidebar + ChatArea ===== */}
-      {isChatMode && (
-        <>
-          {/* Mobile sidebar overlay */}
-          {chatSidebarOpen && (
-            <div className="fixed inset-0 z-40 md:hidden">
-              <div
-                className="absolute inset-0 bg-black/40 backdrop-blur-[2px]"
-                onClick={() => setChatSidebarOpen(false)}
-              />
-              <div className="relative z-50 h-full w-80 animate-in slide-in-from-left duration-200">
+      {/* Global AppHeader - always full width on top */}
+      <AppHeader
+        onToggleSidebar={() => setSidebarOpen((prev) => !prev)}
+        navItems={navItems}
+        activeNavItem={navItem}
+        onNavigate={handleNavigate}
+        isAdmin={isAdmin}
+      />
+
+      {/* Main workspace area below the header */}
+      <div className="flex flex-1 overflow-hidden">
+        {/* Mobile sidebar overlay (Drawer) */}
+        {sidebarOpen && (
+          <div className="fixed inset-0 z-40 md:hidden">
+            <div
+              className="absolute inset-0 bg-black/40 backdrop-blur-[2px]"
+              onClick={() => setSidebarOpen(false)}
+            />
+            <div className="relative z-50 h-full w-80 animate-in slide-in-from-left duration-200">
+              {isChatMode ? (
                 <ChatSidebar
                   activeChannelId={activeChannelId}
                   onSelectChannel={handleSelectChannel}
                   className="flex"
                 />
-              </div>
+              ) : (
+                <AdminSidebar
+                  activeItem={navItem}
+                  onNavigate={handleNavigate}
+                  onLogout={handleLogout}
+                  isAdmin={isAdmin}
+                />
+              )}
             </div>
-          )}
+          </div>
+        )}
 
-          {/* Desktop chat sidebar */}
-          <div className={cn(
+        {/* Desktop sidebar */}
+        <div
+          className={cn(
             'hidden md:flex shrink-0 flex-col border-r bg-sidebar transition-all duration-300 ease-in-out',
-            chatSidebarOpen ? 'w-72' : 'w-0 overflow-hidden border-r-0'
-          )}>
+            sidebarOpen ? (isChatMode ? 'w-72' : 'w-60') : 'w-0 overflow-hidden border-r-0'
+          )}
+        >
+          {isChatMode ? (
             <ChatSidebar
               activeChannelId={activeChannelId}
               onSelectChannel={handleSelectChannel}
               className="flex"
             />
-          </div>
-
-          {/* Chat main area */}
-          <div className="flex flex-1 flex-col overflow-hidden">
-            <AppHeader
-              onToggleSidebar={() => setChatSidebarOpen((prev) => !prev)}
-              navItems={navItems}
-              activeNavItem={navItem}
+          ) : (
+            <AdminSidebar
+              activeItem={navItem}
               onNavigate={handleNavigate}
+              onLogout={handleLogout}
               isAdmin={isAdmin}
             />
+          )}
+        </div>
+
+        {/* Main Content Area */}
+        <div className="flex flex-1 flex-col overflow-hidden">
+          {isChatMode ? (
             <ChatArea
               channel={selectedChannel ?? null}
               onlineUsers={onlineUsers}
             />
-          </div>
-        </>
-      )}
-
-      {/* ===== ADMIN MODE: Navigation + Content ===== */}
-      {!isChatMode && (
-        <div className="flex flex-1 flex-col overflow-hidden">
-          <AppHeader
-            onToggleSidebar={() => setAdminNavOpen((prev) => !prev)}
-            navItems={navItems}
-            activeNavItem={navItem}
-            onNavigate={handleNavigate}
-            isAdmin={isAdmin}
-          />
-
-          <div className="flex flex-1 overflow-hidden">
-            {/* Admin navigation sidebar */}
-            {adminNavOpen && (
-              <div className="fixed inset-0 z-40 lg:hidden">
-                <div
-                  className="absolute inset-0 bg-black/40 backdrop-blur-[2px]"
-                  onClick={() => setAdminNavOpen(false)}
-                />
-                <div className="relative z-50 h-full w-72 animate-in slide-in-from-left duration-200">
-                  <AdminSidebar
-                    activeItem={navItem}
-                    onNavigate={(item) => { handleNavigate(item); setAdminNavOpen(false) }}
-                    onLogout={handleLogout}
-                    isAdmin={isAdmin}
-                  />
-                </div>
-              </div>
-            )}
-
-            {/* Desktop admin sidebar */}
-            <div className="hidden lg:flex w-60 shrink-0">
-              <AdminSidebar
-                activeItem={navItem}
-                onNavigate={handleNavigate}
-                onLogout={handleLogout}
-                isAdmin={isAdmin}
-              />
-            </div>
-
-            {/* Admin content */}
+          ) : (
             <div className="flex-1 overflow-y-auto p-4 lg:p-6">
               {navItem === 'admin-dashboard' && isAdmin && <AdminDashboard />}
               {navItem === 'user-management' && isAdmin && <UserManagement />}
               {navItem === 'message-viewer' && isAdmin && <MessageViewer />}
               {navItem === 'audit-logs' && isAdmin && <AuditLogViewer />}
             </div>
-          </div>
+          )}
         </div>
-      )}
+      </div>
     </div>
   )
 }

@@ -79,28 +79,9 @@ export function ChatSidebar({
   }).filter(Boolean))
 
   return (
-    <div className={cn('flex h-full w-72 flex-col border-r bg-sidebar', className)}>
-      {/* Header with gradient accent */}
-      <div className="flex h-14 items-center justify-between px-4">
-        <div className="flex items-center gap-2.5">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-100 dark:bg-emerald-900/30">
-            <Shield className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
-          </div>
-          <div>
-            <h3 className="font-bold text-sm leading-tight">SecureTeam</h3>
-          </div>
-        </div>
-        <CreateChannelDialog
-          trigger={
-            <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg hover:bg-muted" title="Tạo kênh mới" aria-label="Tạo kênh mới">
-              <Plus className="h-4 w-4" />
-            </Button>
-          }
-        />
-      </div>
-
-      {/* Search */}
-      <div className="px-3 pb-2">
+    <div className={cn('flex h-full w-72 flex-col bg-sidebar/50 backdrop-blur-md border-r border-border/40', className)}>
+      {/* Top spacing and search bar */}
+      <div className="px-3 pt-5 pb-2">
         <div className="relative">
           <Search className="absolute top-1/2 left-3 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
           <Input
@@ -117,20 +98,27 @@ export function ChatSidebar({
         <div className="px-3 pb-2">
           <button
             onClick={() => setShowNewDM(true)}
-            className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/15 hover:bg-emerald-100 dark:hover:bg-emerald-900/25 transition-colors shadow-sm"
+            className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium text-violet-600 dark:text-violet-400 bg-violet-50 dark:bg-violet-950/20 hover:bg-violet-100 dark:hover:bg-violet-950/30 transition-all shadow-sm"
           >
             <UserPlus className="h-4 w-4" />
             Tin nhắn mới
           </button>
         </div>
 
-        <Separator className="mx-3 w-auto" />
+        <Separator className="mx-3 w-auto opacity-50" />
 
         {/* Channels section */}
-        <div className="px-3 pt-3 pb-1">
-          <span className="flex items-center gap-1.5 px-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+        <div className="px-3 pt-3 pb-1 flex items-center justify-between">
+          <span className="flex items-center gap-1.5 px-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60">
             Kênh
           </span>
+          <CreateChannelDialog
+            trigger={
+              <button className="text-muted-foreground hover:text-violet-600 dark:hover:text-violet-400 transition-colors p-0.5 rounded-md hover:bg-muted/80" title="Tạo kênh mới">
+                <Plus className="h-3.5 w-3.5" />
+              </button>
+            }
+          />
         </div>
 
         <div className="px-2 space-y-0.5">
@@ -157,11 +145,11 @@ export function ChatSidebar({
           )}
         </div>
 
-        <Separator className="mx-3 my-3 w-auto" />
+        <Separator className="mx-3 my-3 w-auto opacity-50" />
 
         {/* Direct Messages */}
         <div className="px-3 pb-1">
-          <span className="flex items-center gap-1.5 px-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+          <span className="flex items-center gap-1.5 px-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60">
             Tin nhắn riêng
           </span>
         </div>
@@ -182,16 +170,16 @@ export function ChatSidebar({
             }}
             className={cn(
               'flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left transition-all duration-150',
-              'border-l-2 border-transparent hover:bg-emerald-50/80 dark:hover:bg-emerald-900/10 hover:border-emerald-300 dark:hover:border-emerald-700'
+              'border-l-2 border-transparent hover:bg-violet-50/50 dark:hover:bg-violet-950/10 hover:border-violet-300 dark:hover:border-violet-800'
             )}
           >
-            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 shadow-sm">
+            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-indigo-600 shadow-sm">
               <Bot className="h-3.5 w-3.5 text-white" />
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-1.5">
-                <span className="truncate text-sm font-medium text-emerald-700 dark:text-emerald-300">SecureBot</span>
-                <span className="rounded-full bg-emerald-100 dark:bg-emerald-900/30 px-1.5 py-0.5 text-[10px] font-medium text-emerald-600 dark:text-emerald-400">
+                <span className="truncate text-sm font-medium text-violet-700 dark:text-violet-300">SecureBot</span>
+                <span className="rounded-full bg-violet-100 dark:bg-violet-900/30 px-1.5 py-0.5 text-[10px] font-medium text-violet-600 dark:text-violet-400">
                   AI
                 </span>
               </div>
@@ -286,7 +274,7 @@ function ChannelItem({ channel, isActive, onClick }: ChannelItemProps) {
       className={cn(
         'flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left transition-all duration-150',
         isActive
-          ? 'border-l-2 border-primary bg-emerald-50/80 dark:bg-emerald-900/15 text-foreground font-medium shadow-sm'
+          ? 'border-l-2 border-violet-600 dark:border-violet-400 bg-violet-50/60 dark:bg-violet-950/20 text-foreground font-medium shadow-sm'
           : 'border-l-2 border-transparent text-sidebar-foreground/70 hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground'
       )}
       onClick={onClick}
@@ -314,7 +302,6 @@ interface DMItemProps {
 }
 
 function DMItem({ channel, isActive, onClick, isOnline, currentUserId }: DMItemProps) {
-  const otherMember = channel.members?.find((m) => m.userId !== currentUserId)
   const displayName = channel.name
 
   return (
@@ -322,7 +309,7 @@ function DMItem({ channel, isActive, onClick, isOnline, currentUserId }: DMItemP
       className={cn(
         'flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left transition-all duration-150',
         isActive
-          ? 'border-l-2 border-primary bg-emerald-50/80 dark:bg-emerald-900/15 text-foreground font-medium shadow-sm'
+          ? 'border-l-2 border-violet-600 dark:border-violet-400 bg-violet-50/60 dark:bg-violet-950/20 text-foreground font-medium shadow-sm'
           : 'border-l-2 border-transparent text-sidebar-foreground/70 hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground'
       )}
       onClick={onClick}

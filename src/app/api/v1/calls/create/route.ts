@@ -23,18 +23,25 @@ export async function POST(request: NextRequest) {
         return errorResponse('VALIDATION_ERROR', 'At least one participant is required');
       }
 
+      // Filter out null/undefined/non-string values
+      const cleanParticipantIds = participantIds.filter((id): id is string => typeof id === 'string' && id.trim() !== '');
+
+      if (cleanParticipantIds.length === 0) {
+        return errorResponse('VALIDATION_ERROR', 'At least one valid participant is required');
+      }
+
       // Validate maxParticipants
       const maxPart = typeof maxParticipants === 'number' ? Math.min(maxParticipants, 100) : 30;
 
       // Validate all participant users exist
       const users = await db.user.findMany({
-        where: { id: { in: participantIds } },
+        where: { id: { in: cleanParticipantIds } },
         select: { id: true, name: true, isActive: true },
       });
 
-      if (users.length !== participantIds.length) {
+      if (users.length !== cleanParticipantIds.length) {
         const foundIds = new Set(users.map((u) => u.id));
-        const missing = participantIds.filter((id: string) => !foundIds.has(id));
+        const missing = cleanParticipantIds.filter((id: string) => !foundIds.has(id));
         return errorResponse('VALIDATION_ERROR', `Users not found: ${missing.join(', ')}`);
       }
 

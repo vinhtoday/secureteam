@@ -43,31 +43,25 @@ export function CallControls({
       try {
         // Build participant list
         let participantIds: string[] = []
-        if (channelMembers?.length) {
+        if (channelMembers && channelMembers.length > 0) {
           participantIds = channelMembers
-            .filter((m) => {
-              const uid = m.user?.id || m.userId
-              return uid && uid !== user.id
-            })
-            .map((m) => m.user?.id || m.userId)
-            .filter(Boolean) as string[]
+            .filter((m) => (m.userId || m.user?.id) !== user.id)
+            .map((m) => (m.userId || m.user?.id))
+            .filter((id): id is string => typeof id === 'string')
         }
 
-        if (!participantIds.length) {
-          // Fetch channel members as fallback
+        // If no members from prop, fetch from API
+        if (participantIds.length === 0) {
           const { api } = await import('@/lib/api')
-          const res = await api.get<{
-            members?: Array<{ userId?: string; user?: { id: string } }>
-          }>(`/api/v1/channels/${channel.id}`)
-          const data = res.data
-          if (data?.members) {
-            participantIds = data.members
-              .filter((m) => {
-                const uid = m.user?.id || m.userId
-                return uid && uid !== user.id
-              })
-              .map((m) => m.user?.id || m.userId)
-              .filter(Boolean) as string[]
+          const membersRes = await api.get<any>(
+            `/api/v1/channels/${channel.id}`
+          )
+          const channelData = membersRes.data
+          if (channelData?.members) {
+            participantIds = channelData.members
+              .filter((m: any) => (m.userId || m.user?.id) !== user.id)
+              .map((m: any) => (m.userId || m.user?.id))
+              .filter((id: any): id is string => typeof id === 'string')
           }
         }
 

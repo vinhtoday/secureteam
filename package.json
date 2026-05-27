@@ -5,14 +5,14 @@
   "description": "SecureTeam - Enterprise Chat System with Real-time Communication, Video Calls, Task Management & Admin Dashboard",
   "scripts": {
     "dev": "next dev -p 3000",
-    "build": "next build && cp -r .next/static .next/standalone/.next/ && cp -r public .next/standalone/",
+    "build": "next build && node scripts/copy-assets.js",
     "start": "NODE_ENV=production node .next/standalone/server.js",
     "lint": "eslint .",
     "db:push": "prisma db push",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:reset": "prisma migrate reset",
-    "seed": "bun run prisma/seed.ts"
+    "seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.11.1",

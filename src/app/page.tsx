@@ -25,9 +25,6 @@ import {
   FileText,
   LogOut,
   Shield,
-  Menu,
-  X,
-  MessageCircle,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 

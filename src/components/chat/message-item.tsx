@@ -5,7 +5,6 @@ import { cn } from '@/lib/utils'
 import { UserAvatar } from './user-status-badge'
 import { useAuthStore } from '@/stores/auth-store'
 import type { Message } from '@/hooks/use-messages'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import {
   Tooltip,
@@ -32,7 +31,6 @@ interface MessageItemProps {
   isConsecutive?: boolean
   isSystem?: boolean
   onlineUsers?: string[]
-  typingUsers?: { userId: string; channelId: string }[]
 }
 
 function formatTime(dateStr: string) {

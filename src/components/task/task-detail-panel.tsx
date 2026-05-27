@@ -185,13 +185,15 @@ export function TaskDetailPanel() {
   const labels = labelsData ?? []
 
   // Sync state when task changes
-  if (task && task.id !== prevTaskId) {
-    setEditTitle(task.title)
-    setEditDescription(task.description || '')
-    setPrevTaskId(task.id)
-    setCommentText('')
-    setIsEditingTitle(false)
-  }
+  useEffect(() => {
+    if (task && task.id !== prevTaskId) {
+      setEditTitle(task.title)
+      setEditDescription(task.description || '')
+      setPrevTaskId(task.id)
+      setCommentText('')
+      setIsEditingTitle(false)
+    }
+  }, [task, prevTaskId])
 
   useEffect(() => {
     commentsEndRef.current?.scrollIntoView({ behavior: 'smooth' })

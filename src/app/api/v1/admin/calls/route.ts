@@ -69,7 +69,7 @@ export async function GET(request: NextRequest) {
                 startedBy: true,
               },
             },
-            channelId_rel: {
+            channel: {
               select: { id: true, name: true, type: true },
             },
           },

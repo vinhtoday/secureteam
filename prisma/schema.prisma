@@ -36,6 +36,8 @@ model User {
   name              String
   avatar            String?
   bio               String?
+  department        String?
+  position          String?
   roleId            String
   isBot             Boolean   @default(false)
   isEmailVerified   Boolean   @default(false)
@@ -58,6 +60,13 @@ model User {
   ownedChannels   Channel[]        @relation("ChannelOwner")
   createdCalls    CallRoom[]       @relation("CallCreator")
   callParticipations CallParticipant[] @relation("CallParticipant")
+  taskCreated      Task[]            @relation("TaskCreator")
+  taskAssignments  TaskAssignment[]
+  taskActivities   TaskActivity[]
+  taskComments     TaskComment[]
+  taskAttachments  TaskAttachment[]
+  notifications    Notification[]    @relation("NotificationRecipient")
+  sentNotifications Notification[] @relation("NotificationSender")
 
   @@index([roleId])
   @@index([isActive])
@@ -207,21 +216,23 @@ model EncryptionKey {
 // ============================================
 
 model CallRoom {
-  id          String   @id @default(cuid())
-  title       String
-  type        String   @default("voice") // voice, video, group_voice, group_video
-  status      String   @default("active") // ringing, active, ended
-  channelId   String?
-  channel     Channel? @relation(fields: [channelId], references: [id], onDelete: SetNull)
-  createdBy   String
-  creator     User     @relation("CallCreator", fields: [createdBy], references: [id])
-  startedAt   DateTime @default(now())
-  endedAt     DateTime?
-  duration    Int      @default(0) // seconds
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id               String   @id @default(cuid())
+  title            String
+  type             String   @default("voice") // voice, video, group_voice, group_video
+  status           String   @default("active") // ringing, active, ended
+  channelId        String?
+  channel          Channel? @relation(fields: [channelId], references: [id], onDelete: SetNull)
+  createdBy        String
+  creator          User     @relation("CallCreator", fields: [createdBy], references: [id])
+  maxParticipants  Int?
+  startedAt        DateTime @default(now())
+  endedAt          DateTime?
+  duration         Int      @default(0) // seconds
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 
-  participants CallParticipant[]
+  participants     CallParticipant[]
+  recordings       CallRecording[]
 
   @@index([createdBy])
   @@index([channelId])
@@ -248,6 +259,150 @@ model CallParticipant {
   @@unique([callId, userId])
   @@index([userId])
   @@index([callId])
+}
+
+// ============================================
+// TASK MANAGEMENT
+// ============================================
+
+model Task {
+  id            String   @id @default(cuid())
+  title         String
+  description   String?
+  status        String   @default("todo") // todo, in_progress, done
+  priority      String   @default("medium") // low, medium, high, urgent
+  dueDate       DateTime?
+  channelId     String?
+  createdById   String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  creator       User     @relation("TaskCreator", fields: [createdById], references: [id])
+  assignees     TaskAssignment[]
+  comments      TaskComment[]
+  activities    TaskActivity[]
+  attachments   TaskAttachment[]
+  labels        TaskLabel[]
+
+  @@index([status])
+  @@index([createdById])
+  @@index([channelId])
+}
+
+model TaskAssignment {
+  id        String   @id @default(cuid())
+  taskId    String
+  userId    String
+  assignedAt DateTime @default(now())
+
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([taskId, userId])
+  @@index([userId])
+  @@index([taskId])
+}
+
+model TaskComment {
+  id        String   @id @default(cuid())
+  taskId    String
+  userId    String
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([taskId])
+  @@index([userId])
+}
+
+model TaskActivity {
+  id        String   @id @default(cuid())
+  taskId    String
+  userId    String
+  action    String // created, updated, status_changed, assigned, commented
+  details   String?
+  createdAt DateTime @default(now())
+
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([taskId])
+}
+
+model TaskAttachment {
+  id        String   @id @default(cuid())
+  taskId    String
+  userId    String
+  fileName   String
+  fileUrl    String
+  fileSize   Int?
+  mimeType   String?
+  createdAt DateTime @default(now())
+
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([taskId])
+}
+
+model TaskLabel {
+  id     String @id @default(cuid())
+  name   String
+  color  String @default("#6366f1")
+  taskId String
+
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  @@index([taskId])
+}
+
+// ============================================
+// CALL RECORDING
+// ============================================
+
+model CallRecording {
+  id        String   @id @default(cuid())
+  callId    String
+  type      String   @default("audio") // audio, video
+  status    String   @default("active") // active, stopped, processing
+  startedBy String
+  duration  Int      @default(0)
+ fileUrl   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  call CallRoom @relation(fields: [callId], references: [id], onDelete: Cascade)
+
+  @@index([callId])
+}
+
+// ============================================
+// NOTIFICATIONS
+// ============================================
+
+model Notification {
+  id          String   @id @default(cuid())
+  recipientId String
+  senderId    String?
+  type        String   // message, mention, call, task, system
+  title       String
+  body        String?
+  link        String?
+  isRead      Boolean  @default(false)
+  readAt      DateTime?
+  metadata    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  recipient User @relation("NotificationRecipient", fields: [recipientId], references: [id], onDelete: Cascade)
+  sender    User? @relation("NotificationSender", fields: [senderId], references: [id], onDelete: SetNull)
+
+  @@index([recipientId])
+  @@index([isRead])
+  @@index([createdAt])
 }
 
 // ============================================

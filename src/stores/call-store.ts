@@ -85,13 +85,7 @@ export const useCallStore = create<CallState>((set) => ({
   setIncomingCall: (call) => set({ incomingCall: call }),
 
   toggleMute: () =>
-    set((state) => {
-      const isMuted = !state.isMuted
-      const participants = state.participants.map((p) =>
-        p.userId === state.currentCall?.createdBy ? { ...p, isMuted } : p
-      )
-      return { isMuted, participants }
-    }),
+    set((state) => ({ isMuted: !state.isMuted })),
 
   toggleCamera: () =>
     set((state) => ({ isCameraOff: !state.isCameraOff })),

@@ -44,7 +44,6 @@ export function ChatArea({
   const channelId = channel?.id || null
 
   // SecureBot integration
-  const botChannelId = channelId
   const isBotChannel = useMemo(() => {
     if (!channel || !user) return false
     if (channel.type !== 'direct') return false
@@ -52,9 +51,7 @@ export function ChatArea({
     return otherMember?.user?.isBot === true || otherMember?.userId === 'securebot-system'
   }, [channel, user])
 
-  const { isThinking: botIsThinking, shouldTriggerBot, chatWithBot } = useBot(
-    isBotChannel ? channelId : channelId
-  )
+  const { isThinking: botIsThinking, shouldTriggerBot, chatWithBot } = useBot(channelId)
 
   const {
     data: messagesPages,
@@ -331,7 +328,7 @@ export function ChatArea({
             placeholder={isBotChannel ? 'Nhập tin nhắn cho SecureBot...' : undefined}
             typingUsers={channelTypingUsers.map((t) => ({
               userId: t.userId,
-              name: t.userId,
+              name: t.userName,
             }))}
           />
         </div>

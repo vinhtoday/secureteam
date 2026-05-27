@@ -32,13 +32,10 @@ import {
 } from 'lucide-react'
 import { UserAvatar } from './user-status-badge'
 import { CreateChannelDialog } from './create-channel-dialog'
-import type { NavItem } from '@/components/layout/app-sidebar'
-
 interface ChatSidebarProps {
   activeChannelId: string | null
   onSelectChannel: (channelId: string) => void
   className?: string
-  onNavigate?: (item: NavItem) => void
 }
 
 export function ChatSidebar({

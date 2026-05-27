@@ -162,7 +162,8 @@ export function useSocket() {
     const token = getAccessToken()
     if (!token) return
 
-    const socket = io('/?XTransformPort=3004', {
+    const SOCKET_PORT = process.env.NEXT_PUBLIC_SOCKET_PORT || '3004'
+    const socket = io(`/?XTransformPort=${SOCKET_PORT}`, {
       transports: ['websocket', 'polling'],
       reconnection: true,
       reconnectionAttempts: 10,

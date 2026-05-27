@@ -5,7 +5,18 @@ import { Slot } from "@radix-ui/react-slot"
 import { cva, VariantProps } from "class-variance-authority"
 import { PanelLeftIcon } from "lucide-react"
 
-import { useIsMobile } from "@/hooks/use-mobile"
+// Inline mobile detection hook (replaces deleted use-mobile.ts)
+function useIsMobile() {
+  const [isMobile, setIsMobile] = React.useState(false)
+  React.useEffect(() => {
+    const mql = window.matchMedia("(max-width: 768px)")
+    const onChange = () => setIsMobile(mql.matches)
+    mql.addEventListener("change", onChange)
+    setIsMobile(mql.matches)
+    return () => mql.removeEventListener("change", onChange)
+  }, [])
+  return isMobile
+}
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"

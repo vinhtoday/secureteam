@@ -3,20 +3,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { verifyToken, type JwtPayload } from './auth';
 import { unauthorizedResponse } from './api-response';
 
-// Extend NextRequest to carry authenticated user info
-declare global {
-  // eslint-disable-next-line @typescript-eslint/no-namespace
-  namespace NextAuth {
-    interface User {
-      id: string;
-      email: string;
-      name: string;
-      roleId: string;
-      roleName: string;
-    }
-  }
-}
-
 export interface AuthenticatedRequest extends NextRequest {
   user: JwtPayload;
 }

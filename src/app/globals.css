@@ -204,3 +204,45 @@
 .dark * {
   scrollbar-color: oklch(1 0 0 / 12%) transparent;
 }
+
+@keyframes pulseGlow {
+  0%, 100% {
+    transform: scale(1) translate(0px, 0px);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.05) translate(8px, -8px);
+    opacity: 0.95;
+  }
+}
+
+@keyframes floatCard {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+.animate-pulse-glow {
+  animation: pulseGlow 8s ease-in-out infinite;
+}
+
+.animate-float-card {
+  animation: floatCard 4s ease-in-out infinite;
+}
+
+.rounded-tr-xs {
+  border-top-right-radius: 4px !important;
+}
+.rounded-br-xs {
+  border-bottom-right-radius: 4px !important;
+}
+.rounded-tl-xs {
+  border-top-left-radius: 4px !important;
+}
+.rounded-bl-xs {
+  border-bottom-left-radius: 4px !important;
+}
+

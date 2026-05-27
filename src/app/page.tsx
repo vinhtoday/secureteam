@@ -148,6 +148,7 @@ export default function Home() {
             <ChatArea
               channel={selectedChannel ?? null}
               onlineUsers={onlineUsers}
+              onSelectChannel={handleSelectChannel}
             />
           ) : (
             <div className="flex-1 overflow-y-auto p-4 lg:p-6">

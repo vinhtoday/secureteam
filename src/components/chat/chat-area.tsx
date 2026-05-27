@@ -14,17 +14,20 @@ import { MemberList } from './member-list'
 import { BotTypingIndicator } from './bot-typing-indicator'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from '@/components/ui/button'
-import { AlertCircle, MessageSquarePlus, MessagesSquare, Sparkles } from 'lucide-react'
+import { AlertCircle, MessageSquarePlus, MessagesSquare, Sparkles, Bot, User, ArrowRight, Shield, ListTodo, UserCheck } from 'lucide-react'
 import type { ChannelDetail } from '@/hooks/use-channels'
+import { api } from '@/lib/api'
 
 interface ChatAreaProps {
   channel: ChannelDetail | null
   onlineUsers: string[]
+  onSelectChannel?: (channelId: string) => void
 }
 
 export function ChatArea({
   channel,
   onlineUsers,
+  onSelectChannel,
 }: ChatAreaProps) {
   const user = useAuthStore((s) => s.user) as User | null
   const queryClient = useQueryClient()
@@ -167,6 +170,20 @@ export function ChatArea({
     [channelId, user, sendMessage, sendSocketMessage, shouldTriggerBot, chatWithBot, isBotChannel]
   )
 
+  // Auto-run bot quick commands from Welcome Dashboard
+  useEffect(() => {
+    if (channelId && isBotChannel && typeof window !== 'undefined') {
+      const autoCommand = window.sessionStorage.getItem('bot_auto_command')
+      if (autoCommand) {
+        window.sessionStorage.removeItem('bot_auto_command')
+        // Automatically send the quick action command
+        setTimeout(() => {
+          handleSend(autoCommand, 'text')
+        }, 300)
+      }
+    }
+  }, [channelId, isBotChannel, handleSend])
+
   const handleDelete = useCallback(
     async (message: Message) => {
       if (confirm('Bạn có chắc muốn xóa tin nhắn này?')) {
@@ -186,25 +203,144 @@ export function ChatArea({
     (t) => t.channelId === channelId && t.userId !== user?.id
   )
 
-  // No channel selected
+  // No channel selected (Workspace Welcome Dashboard & SecureBot Hub)
   if (!channel) {
+    const handleOpenBotDM = async (autoCommand?: string) => {
+      try {
+        const res = await api.post('/api/v1/channels/direct', { userId: 'securebot-system' })
+        const dmChannel = res.data as { id: string }
+        queryClient.invalidateQueries({ queryKey: ['channels'] })
+        if (autoCommand && typeof window !== 'undefined') {
+          window.sessionStorage.setItem('bot_auto_command', autoCommand)
+        }
+        if (onSelectChannel) {
+          onSelectChannel(dmChannel.id)
+        }
+      } catch (error) {
+        console.error('Failed to open bot channel:', error)
+      }
+    }
+
     return (
-      <div className="flex flex-1 items-center justify-center bg-gradient-to-b from-background to-violet-500/5">
-        <div className="text-center max-w-sm px-6">
-          <div className="relative inline-flex mx-auto mb-6">
-            <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-100 to-indigo-100 dark:from-violet-900/20 dark:to-indigo-900/20 shadow-lg shadow-violet-500/10">
-              <MessagesSquare className="h-10 w-10 text-violet-600 dark:text-violet-400" />
+      <div className="flex-1 overflow-y-auto bg-gradient-to-b from-background via-violet-500/5 to-background relative p-6 md:p-10 flex flex-col justify-center items-center">
+        {/* Animated backdrop glow balls */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-1/4 left-1/4 w-80 h-80 rounded-full bg-violet-400/10 blur-3xl animate-pulse duration-[6000ms]" />
+          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 rounded-full bg-indigo-400/10 blur-3xl animate-pulse duration-[8000ms]" />
+        </div>
+
+        <div className="relative z-10 max-w-4xl w-full space-y-8 animate-in fade-in zoom-in-95 duration-500">
+          {/* Header section */}
+          <div className="text-center space-y-3">
+            <div className="relative inline-flex mx-auto">
+              <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-500 to-indigo-600 shadow-lg shadow-violet-500/25">
+                <Shield className="h-8 w-8 text-white" />
+              </div>
+              <span className="absolute -top-1 -right-1 flex h-4 w-4">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-4 w-4 bg-emerald-500"></span>
+              </span>
             </div>
-            <div className="absolute -top-1 -right-1 flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-indigo-600 shadow-md">
-              <Sparkles className="h-3.5 w-3.5 text-white" />
+            <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-violet-600 to-indigo-600 dark:from-violet-400 dark:to-indigo-400">
+              Chào mừng trở lại, {user?.name || 'Thành viên'}!
+            </h1>
+            <p className="text-muted-foreground max-w-lg mx-auto text-sm md:text-base leading-relaxed">
+              Bạn đang ở trong không gian làm việc bảo mật của **SecureTeam**. Hãy chọn một kênh hoặc bắt đầu trò chuyện với AI Assistant của chúng tôi.
+            </p>
+          </div>
+
+          {/* Main Dashboard Cards */}
+          <div className="grid gap-6 md:grid-cols-2">
+            {/* User Profile Info Card */}
+            <div className="glass-card rounded-2xl p-6 flex flex-col justify-between hover:scale-[1.01] transition-transform duration-300">
+              <div className="space-y-4">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-violet-600 dark:text-violet-400 bg-violet-100 dark:bg-violet-950/40 px-2.5 py-1 rounded-full">
+                  Thành viên hệ thống
+                </span>
+                <div className="flex items-center gap-4 pt-2">
+                  <div className="h-14 w-14 rounded-full bg-gradient-to-br from-violet-100 to-indigo-100 dark:from-violet-900/40 dark:to-indigo-900/40 flex items-center justify-center text-violet-600 dark:text-violet-400 text-lg font-bold border border-violet-200/50 dark:border-violet-800/30 shadow-sm">
+                    {user?.name ? user.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0,2) : '?'}
+                  </div>
+                  <div className="min-w-0">
+                    <h3 className="font-bold text-foreground text-lg truncate">{user?.name}</h3>
+                    <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
+                    <span className="inline-block mt-1 text-[10px] px-2 py-0.5 rounded-full font-medium bg-muted text-muted-foreground border border-border/40">
+                      {user?.role?.name || 'MEMBER'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <div className="pt-6 border-t border-border/40 mt-6 flex items-center justify-between text-xs text-muted-foreground">
+                <span className="flex items-center gap-1.5">
+                  <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                  {onlineUsers.length} thành viên đang trực tuyến
+                </span>
+                <span>Kết nối mã hóa AES-256</span>
+              </div>
+            </div>
+
+            {/* AI Assistant Quick Commands Widget (SecureBot Hub) */}
+            <div className="glass-card rounded-2xl p-6 space-y-4 hover:scale-[1.01] transition-transform duration-300">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Bot className="h-5 w-5 text-violet-600 dark:text-violet-400" />
+                  <span className="text-sm font-bold text-foreground">SecureBot AI Assistant</span>
+                </div>
+                <span className="flex items-center gap-1 text-[10px] text-emerald-500 font-bold bg-emerald-50 dark:bg-emerald-950/20 px-2 py-0.5 rounded-full border border-emerald-250/20">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" /> ONLINE
+                </span>
+              </div>
+              <p className="text-xs text-muted-foreground leading-normal">
+                Nhấp chuột vào các phím tắt lệnh nhanh dưới đây để mở trò chuyện và chạy lệnh tự động với trợ lý ảo:
+              </p>
+              
+              <div className="grid grid-cols-2 gap-2.5 pt-1">
+                <button
+                  onClick={() => handleOpenBotDM('thông tin')}
+                  className="flex items-center justify-between rounded-xl border border-border/50 bg-background/50 hover:bg-violet-50/50 dark:hover:bg-violet-950/20 p-3 text-left transition-all hover:border-violet-300 dark:hover:border-violet-800 group"
+                >
+                  <div className="flex items-center gap-2">
+                    <User className="h-4 w-4 text-violet-500 group-hover:scale-110 transition-transform" />
+                    <span className="text-xs font-semibold text-foreground/80">Hồ sơ cá nhân</span>
+                  </div>
+                  <ArrowRight className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                </button>
+
+                <button
+                  onClick={() => handleOpenBotDM('online')}
+                  className="flex items-center justify-between rounded-xl border border-border/50 bg-background/50 hover:bg-violet-50/50 dark:hover:bg-violet-950/20 p-3 text-left transition-all hover:border-violet-300 dark:hover:border-violet-800 group"
+                >
+                  <div className="flex items-center gap-2">
+                    <UserCheck className="h-4 w-4 text-violet-500 group-hover:scale-110 transition-transform" />
+                    <span className="text-xs font-semibold text-foreground/80">Xem ai online</span>
+                  </div>
+                  <ArrowRight className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                </button>
+
+                <button
+                  onClick={() => handleOpenBotDM('task')}
+                  className="flex items-center justify-between rounded-xl border border-border/50 bg-background/50 hover:bg-violet-50/50 dark:hover:bg-violet-950/20 p-3 text-left transition-all hover:border-violet-300 dark:hover:border-violet-800 group"
+                >
+                  <div className="flex items-center gap-2">
+                    <ListTodo className="h-4 w-4 text-violet-500 group-hover:scale-110 transition-transform" />
+                    <span className="text-xs font-semibold text-foreground/80">Việc được giao</span>
+                  </div>
+                  <ArrowRight className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                </button>
+
+                <button
+                  onClick={() => handleOpenBotDM('tìm ')}
+                  className="flex items-center justify-between rounded-xl border border-border/50 bg-background/50 hover:bg-violet-50/50 dark:hover:bg-violet-950/20 p-3 text-left transition-all hover:border-violet-300 dark:hover:border-violet-800 group"
+                >
+                  <div className="flex items-center gap-2">
+                    <Bot className="h-4 w-4 text-violet-500 group-hover:scale-110 transition-transform" />
+                    <span className="text-xs font-semibold text-foreground/80">Tìm nhân viên</span>
+                  </div>
+                  <ArrowRight className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                </button>
+              </div>
             </div>
           </div>
-          <h3 className="text-xl font-semibold text-foreground">
-            Chào mừng đến SecureTeam
-          </h3>
-          <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
-            Chọn một kênh từ danh sách hoặc tạo kênh mới để bắt đầu trò chuyện với đồng nghiệp
-          </p>
         </div>
       </div>
     )

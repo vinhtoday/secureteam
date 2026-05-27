@@ -5,6 +5,8 @@ import { cn } from '@/lib/utils'
 import { UserAvatar } from './user-status-badge'
 import { useAuthStore } from '@/stores/auth-store'
 import type { Message } from '@/hooks/use-messages'
+import { useQueryClient } from '@tanstack/react-query'
+import { api } from '@/lib/api'
 import { Button } from '@/components/ui/button'
 import {
   Tooltip,
@@ -84,6 +86,16 @@ export const MessageItem = memo(
       ref
     ) {
       const user = useAuthStore((s) => s.user)
+      const queryClient = useQueryClient()
+
+      const handleToggleReaction = async (emoji: string) => {
+        try {
+          await api.post(`/api/v1/channels/${message.channelId}/messages/${message.id}/react`, { emoji })
+          queryClient.invalidateQueries({ queryKey: ['messages', message.channelId] })
+        } catch (error) {
+          console.error('[Reactions] Failed to toggle reaction:', error)
+        }
+      }
 
       if (isSystem || message.contentType === 'system') {
         return (
@@ -142,22 +154,28 @@ export const MessageItem = memo(
         )
       }
 
-      // Bubble corner rounding based on consecutive grouping
+      // Parse reactions from message metadata
+      let reactions: Record<string, string[]> = {}
+      if (message.metadata) {
+        try {
+          const meta = JSON.parse(message.metadata)
+          if (meta && typeof meta === 'object' && meta.reactions) {
+            reactions = meta.reactions
+          }
+        } catch {
+          reactions = {}
+        }
+      }
+
+      // Bubble corner rounding based on consecutive grouping (Messenger style)
       const bubbleRadius = isOwn
         ? cn(
-            'rounded-2xl',
-            isConsecutive
-              ? 'rounded-tr-md'
-              : 'rounded-tr-md',
-            // First in group: larger top-right radius
-            !isConsecutive ? 'rounded-tr-sm' : 'rounded-tr-sm'
+            'rounded-2xl text-white bg-gradient-to-r from-violet-600 to-indigo-600',
+            isConsecutive ? 'rounded-tr-xs rounded-br-xs' : 'rounded-tr-sm'
           )
         : cn(
-            'rounded-2xl',
-            isConsecutive
-              ? 'rounded-tl-md'
-              : 'rounded-tl-md',
-            !isConsecutive ? 'rounded-tl-sm' : 'rounded-tl-sm'
+            'rounded-2xl text-foreground bg-muted dark:bg-muted/80',
+            isConsecutive ? 'rounded-tl-xs rounded-bl-xs' : 'rounded-tl-sm'
           )
 
       return (
@@ -166,7 +184,7 @@ export const MessageItem = memo(
           className={cn(
             'group relative flex gap-2 px-4 py-0.5',
             isOwn ? 'justify-end' : 'justify-start',
-            isConsecutive ? 'pt-0.5' : 'pt-1.5'
+            isConsecutive ? 'pt-0.5' : 'pt-2'
           )}
         >
           {/* Avatar — only for OTHER messages, and only on first message */}
@@ -206,10 +224,7 @@ export const MessageItem = memo(
                 className={cn(
                   'relative',
                   bubbleRadius,
-                  'px-3.5 py-2 shadow-sm',
-                  isOwn
-                    ? 'bg-gradient-to-r from-violet-600 to-indigo-600 text-white rounded-tr-sm'
-                    : 'bg-muted dark:bg-muted/80 text-foreground rounded-tl-sm'
+                  'px-4 py-2.5 shadow-sm transition-all duration-200 hover:shadow-md'
                 )}
               >
                 {/* Reply reference — inside bubble */}
@@ -243,7 +258,7 @@ export const MessageItem = memo(
                 {/* File attachment — inside bubble */}
                 {message.fileUrl && (
                   <div className={cn(
-                    'margin-top-2 flex items-center gap-2.5 rounded-lg px-3 py-2',
+                    'mt-2 flex items-center gap-2.5 rounded-lg px-3 py-2',
                     isOwn
                       ? 'bg-white/15'
                       : 'bg-muted/80 dark:bg-muted/60'
@@ -275,7 +290,7 @@ export const MessageItem = memo(
 
                 {/* Timestamp + edited indicator */}
                 <div className={cn(
-                  'flex items-center gap-1.5 mt-0.5 justify-end',
+                  'flex items-center gap-1.5 mt-1 justify-end',
                   isOwn ? 'text-white/70' : 'text-muted-foreground'
                 )}>
                   {message.isEdited && (
@@ -294,15 +309,46 @@ export const MessageItem = memo(
                   {message.isPinned && (
                     <Pin className="h-2.5 w-2.5 text-amber-400 dark:text-amber-500" />
                   )}
+                  {isOwn && (
+                    <span className="text-[10px] opacity-75 font-semibold ml-0.5 select-none" title="Đã nhận">✓✓</span>
+                  )}
                 </div>
               </div>
+
+              {/* Display reaction pills directly under bubble */}
+              {Object.keys(reactions).length > 0 && (
+                <div className={cn(
+                  'flex flex-wrap gap-1 mt-1 z-10 relative',
+                  isOwn ? 'justify-end' : 'justify-start'
+                )}>
+                  {Object.entries(reactions).map(([emoji, userIds]) => {
+                    const hasReacted = userIds.includes(user?.id || '')
+                    return (
+                      <button
+                        key={emoji}
+                        onClick={() => handleToggleReaction(emoji)}
+                        className={cn(
+                          'flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] border shadow-sm transition-all hover:scale-105 active:scale-95 duration-150',
+                          hasReacted
+                            ? 'bg-violet-50 border-violet-200 dark:bg-violet-950/40 dark:border-violet-900/30 text-violet-600 dark:text-violet-400 font-semibold'
+                            : 'bg-background border-border hover:bg-muted text-muted-foreground'
+                        )}
+                        title={`${userIds.length} người thả cảm xúc`}
+                      >
+                        <span className="text-xs">{emoji}</span>
+                        <span>{userIds.length}</span>
+                      </button>
+                    )
+                  })}
+                </div>
+              )}
 
               {/* Reply count indicator — only shown if replies exist via metadata */}
               {(message as unknown as Record<string, unknown>)?.replies && Array.isArray((message as unknown as Record<string, unknown>).replies) && ((message as unknown as Record<string, unknown>).replies as unknown[]).length > 0 && (
                 <button
                   onClick={() => onThread?.(message)}
                   className={cn(
-                    'mt-0.5 flex items-center gap-1 text-xs transition-colors px-1 rounded-md',
+                    'mt-1 flex items-center gap-1 text-xs transition-colors px-1 rounded-md',
                     isOwn
                       ? 'text-white/60 hover:text-white/80'
                       : 'text-muted-foreground hover:text-foreground'
@@ -313,40 +359,61 @@ export const MessageItem = memo(
                 </button>
               )}
 
-              {/* Hover actions */}
+              {/* Hover actions & Reactions bar */}
               {!isSystem && (
                 <div className={cn(
-                  'absolute -top-3 hidden items-center gap-0.5 rounded-lg border bg-background p-0.5 shadow-md group-hover:flex z-10',
-                  isOwn ? 'right-0' : 'left-0'
+                  'absolute -top-9 hidden items-center gap-1 rounded-full border border-violet-100 dark:border-violet-950 bg-background/95 backdrop-blur-md px-2 py-1 shadow-lg group-hover:flex z-20 animate-in fade-in slide-in-from-bottom-1 duration-150',
+                  isOwn ? 'right-2' : 'left-2'
                 )}>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-7 w-7"
-                        onClick={() => onReply?.(message)}
-                      >
-                        <Reply className="h-3.5 w-3.5" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>Phản hồi</TooltipContent>
-                  </Tooltip>
-                  {(isOwn || user?.role?.name === 'SUPER_ADMIN' || user?.role?.name === 'ADMIN') && (
+                  {/* Emoji Quick Actions */}
+                  <div className="flex items-center gap-1.5 pr-1.5 border-r border-border/50">
+                    {['👍', '❤️', '😂', '😮', '😢', '🙏'].map((emoji) => {
+                      const userHasReacted = reactions[emoji]?.includes(user?.id || '')
+                      return (
+                        <button
+                          key={emoji}
+                          onClick={() => handleToggleReaction(emoji)}
+                          className={cn(
+                            'text-sm p-1 rounded-full hover:scale-125 active:scale-95 transition-all duration-100',
+                            userHasReacted && 'bg-violet-100 dark:bg-violet-900/30'
+                          )}
+                        >
+                          {emoji}
+                        </button>
+                      )
+                    })}
+                  </div>
+                  {/* Action buttons */}
+                  <div className="flex items-center gap-0.5 pl-0.5">
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-7 w-7 text-destructive hover:text-destructive"
-                          onClick={() => onDelete?.(message)}
+                          className="h-6 w-6 rounded-full hover:bg-muted"
+                          onClick={() => onReply?.(message)}
                         >
-                          <Trash2 className="h-3.5 w-3.5" />
+                          <Reply className="h-3.5 w-3.5" />
                         </Button>
                       </TooltipTrigger>
-                      <TooltipContent>Xóa</TooltipContent>
+                      <TooltipContent>Phản hồi</TooltipContent>
                     </Tooltip>
-                  )}
+                    {(isOwn || user?.role?.name === 'SUPER_ADMIN' || user?.role?.name === 'ADMIN') && (
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-6 w-6 rounded-full text-destructive hover:text-destructive hover:bg-destructive/10"
+                            onClick={() => onDelete?.(message)}
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>Xóa</TooltipContent>
+                      </Tooltip>
+                    )}
+                  </div>
                 </div>
               )}
             </div>

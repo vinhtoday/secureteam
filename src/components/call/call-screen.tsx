@@ -535,6 +535,8 @@ function VideoGrid({
   }
 
   for (const p of participants) {
+    // Skip if this participant is the local user (already added above)
+    if (user && p.userId === user.id) continue
     tiles.push({
       userId: p.userId,
       name: p.user?.name || 'Unknown',

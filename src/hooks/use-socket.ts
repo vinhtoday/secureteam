@@ -394,63 +394,50 @@ export function useSocket() {
       }
     })
 
-    // WebRTC signaling — with per-user queue to prevent concurrent processing
-    const signalQueue = new Map<string, Promise<void>>()
+    // WebRTC signaling — simple fire-and-forget with try-catch
     socket.on(
       'call:signal',
-      (data: {
+      async (data: {
         callId: string
         fromUserId: string
         signal: unknown
       }) => {
-        const callStore = useCallStore.getState()
-        // Only drop if we have a different active call (not if currentCall is null
-        // — it might be in the process of being set during join/accept)
-        if (data.callId && callStore.currentCall?.id && callStore.currentCall.id !== data.callId) {
-          console.log(`[Socket] Dropping signal for different call: ${data.callId} vs ${callStore.currentCall.id}`)
-          return
-        }
-
-        // Queue signals per-user to ensure sequential processing
-        const userId = data.fromUserId
-        const prev = signalQueue.get(userId) || Promise.resolve()
-        const next = prev.then(async () => {
-          try {
-            const { handleOffer, handleAnswer, handleIceCandidate, webrtcManager } =
-              await import('@/lib/webrtc')
-            const signal = data.signal as {
-              type: string
-              sdp?: string
-              candidate?: RTCIceCandidateInit
-            }
-            if (data.callId) webrtcManager.setCallId(data.callId)
-
-            switch (signal.type) {
-              case 'offer':
-                await handleOffer(userId, {
-                  type: 'offer',
-                  sdp: signal.sdp!,
-                })
-                break
-              case 'answer':
-                await handleAnswer(userId, {
-                  type: 'answer',
-                  sdp: signal.sdp!,
-                })
-                break
-              case 'ice-candidate':
-                await handleIceCandidate(userId, signal.candidate!)
-                break
-            }
-          } catch (error) {
-            console.error('[Socket] Failed to handle signal:', error)
+        try {
+          const callStore = useCallStore.getState()
+          // Only drop if we have a different active call
+          if (data.callId && callStore.currentCall?.id && callStore.currentCall.id !== data.callId) {
+            return
           }
-        })
-        signalQueue.set(userId, next)
-        // Clean up when done
-        next.finally(() => {
-          if (signalQueue.get(userId) === next) signalQueue.delete(userId)
-        })
+
+          const { handleOffer, handleAnswer, handleIceCandidate, webrtcManager } =
+            await import('@/lib/webrtc')
+          const signal = data.signal as {
+            type: string
+            sdp?: string
+            candidate?: RTCIceCandidateInit
+          }
+          if (data.callId) webrtcManager.setCallId(data.callId)
+
+          switch (signal.type) {
+            case 'offer':
+              await handleOffer(data.fromUserId, {
+                type: 'offer',
+                sdp: signal.sdp!,
+              })
+              break
+            case 'answer':
+              await handleAnswer(data.fromUserId, {
+                type: 'answer',
+                sdp: signal.sdp!,
+              })
+              break
+            case 'ice-candidate':
+              await handleIceCandidate(data.fromUserId, signal.candidate!)
+              break
+          }
+        } catch (error) {
+          console.error('[Socket] Failed to handle signal:', error)
+        }
       }
     )
 

@@ -1,4 +1,4 @@
-// SecureTeam - WebRTC Manager
+// SecureTeam - WebRTC Manager (Simplified & Robust)
 import type { Socket } from 'socket.io-client'
 
 const ICE_SERVERS: RTCConfiguration = {
@@ -144,20 +144,24 @@ class WebRTCManager {
     })
   }
 
+  /**
+   * Create a new PeerConnection for a user, or return existing if healthy.
+   * Adds local tracks and sets up event handlers.
+   */
   createPeerConnection(userId: string): RTCPeerConnection | null {
-    if (this.peerConnections.has(userId)) {
-      const existing = this.peerConnections.get(userId)!
-      if (existing.connectionState !== 'closed' && existing.connectionState !== 'failed') {
-        return existing
-      }
+    // Return existing healthy connection
+    const existing = this.peerConnections.get(userId)
+    if (existing && existing.signalingState !== 'closed') {
+      return existing
+    }
+    if (existing) {
       existing.close()
       this.peerConnections.delete(userId)
     }
 
     const pc = new RTCPeerConnection(ICE_SERVERS)
 
-    // Add local tracks — this is the critical part:
-    // localStream must be ready BEFORE this is called
+    // Add local tracks
     const activeStream = this.getActiveVideoStream()
     if (activeStream) {
       activeStream.getTracks().forEach((track) => {
@@ -168,33 +172,33 @@ class WebRTCManager {
       console.warn(`[WebRTC] No local stream when creating peer connection for ${userId}`)
     }
 
-    // Handle remote stream — accumulate ALL tracks into a single MediaStream per user
+    // Accumulate remote tracks into a single persistent MediaStream per user
     pc.ontrack = (event) => {
       console.log(
         `[WebRTC] Remote track from ${userId}: ${event.track.kind}, streams: ${event.streams?.length || 0}`
       )
-      // Always use a persistent MediaStream to accumulate all tracks (audio + video)
       if (!this.remoteStreamsMap.has(userId)) {
         this.remoteStreamsMap.set(userId, new MediaStream())
       }
       const remoteStream = this.remoteStreamsMap.get(userId)!
+
+      // Add track from event
       if (event.track) {
-        // Don't add duplicate tracks
-        const existing = remoteStream.getTracks().find(t => t.id === event.track.id)
-        if (!existing) {
+        const alreadyHas = remoteStream.getTracks().some((t) => t.id === event.track.id)
+        if (!alreadyHas) {
           remoteStream.addTrack(event.track)
-          console.log(`[WebRTC] Added ${event.track.kind} track to remote stream for ${userId}, total tracks: ${remoteStream.getTracks().length}`)
         }
       }
-      // Also sync from event.streams if available (some browsers populate this)
-      if (event.streams && event.streams[0]) {
+      // Also sync from event.streams (some browsers)
+      if (event.streams?.[0]) {
         for (const track of event.streams[0].getTracks()) {
-          const exists = remoteStream.getTracks().find(t => t.id === track.id)
-          if (!exists) {
+          const alreadyHas = remoteStream.getTracks().some((t) => t.id === track.id)
+          if (!alreadyHas) {
             remoteStream.addTrack(track)
           }
         }
       }
+
       this.onRemoteStreamCallback?.(userId, remoteStream)
     }
 
@@ -237,52 +241,12 @@ class WebRTCManager {
     return pc
   }
 
-  replaceVideoTrack(userId: string, newTrack: MediaStreamTrack | null) {
-    const pc = this.peerConnections.get(userId)
-    if (!pc) return
-    const videoSender = pc.getSenders().find((s) => s.track?.kind === 'video')
-    if (videoSender && newTrack) {
-      videoSender.replaceTrack(newTrack).catch(() => {})
-    }
-  }
-
-  async replaceTrackOnAllPeers(newTrack: MediaStreamTrack): Promise<void> {
-    for (const userId of this.getConnectedPeerIds()) {
-      this.replaceVideoTrack(userId, newTrack)
-    }
-  }
-
-  // Per-user signal lock to prevent concurrent processing for the same user
-  private signalLocks = new Map<string, Promise<void>>() // unused
-  private signalingUsers = new Set<string>() // users currently processing a signal
-
+  /**
+   * Caller: create SDP offer for a remote user.
+   * Call this AFTER local stream is ready.
+   */
   async createOffer(userId: string): Promise<RTCSessionDescriptionInit | null> {
-    let pc = this.peerConnections.get(userId)
-
-    if (pc) {
-      // If we already have a remote offer (glare), defer to it
-      if (pc.signalingState === 'have-remote-offer') {
-        console.warn(`[WebRTC] Glare with ${userId}: have remote offer, deferring`)
-        return null
-      }
-      // If already have local offer, don't create another
-      if (pc.signalingState === 'have-local-offer') {
-        console.warn(`[WebRTC] Already have local offer for ${userId}, skipping`)
-        return null
-      }
-      // If in unexpected state, close and recreate
-      if (pc.signalingState !== 'stable') {
-        console.warn(`[WebRTC] PC in unexpected state ${pc.signalingState} for ${userId}, recreating`)
-        pc.close()
-        this.peerConnections.delete(userId)
-        this.remoteStreamsMap.delete(userId)
-        pc = null
-      }
-    }
-
-    if (!pc) {
-      pc = this.createPeerConnection(userId)
-    }
+    const pc = this.createPeerConnection(userId)
     if (!pc) return null
 
     try {
@@ -291,6 +255,7 @@ class WebRTCManager {
         offerToReceiveVideo: true,
       })
       await pc.setLocalDescription(offer)
+      console.log(`[WebRTC] Offer created for ${userId}, state=${pc.signalingState}`)
       return offer
     } catch (error) {
       console.error('[WebRTC] Failed to create offer:', error)
@@ -298,73 +263,60 @@ class WebRTCManager {
     }
   }
 
+  /**
+   * Callee: create SDP answer in response to a remote offer.
+   */
   async createAnswer(
     userId: string,
     offer: RTCSessionDescriptionInit
   ): Promise<RTCSessionDescriptionInit | null> {
-    let pc = this.peerConnections.get(userId)
-
-    if (pc) {
-      // Handle glare: if we have a local offer, rollback to accept remote offer
-      if (pc.signalingState === 'have-local-offer') {
-        console.warn(`[WebRTC] Glare with ${userId}: rolling back local offer to accept remote`)
-        try {
-          await pc.setLocalDescription({ type: 'rollback' } as RTCSessionDescriptionInit)
-        } catch {
-          // Rollback failed, close and recreate
-          pc.close()
-          this.peerConnections.delete(userId)
-          this.remoteStreamsMap.delete(userId)
-          pc = null
-        }
-      }
-      // Already processing a remote offer — skip duplicate
-      else if (pc.signalingState === 'have-remote-offer') {
-        console.warn(`[WebRTC] Already have remote offer from ${userId}, ignoring duplicate`)
-        return null
-      }
-      // Unexpected state — close and recreate
-      else if (pc.signalingState !== 'stable') {
-        console.warn(`[WebRTC] PC in unexpected state ${pc.signalingState} for ${userId}, recreating`)
-        pc.close()
+    // Close any existing broken connection for this user and start fresh
+    const existing = this.peerConnections.get(userId)
+    if (existing) {
+      if (existing.signalingState === 'closed') {
+        existing.close()
         this.peerConnections.delete(userId)
         this.remoteStreamsMap.delete(userId)
-        pc = null
+      } else if (existing.signalingState !== 'stable') {
+        // Not in stable state — close and recreate to accept the new offer
+        console.warn(`[WebRTC] PC for ${userId} in state ${existing.signalingState}, recreating for new offer`)
+        existing.close()
+        this.peerConnections.delete(userId)
+        this.remoteStreamsMap.delete(userId)
       }
     }
 
-    if (!pc) {
-      pc = this.createPeerConnection(userId)
-    }
+    const pc = this.createPeerConnection(userId)
     if (!pc) return null
 
     try {
       await pc.setRemoteDescription(new RTCSessionDescription(offer))
       const answer = await pc.createAnswer()
       await pc.setLocalDescription(answer)
+      console.log(`[WebRTC] Answer created for ${userId}, state=${pc.signalingState}`)
       return answer
     } catch (error) {
       console.error('[WebRTC] Failed to create answer:', error)
-      // If anything goes wrong, close and cleanup so next attempt starts fresh
-      pc.close()
-      this.peerConnections.delete(userId)
-      this.remoteStreamsMap.delete(userId)
       return null
     }
   }
 
+  /**
+   * Caller: handle the callee's answer.
+   */
   async handleAnswer(userId: string, answer: RTCSessionDescriptionInit): Promise<void> {
     const pc = this.peerConnections.get(userId)
-    if (!pc) return
-    // Only set remote answer if we have a pending local offer
-    if (pc.signalingState !== 'have-local-offer') {
-      console.warn(`[WebRTC] Ignoring answer from ${userId}: signalingState=${pc.signalingState}, expected 'have-local-offer'`)
+    if (!pc) {
+      console.warn(`[WebRTC] No PC for ${userId} when handling answer`)
       return
     }
+
     try {
       await pc.setRemoteDescription(new RTCSessionDescription(answer))
+      console.log(`[WebRTC] Answer set for ${userId}, state=${pc.signalingState}`)
     } catch (error) {
-      console.error('[WebRTC] Failed to set answer:', error)
+      console.error(`[WebRTC] Failed to set answer for ${userId} (state=${pc.signalingState}):`, error)
+      // Don't crash — ICE restart will recover if connection fails
     }
   }
 

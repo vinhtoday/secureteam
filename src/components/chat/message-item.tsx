@@ -14,6 +14,12 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip'
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import {
   Reply,
   Pin,
   Trash2,
@@ -28,7 +34,7 @@ interface MessageItemProps {
   message: Message
   onReply?: (message: Message) => void
   onThread?: (message: Message) => void
-  onDelete?: (message: Message) => void
+  onDelete?: (message: Message, mode: 'recall' | 'me') => void
   isOwnMessage?: boolean
   isConsecutive?: boolean
   isSystem?: boolean
@@ -398,21 +404,40 @@ export const MessageItem = memo(
                       </TooltipTrigger>
                       <TooltipContent>Phản hồi</TooltipContent>
                     </Tooltip>
-                    {(isOwn || user?.role?.name === 'SUPER_ADMIN' || user?.role?.name === 'ADMIN') && (
+                    <DropdownMenu>
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-6 w-6 rounded-full text-destructive hover:text-destructive hover:bg-destructive/10"
-                            onClick={() => onDelete?.(message)}
-                          >
-                            <Trash2 className="h-3.5 w-3.5" />
-                          </Button>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-6 w-6 rounded-full text-destructive hover:text-destructive hover:bg-destructive/10"
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </Button>
+                          </DropdownMenuTrigger>
                         </TooltipTrigger>
-                        <TooltipContent>Xóa</TooltipContent>
+                        <TooltipContent>Xóa tin nhắn</TooltipContent>
                       </Tooltip>
-                    )}
+                      <DropdownMenuContent align="end" className="w-48">
+                        {(isOwn || user?.role?.name === 'SUPER_ADMIN' || user?.role?.name === 'ADMIN') && (
+                          <DropdownMenuItem
+                            onClick={() => onDelete?.(message, 'recall')}
+                            className="text-destructive focus:text-destructive text-xs cursor-pointer font-medium"
+                          >
+                            <Trash2 className="h-3.5 w-3.5 mr-2" />
+                            Thu hồi (cả 2 không thấy)
+                          </DropdownMenuItem>
+                        )}
+                        <DropdownMenuItem
+                          onClick={() => onDelete?.(message, 'me')}
+                          className="text-xs cursor-pointer font-medium"
+                        >
+                          <Trash2 className="h-3.5 w-3.5 mr-2 text-muted-foreground" />
+                          Xóa phía tôi (ẩn tin nhắn)
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
                 </div>
               )}

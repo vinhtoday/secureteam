@@ -125,3 +125,30 @@ export function useCreateDirectMessage() {
     },
   })
 }
+
+export function useUpdateChannel(channelId: string) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (data: { name?: string; description?: string }) => {
+      const res = await api.patch<Channel>(`/api/v1/channels/${channelId}`, data)
+      return res.data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['channel', channelId] })
+      queryClient.invalidateQueries({ queryKey: ['channels'] })
+    },
+  })
+}
+
+export function useDeleteChannel() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (channelId: string) => {
+      const res = await api.delete(`/api/v1/channels/${channelId}`)
+      return res.data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['channels'] })
+    },
+  })
+}

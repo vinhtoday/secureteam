@@ -21,7 +21,7 @@ import { api } from '@/lib/api'
 interface ChatAreaProps {
   channel: ChannelDetail | null
   onlineUsers: string[]
-  onSelectChannel?: (channelId: string) => void
+  onSelectChannel?: (channelId: string | null) => void
 }
 
 export function ChatArea({
@@ -88,13 +88,17 @@ export function ChatArea({
     return cleanup
   }, [channelId, onNewMessage, queryClient])
 
-  // Messages list
-  const messages = messagesPages?.pages.flat() || []
-  const allMessages = [...messages].reverse()
+  // Messages list chronologically sorted (oldest first -> top to bottom)
+  const allMessages = useMemo(() => {
+    const msgs = messagesPages?.pages.flat() || []
+    return [...msgs].sort(
+      (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+    )
+  }, [messagesPages])
 
   // Auto-scroll on new messages
   useEffect(() => {
-    if (messages.length > 0 && scrollRef.current) {
+    if (allMessages.length > 0 && scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight
     }
   }, [messagesPages?.pages.length])
@@ -185,11 +189,15 @@ export function ChatArea({
   }, [channelId, isBotChannel, handleSend])
 
   const handleDelete = useCallback(
-    async (message: Message) => {
-      if (confirm('Bạn có chắc muốn xóa tin nhắn này?')) {
+    async (message: Message, mode: 'recall' | 'me') => {
+      const confirmMsg =
+        mode === 'recall'
+          ? 'Bạn có chắc muốn thu hồi tin nhắn này đối với mọi người?'
+          : 'Bạn có chắc muốn xóa tin nhắn này ở phía bạn?'
+      if (confirm(confirmMsg)) {
         try {
           const { api } = await import('@/lib/api')
-          await api.delete(`/api/v1/channels/${channelId}/messages/${message.id}`)
+          await api.delete(`/api/v1/channels/${channelId}/messages/${message.id}?mode=${mode}`)
           queryClient.invalidateQueries({ queryKey: ['messages', channelId] })
         } catch {
           // Silent fail
@@ -357,6 +365,7 @@ export function ChatArea({
         channel={channel}
         channelMembers={channel.members}
         onToggleMembers={() => setShowMembers(!showMembers)}
+        onSelectChannel={onSelectChannel}
       />
 
       <div className="flex flex-1 overflow-hidden">

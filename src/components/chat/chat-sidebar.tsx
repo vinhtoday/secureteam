@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { cn } from '@/lib/utils'
 import { useAuthStore, type User } from '@/stores/auth-store'
 import { useChannels, type Channel } from '@/hooks/use-channels'
@@ -58,7 +58,14 @@ export function ChatSidebar({
   })
 
   const groupChannels = channels?.filter((c) => c.type !== 'direct') || []
-  const directChannels = dmChannels || []
+  
+  // Filter out securebot system channel from the dynamic DMs list to avoid duplicate bot display
+  const directChannels = useMemo(() => {
+    return (dmChannels || []).filter((c) => {
+      const otherMember = c.members?.find((m) => m.userId !== user?.id)
+      return otherMember?.userId !== 'securebot-system' && otherMember?.user?.isBot !== true
+    })
+  }, [dmChannels, user])
 
   const handleCreateDM = async (userId: string) => {
     try {
@@ -121,7 +128,7 @@ export function ChatSidebar({
           />
         </div>
 
-        <div className="px-2 space-y-0.5">
+        <div className="pl-2 pr-3.5 space-y-0.5">
           {channelsLoading ? (
             Array.from({ length: 3 }).map((_, i) => (
               <div key={i} className="flex items-center gap-2.5 rounded-lg px-3 py-2.5">
@@ -154,7 +161,7 @@ export function ChatSidebar({
           </span>
         </div>
 
-        <div className="px-2 space-y-0.5">
+        <div className="pl-2 pr-3.5 space-y-0.5">
           {/* SecureBot quick access */}
           <button
             onClick={async () => {

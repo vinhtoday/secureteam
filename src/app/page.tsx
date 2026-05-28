@@ -18,7 +18,15 @@ import { useSocket } from '@/hooks/use-socket'
 import { useChannel } from '@/hooks/use-channels'
 import { cn } from '@/lib/utils'
 
+import { MessageSquare, Trello, Shield } from 'lucide-react'
+
 type AuthView = 'login' | 'register'
+
+const headerTabs = [
+  { id: 'chat', label: 'Tin nhắn', icon: MessageSquare, adminOnly: false },
+  { id: 'tasks', label: 'Kế hoạch', icon: Trello, adminOnly: false },
+  { id: 'admin-dashboard', label: 'Quản trị', icon: Shield, adminOnly: true },
+]
 
 export default function Home() {
   const [authView, setAuthView] = useState<AuthView>('login')
@@ -38,7 +46,7 @@ export default function Home() {
     isChatMode ? activeChannelId : null
   )
 
-  const handleSelectChannel = useCallback((channelId: string) => {
+  const handleSelectChannel = useCallback((channelId: string | null) => {
     setActiveChannelId(channelId)
     // On mobile, close sidebar after selecting a channel
     if (typeof window !== 'undefined' && window.innerWidth < 768) {
@@ -86,9 +94,9 @@ export default function Home() {
       {/* Global AppHeader - always full width on top */}
       <AppHeader
         onToggleSidebar={() => setSidebarOpen((prev) => !prev)}
-        navItems={navItems}
-        activeNavItem={navItem}
-        onNavigate={handleNavigate}
+        navItems={headerTabs}
+        activeNavItem={['admin-dashboard', 'user-management', 'message-viewer', 'audit-logs'].includes(navItem) ? 'admin-dashboard' : navItem}
+        onNavigate={(item) => handleNavigate(item as any)}
         isAdmin={isAdmin}
       />
 

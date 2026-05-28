@@ -92,7 +92,21 @@ export async function GET(
         take: limit,
       });
 
-      return paginatedResponse(messages.reverse(), page, limit, total);
+      // Filter out messages that are deleted for the current user
+      const visibleMessages = messages.filter((msg) => {
+        if (!msg.metadata) return true;
+        try {
+          const meta = JSON.parse(msg.metadata);
+          if (meta && Array.isArray(meta.deletedFor) && meta.deletedFor.includes(userId)) {
+            return false;
+          }
+        } catch {
+          // ignore parsing error
+        }
+        return true;
+      });
+
+      return paginatedResponse(visibleMessages.reverse(), page, limit, total);
     } catch (error) {
       console.error('Get messages error:', error);
       return serverErrorResponse('Failed to get messages');

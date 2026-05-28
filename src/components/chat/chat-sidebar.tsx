@@ -213,6 +213,13 @@ export function ChatSidebar({
         </div>
       </ScrollArea>
 
+      <Separator className="opacity-50" />
+      <div className="py-2.5 px-3">
+        <div className="text-[10px] text-center text-muted-foreground/45 font-medium select-none">
+          SecureTeam v1.2 • By vinhtoday
+        </div>
+      </div>
+
       {/* New DM Sheet */}
       <Sheet open={showNewDM} onOpenChange={setShowNewDM}>
         <SheetContent>

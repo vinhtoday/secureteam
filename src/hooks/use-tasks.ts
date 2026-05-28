@@ -208,15 +208,11 @@ export function useBulkUpdateTasks() {
   return useMutation({
     mutationFn: async (data: {
       taskIds: string[]
-      updates: {
-        status?: string
-        priority?: string
-        assigneeId?: string
-        labelId?: string
-        isArchived?: boolean
-      }
+      status?: string
+      priority?: string
+      updates?: { id: string; status?: string; position?: number }[]
     }) => {
-      const res = await api.post<{ updated: number }>('/api/v1/tasks/bulk', data)
+      const res = await api.post<{ updated: number } | any>('/api/v1/tasks/bulk-update', data)
       return res.data
     },
     onSuccess: () => {

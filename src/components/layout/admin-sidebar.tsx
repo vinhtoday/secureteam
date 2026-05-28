@@ -10,13 +10,15 @@ import {
   Users,
   Eye,
   ClipboardList,
-  LogOut
+  LogOut,
+  Trello
 } from 'lucide-react'
 
-type NavItem = 'chat' | 'admin-dashboard' | 'user-management' | 'message-viewer' | 'audit-logs'
+type NavItem = 'chat' | 'tasks' | 'admin-dashboard' | 'user-management' | 'message-viewer' | 'audit-logs'
 
 const navItems: { id: NavItem; label: string; icon: React.ElementType; adminOnly: boolean }[] = [
   { id: 'chat', label: 'Tin nhắn', icon: MessageSquare, adminOnly: false },
+  { id: 'tasks', label: 'Kế hoạch', icon: Trello, adminOnly: false },
   { id: 'admin-dashboard', label: 'Thống kê', icon: LayoutDashboard, adminOnly: true },
   { id: 'user-management', label: 'Người dùng', icon: Users, adminOnly: true },
   { id: 'message-viewer', label: 'Xem tin nhắn', icon: Eye, adminOnly: true },
@@ -75,7 +77,7 @@ export function AdminSidebar({
         </nav>
       </ScrollArea>
       <Separator className="opacity-50" />
-      <div className="p-3">
+      <div className="p-3 flex flex-col gap-2">
         <Button
           variant="ghost"
           size="sm"
@@ -85,6 +87,9 @@ export function AdminSidebar({
           <LogOut className="h-4 w-4" />
           Đăng xuất
         </Button>
+        <div className="text-[10px] text-center text-muted-foreground/45 font-medium select-none pt-1">
+          SecureTeam v1.2 • By vinhtoday
+        </div>
       </div>
     </aside>
   )

@@ -13,6 +13,7 @@ import { AdminDashboard } from '@/components/admin/admin-dashboard'
 import { UserManagement } from '@/components/admin/user-management'
 import { MessageViewer } from '@/components/admin/message-viewer'
 import { AuditLogViewer } from '@/components/admin/audit-log-viewer'
+import { TaskBoard } from '@/components/task/task-board'
 import { useSocket } from '@/hooks/use-socket'
 import { useChannel } from '@/hooks/use-channels'
 import { cn } from '@/lib/utils'
@@ -151,7 +152,8 @@ export default function Home() {
               onSelectChannel={handleSelectChannel}
             />
           ) : (
-            <div className="flex-1 overflow-y-auto p-4 lg:p-6">
+            <div className={cn("flex-1 p-4 lg:p-6", navItem !== 'tasks' ? "overflow-y-auto" : "overflow-hidden h-full flex flex-col")}>
+              {navItem === 'tasks' && <TaskBoard />}
               {navItem === 'admin-dashboard' && isAdmin && <AdminDashboard />}
               {navItem === 'user-management' && isAdmin && <UserManagement />}
               {navItem === 'message-viewer' && isAdmin && <MessageViewer />}

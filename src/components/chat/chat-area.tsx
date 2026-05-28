@@ -341,6 +341,11 @@ export function ChatArea({
               </div>
             </div>
           </div>
+          
+          {/* Footer signature */}
+          <div className="text-center pt-8 text-xs text-muted-foreground/35 select-none font-medium">
+            SecureTeam Platform • Developed with ❤️ by vinhtoday
+          </div>
         </div>
       </div>
     )

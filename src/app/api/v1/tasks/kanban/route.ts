@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
         isArchived: includeArchived ? undefined : false,
         OR: [
           { createdBy: userId },
-          { assignments: { some: { userId } } },
+          { assignees: { some: { userId } } },
         ],
       };
 
@@ -43,7 +43,7 @@ export async function GET(request: NextRequest) {
       }
 
       if (assigneeId) {
-        where.assignments = { some: { userId: assigneeId } };
+        where.assignees = { some: { userId: assigneeId } };
       }
 
       if (labelId) {
@@ -79,7 +79,7 @@ export async function GET(request: NextRequest) {
           creator: {
             select: { id: true, name: true, avatar: true },
           },
-          assignments: {
+          assignees: {
             select: {
               id: true,
               userId: true,
@@ -112,10 +112,12 @@ export async function GET(request: NextRequest) {
         ],
       });
 
-      // Map DB structure to front-end labels format
-      const formattedTasks = tasks.map((task) => ({
+      // Map DB structure to front-end labels and assignments format
+      const formattedTasks = tasks.map((task: any) => ({
         ...task,
         labels: task.labels.map((l: any) => l.label),
+        assignments: task.assignees,
+        assignees: undefined,
       }));
 
       // Group tasks into Kanban columns

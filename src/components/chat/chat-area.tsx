@@ -14,7 +14,7 @@ import { MemberList } from './member-list'
 import { BotTypingIndicator } from './bot-typing-indicator'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from '@/components/ui/button'
-import { AlertCircle, MessageSquarePlus, MessagesSquare, Sparkles, Bot, User, ArrowRight, Shield, ListTodo, UserCheck } from 'lucide-react'
+import { AlertCircle, MessageSquarePlus, MessagesSquare, Sparkles, Bot, User as UserIcon, ArrowRight, Shield, ListTodo, UserCheck } from 'lucide-react'
 import type { ChannelDetail } from '@/hooks/use-channels'
 import { api } from '@/lib/api'
 
@@ -260,42 +260,42 @@ export function ChatArea({
           {/* Main Dashboard Cards */}
           <div className="grid gap-6 md:grid-cols-2">
             {/* User Profile Info Card */}
-            <div className="glass-card rounded-2xl p-6 flex flex-col justify-between hover:scale-[1.01] transition-transform duration-300">
+            <div className="glass-card-premium rounded-3xl p-6 flex flex-col justify-between hover:scale-[1.02] hover:-translate-y-0.5 transition-all duration-300 border-ultra-thin shadow-xl">
               <div className="space-y-4">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-violet-600 dark:text-violet-400 bg-violet-100 dark:bg-violet-950/40 px-2.5 py-1 rounded-full">
+                <span className="text-[9px] font-bold uppercase tracking-wider text-violet-600 dark:text-violet-400 bg-violet-500/10 border border-ultra-thin border-violet-500/25 px-2.5 py-1 rounded-full">
                   Thành viên hệ thống
                 </span>
                 <div className="flex items-center gap-4 pt-2">
-                  <div className="h-14 w-14 rounded-full bg-gradient-to-br from-violet-100 to-indigo-100 dark:from-violet-900/40 dark:to-indigo-900/40 flex items-center justify-center text-violet-600 dark:text-violet-400 text-lg font-bold border border-violet-200/50 dark:border-violet-800/30 shadow-sm">
+                  <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center text-white text-lg font-bold border border-ultra-thin shadow-md transition-transform hover:rotate-3 duration-300">
                     {user?.name ? user.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0,2) : '?'}
                   </div>
                   <div className="min-w-0">
                     <h3 className="font-bold text-foreground text-lg truncate">{user?.name}</h3>
                     <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
-                    <span className="inline-block mt-1 text-[10px] px-2 py-0.5 rounded-full font-medium bg-muted text-muted-foreground border border-border/40">
+                    <span className="inline-block mt-1.5 text-[10px] px-2.5 py-0.5 rounded-full font-bold bg-muted/60 text-muted-foreground border border-ultra-thin">
                       {user?.role?.name || 'MEMBER'}
                     </span>
                   </div>
                 </div>
               </div>
-              <div className="pt-6 border-t border-border/40 mt-6 flex items-center justify-between text-xs text-muted-foreground">
-                <span className="flex items-center gap-1.5">
-                  <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-                  {onlineUsers.length} thành viên đang trực tuyến
+              <div className="pt-6 border-t border-border/20 mt-6 flex items-center justify-between text-xs text-muted-foreground">
+                <span className="flex items-center gap-1.5 font-semibold">
+                  <span className="h-2 w-2 rounded-full bg-emerald-500 animate-online-glow" />
+                  {onlineUsers.length} trực tuyến
                 </span>
-                <span>Kết nối mã hóa AES-256</span>
+                <span className="opacity-80">Mã hóa AES-256</span>
               </div>
             </div>
 
             {/* AI Assistant Quick Commands Widget (SecureBot Hub) */}
-            <div className="glass-card rounded-2xl p-6 space-y-4 hover:scale-[1.01] transition-transform duration-300">
+            <div className="glass-card-premium rounded-3xl p-6 space-y-4 hover:scale-[1.02] hover:-translate-y-0.5 transition-all duration-300 border-ultra-thin shadow-xl">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Bot className="h-5 w-5 text-violet-600 dark:text-violet-400" />
                   <span className="text-sm font-bold text-foreground">SecureBot AI Assistant</span>
                 </div>
-                <span className="flex items-center gap-1 text-[10px] text-emerald-500 font-bold bg-emerald-50 dark:bg-emerald-950/20 px-2 py-0.5 rounded-full border border-emerald-250/20">
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" /> ONLINE
+                <span className="flex items-center gap-1 text-[10px] text-emerald-500 font-bold bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-online-glow" /> ONLINE
                 </span>
               </div>
               <p className="text-xs text-muted-foreground leading-normal">
@@ -305,44 +305,44 @@ export function ChatArea({
               <div className="grid grid-cols-2 gap-2.5 pt-1">
                 <button
                   onClick={() => handleOpenBotDM('thông tin')}
-                  className="flex items-center justify-between rounded-xl border border-border/50 bg-background/50 hover:bg-violet-50/50 dark:hover:bg-violet-950/20 p-3 text-left transition-all hover:border-violet-300 dark:hover:border-violet-800 group"
+                  className="flex items-center justify-between rounded-2xl border border-ultra-thin bg-card/45 hover:bg-violet-500/15 p-3 text-left transition-all hover:-translate-y-0.5 active:translate-y-0 shadow-sm group cursor-pointer"
                 >
                   <div className="flex items-center gap-2">
-                    <User className="h-4 w-4 text-violet-500 group-hover:scale-110 transition-transform" />
-                    <span className="text-xs font-semibold text-foreground/80">Hồ sơ cá nhân</span>
+                    <UserIcon className="h-4 w-4 text-violet-500 group-hover:scale-110 transition-transform" />
+                    <span className="text-xs font-bold text-foreground/80">Hồ sơ</span>
                   </div>
                   <ArrowRight className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
                 </button>
 
                 <button
                   onClick={() => handleOpenBotDM('online')}
-                  className="flex items-center justify-between rounded-xl border border-border/50 bg-background/50 hover:bg-violet-50/50 dark:hover:bg-violet-950/20 p-3 text-left transition-all hover:border-violet-300 dark:hover:border-violet-800 group"
+                  className="flex items-center justify-between rounded-2xl border border-ultra-thin bg-card/45 hover:bg-violet-500/15 p-3 text-left transition-all hover:-translate-y-0.5 active:translate-y-0 shadow-sm group cursor-pointer"
                 >
                   <div className="flex items-center gap-2">
                     <UserCheck className="h-4 w-4 text-violet-500 group-hover:scale-110 transition-transform" />
-                    <span className="text-xs font-semibold text-foreground/80">Xem ai online</span>
+                    <span className="text-xs font-bold text-foreground/80">Online</span>
                   </div>
                   <ArrowRight className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
                 </button>
 
                 <button
                   onClick={() => handleOpenBotDM('task')}
-                  className="flex items-center justify-between rounded-xl border border-border/50 bg-background/50 hover:bg-violet-50/50 dark:hover:bg-violet-950/20 p-3 text-left transition-all hover:border-violet-300 dark:hover:border-violet-800 group"
+                  className="flex items-center justify-between rounded-2xl border border-ultra-thin bg-card/45 hover:bg-violet-500/15 p-3 text-left transition-all hover:-translate-y-0.5 active:translate-y-0 shadow-sm group cursor-pointer"
                 >
                   <div className="flex items-center gap-2">
                     <ListTodo className="h-4 w-4 text-violet-500 group-hover:scale-110 transition-transform" />
-                    <span className="text-xs font-semibold text-foreground/80">Việc được giao</span>
+                    <span className="text-xs font-bold text-foreground/80">Việc giao</span>
                   </div>
                   <ArrowRight className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
                 </button>
 
                 <button
                   onClick={() => handleOpenBotDM('tìm ')}
-                  className="flex items-center justify-between rounded-xl border border-border/50 bg-background/50 hover:bg-violet-50/50 dark:hover:bg-violet-950/20 p-3 text-left transition-all hover:border-violet-300 dark:hover:border-violet-800 group"
+                  className="flex items-center justify-between rounded-2xl border border-ultra-thin bg-card/45 hover:bg-violet-500/15 p-3 text-left transition-all hover:-translate-y-0.5 active:translate-y-0 shadow-sm group cursor-pointer"
                 >
                   <div className="flex items-center gap-2">
                     <Bot className="h-4 w-4 text-violet-500 group-hover:scale-110 transition-transform" />
-                    <span className="text-xs font-semibold text-foreground/80">Tìm nhân viên</span>
+                    <span className="text-xs font-bold text-foreground/80">Tìm người</span>
                   </div>
                   <ArrowRight className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
                 </button>

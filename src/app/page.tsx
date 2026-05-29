@@ -69,13 +69,32 @@ export default function Home() {
   // Auth screens
   if (!isAuthenticated) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-violet-50/50 via-white to-indigo-50/50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 p-4">
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute -top-40 -right-40 w-80 h-80 rounded-full bg-violet-200/20 dark:bg-violet-900/10 blur-3xl" />
-          <div className="absolute -bottom-40 -left-40 w-96 h-96 rounded-full bg-indigo-200/20 dark:bg-indigo-900/10 blur-3xl" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-violet-100/10 dark:bg-violet-900/5 blur-3xl" />
+      <div className="relative flex min-h-screen items-center justify-center overflow-hidden p-4 bg-gradient-to-br from-violet-950/20 via-background to-indigo-950/20">
+        {/* Animated Aurora Fallback */}
+        <div className="absolute inset-0 bg-gradient-to-tr from-violet-900/10 via-indigo-900/5 to-fuchsia-900/10 dark:from-violet-950/20 dark:via-indigo-950/10 dark:to-fuchsia-950/20 animate-aurora opacity-70 pointer-events-none" />
+        
+        {/* Dynamic Looping Background Video */}
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="absolute inset-0 h-full w-full object-cover opacity-25 dark:opacity-15 pointer-events-none transition-opacity duration-1000 mix-blend-screen dark:mix-blend-lighten"
+          onError={(e) => {
+            (e.target as HTMLVideoElement).style.opacity = '0';
+          }}
+        >
+          <source src="/auth-bg.mp4" type="video/mp4" />
+          <source src="/auth-bg.webm" type="video/webm" />
+        </video>
+
+        {/* Ambient Blur Bubbles */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-40">
+          <div className="absolute -top-40 -right-40 w-96 h-96 rounded-full bg-violet-500/10 blur-3xl animate-pulse-glow" />
+          <div className="absolute -bottom-40 -left-40 w-96 h-96 rounded-full bg-indigo-500/10 blur-3xl animate-pulse-glow" style={{ animationDelay: '-2s' }} />
         </div>
-        <div className="relative z-10">
+
+        <div className="relative z-10 w-full flex justify-center">
           {authView === 'login' ? (
             <LoginForm onSwitchToRegister={() => setAuthView('register')} />
           ) : (

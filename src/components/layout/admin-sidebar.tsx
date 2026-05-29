@@ -46,7 +46,7 @@ export function AdminSidebar({
   )
 
   return (
-    <aside className="flex h-full w-full flex-col bg-sidebar/50 backdrop-blur-md border-r border-border/40">
+    <aside className="flex h-full w-full flex-col bg-sidebar/30 backdrop-blur-md border-r border-ultra-thin">
       <div className="px-4 pt-5 pb-2">
         <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60 block px-2 mb-1">
           Quản trị hệ thống
@@ -62,10 +62,10 @@ export function AdminSidebar({
                 key={item.id}
                 variant="ghost"
                 className={cn(
-                  'h-10 justify-start gap-3 px-3 text-sm font-medium rounded-lg transition-all duration-200',
+                  'h-10 justify-start gap-3 px-3 text-sm font-semibold rounded-lg transition-all duration-150 cursor-pointer',
                   isActive
-                    ? 'bg-violet-50 text-violet-700 dark:bg-violet-950/30 dark:text-violet-400 border-l-2 border-violet-600 dark:border-violet-400 rounded-l-none'
-                    : 'text-sidebar-foreground/75 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
+                    ? 'bg-violet-500/10 text-violet-600 dark:bg-violet-950/30 dark:text-violet-400 border-l-3 border-violet-600 dark:border-violet-400 shadow-sm rounded-l-none'
+                    : 'text-sidebar-foreground/75 hover:bg-sidebar-accent/40 hover:text-sidebar-accent-foreground rounded-l-none'
                 )}
                 onClick={() => onNavigate(item.id)}
               >
@@ -76,18 +76,18 @@ export function AdminSidebar({
           })}
         </nav>
       </ScrollArea>
-      <Separator className="opacity-50" />
+      <Separator className="opacity-40" />
       <div className="p-3 flex flex-col gap-2">
         <Button
           variant="ghost"
           size="sm"
-          className="w-full justify-start gap-2.5 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg transition-colors"
+          className="w-full justify-start gap-2.5 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg transition-colors cursor-pointer"
           onClick={onLogout}
         >
           <LogOut className="h-4 w-4" />
           Đăng xuất
         </Button>
-        <div className="text-[10px] text-center text-muted-foreground/45 font-medium select-none pt-1">
+        <div className="text-[10px] text-center text-muted-foreground/40 font-medium select-none pt-1">
           SecureTeam v1.2 • By vinhtoday
         </div>
       </div>

@@ -47,7 +47,7 @@ export async function GET(request: NextRequest) {
         isArchived: includeArchived ? undefined : false,
         OR: [
           { createdBy: userId },
-          { assignments: { some: { userId } } },
+          { assignees: { some: { userId } } },
         ],
       };
 
@@ -74,7 +74,7 @@ export async function GET(request: NextRequest) {
       }
 
       if (assigneeId) {
-        where.assignments = { some: { userId: assigneeId } };
+        where.assignees = { some: { userId: assigneeId } };
       }
 
       if (labelId) {
@@ -88,7 +88,7 @@ export async function GET(request: NextRequest) {
       if (myTasksOnly) {
         where.OR = [
           { createdBy: userId },
-          { assignments: { some: { userId } } },
+          { assignees: { some: { userId } } },
         ];
       }
 
@@ -119,7 +119,7 @@ export async function GET(request: NextRequest) {
             creator: {
               select: { id: true, name: true, avatar: true },
             },
-            assignments: {
+            assignees: {
               select: {
                 id: true,
                 userId: true,
@@ -156,7 +156,15 @@ export async function GET(request: NextRequest) {
         db.task.count({ where }),
       ]);
 
-      return paginatedResponse(tasks, page, limit, total);
+      // Format response to change assignees to assignments for frontend compatibility
+      const formattedTasks = tasks.map((task: any) => ({
+        ...task,
+        assignments: task.assignees,
+        assignees: undefined,
+        labels: task.labels.map((l: any) => l.label || l),
+      }));
+
+      return paginatedResponse(formattedTasks, page, limit, total);
     } catch (error) {
       console.error('List tasks error:', error);
       return serverErrorResponse('Không thể tải danh sách công việc');
@@ -211,7 +219,7 @@ export async function POST(request: NextRequest) {
         }
       }
 
-      // Create task with assignments and labels
+      // Create task with assignees and labels
       const task = await db.task.create({
         data: {
           title,
@@ -223,7 +231,7 @@ export async function POST(request: NextRequest) {
           channelId: channelId || null,
           parentId: parentId || null,
           createdBy: userId,
-          assignments: assigneeIds && assigneeIds.length > 0
+          assignees: assigneeIds && assigneeIds.length > 0
             ? {
                 createMany: {
                   data: assigneeIds.map((uid) => ({
@@ -259,7 +267,7 @@ export async function POST(request: NextRequest) {
           creator: {
             select: { id: true, name: true, avatar: true },
           },
-          assignments: {
+          assignees: {
             select: {
               id: true,
               userId: true,
@@ -308,7 +316,15 @@ export async function POST(request: NextRequest) {
         await Promise.all(notifyPromises);
       }
 
-      return successResponse(task, {}, 201);
+      // Format response to change assignees to assignments for frontend compatibility
+      const formattedTask = {
+        ...task,
+        assignments: task.assignees,
+        assignees: undefined,
+        labels: task.labels.map((l: any) => l.label || l),
+      };
+
+      return successResponse(formattedTask, {}, 201);
     } catch (error) {
       console.error('Create task error:', error);
       return serverErrorResponse('Không thể tạo công việc');

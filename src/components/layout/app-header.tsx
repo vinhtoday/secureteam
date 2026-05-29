@@ -53,31 +53,31 @@ export function AppHeader({
   }
 
   return (
-    <header className="sticky top-0 z-40 flex h-14 items-center gap-3 border-b bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/60 px-4">
+    <header className="sticky top-2 z-40 mx-4 mt-3 mb-1.5 flex h-14 items-center gap-3 rounded-2xl border border-ultra-thin bg-card/50 backdrop-blur-xl shadow-md transition-all duration-300 px-4">
       {/* Left: Hamburger + Logo */}
       <div className="flex items-center gap-2.5">
         {onToggleSidebar && (
           <Button
             variant="ghost"
             size="icon"
-            className="h-9 w-9 rounded-lg hover:bg-muted"
+            className="h-9 w-9 rounded-lg hover:bg-muted/60 transition-colors"
             onClick={onToggleSidebar}
             aria-label="Toggle sidebar"
           >
             <Menu className="h-4.5 w-4.5" />
           </Button>
         )}
-        <div className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-100 dark:bg-violet-900/30">
-            <Shield className="h-4 w-4 text-violet-600 dark:text-violet-400" />
+        <div className="flex items-center gap-2 group cursor-pointer">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400 transition-transform group-hover:scale-105 group-hover:rotate-3 duration-200">
+            <Shield className="h-4 w-4" />
           </div>
-          <span className="hidden font-bold text-sm sm:inline-block tracking-tight">SecureTeam</span>
+          <span className="hidden font-bold text-sm sm:inline-block tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/80">SecureTeam</span>
         </div>
       </div>
 
       {/* Center: Nav tabs - pill style */}
       {navItems && onNavigate && (
-        <nav className="hidden md:flex items-center gap-1 mx-2 bg-muted/60 rounded-xl p-1">
+        <nav className="hidden md:flex items-center gap-1 mx-2 bg-muted/40 border border-ultra-thin rounded-xl p-1">
           {navItems
             .filter((item) => !item.adminOnly || isAdmin)
             .map((item) => {
@@ -88,10 +88,10 @@ export function AppHeader({
                   key={item.id}
                   onClick={() => onNavigate(item.id)}
                   className={cn(
-                    'flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-all duration-200',
+                    'flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] cursor-pointer',
                     isActive
-                      ? 'bg-background text-violet-600 dark:text-violet-400 shadow-sm'
-                      : 'text-muted-foreground hover:text-foreground'
+                      ? 'bg-background text-violet-600 dark:text-violet-400 shadow-sm border border-ultra-thin'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-background/20'
                   )}
                 >
                   <Icon className="h-3.5 w-3.5" />

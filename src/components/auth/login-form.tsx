@@ -51,9 +51,9 @@ export function LoginForm({ onSwitchToRegister }: LoginFormProps) {
   }
 
   return (
-    <Card className="w-full max-w-md glass-card shadow-2xl rounded-3xl glow-purple p-2 animate-in fade-in zoom-in duration-300">
-      <CardHeader className="text-center pb-2">
-        <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-500 to-indigo-600 shadow-lg shadow-violet-500/20 transition-all hover:scale-105 duration-300">
+    <Card className="w-full max-w-md glass-card-premium shadow-2xl rounded-3xl glow-premium p-3 animate-in fade-in zoom-in duration-500 border-ultra-thin">
+      <CardHeader className="text-center pb-2 group">
+        <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-500 to-indigo-600 shadow-lg shadow-violet-500/30 transition-all hover:scale-110 hover:rotate-6 duration-300">
           <Shield className="h-8 w-8 text-white" />
         </div>
         <CardTitle className="text-3xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-violet-600 to-indigo-600 dark:from-violet-400 dark:to-indigo-400">SecureTeam</CardTitle>
@@ -69,7 +69,7 @@ export function LoginForm({ onSwitchToRegister }: LoginFormProps) {
             </div>
           )}
           <div className="space-y-2">
-            <Label htmlFor="login-email" className="text-sm font-medium">Email</Label>
+            <Label htmlFor="login-email" className="text-sm font-medium text-foreground/80">Email</Label>
             <Input
               id="login-email"
               type="email"
@@ -78,11 +78,11 @@ export function LoginForm({ onSwitchToRegister }: LoginFormProps) {
               onChange={(e) => setEmail(e.target.value)}
               disabled={isLoading}
               autoComplete="email"
-              className="h-11 rounded-xl border-border/60 bg-background/50 focus-visible:ring-violet-500/30 focus-visible:border-violet-500"
+              className="h-11 rounded-xl border-border/40 bg-background/30 focus-visible:ring-violet-500/30 focus-visible:border-violet-500 transition-all hover:bg-background/50"
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="login-password" className="text-sm font-medium">Mật khẩu</Label>
+            <Label htmlFor="login-password" className="text-sm font-medium text-foreground/80">Mật khẩu</Label>
             <div className="relative">
               <Input
                 id="login-password"
@@ -92,7 +92,7 @@ export function LoginForm({ onSwitchToRegister }: LoginFormProps) {
                 onChange={(e) => setPassword(e.target.value)}
                 disabled={isLoading}
                 autoComplete="current-password"
-                className="h-11 rounded-xl border-border/60 bg-background/50 pr-10 focus-visible:ring-violet-500/30 focus-visible:border-violet-500"
+                className="h-11 rounded-xl border-border/40 bg-background/30 pr-10 focus-visible:ring-violet-500/30 focus-visible:border-violet-500 transition-all hover:bg-background/50"
               />
               <button
                 type="button"
@@ -110,13 +110,13 @@ export function LoginForm({ onSwitchToRegister }: LoginFormProps) {
               id="login-remember"
               checked={rememberMe}
               onCheckedChange={(checked) => setRememberMe(checked === true)}
-              className="border-border/80 data-[state=checked]:bg-violet-600 data-[state=checked]:border-violet-600"
+              className="border-border/60 data-[state=checked]:bg-violet-600 data-[state=checked]:border-violet-600"
             />
             <Label htmlFor="login-remember" className="cursor-pointer text-sm font-normal text-muted-foreground hover:text-foreground transition-colors">
               Ghi nhớ đăng nhập
             </Label>
           </div>
-          <Button type="submit" className="w-full h-11 rounded-xl font-semibold bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 hover:scale-[1.01] active:scale-[0.99] text-white shadow-md shadow-violet-500/20 hover:shadow-lg hover:shadow-violet-500/30 transition-all duration-200" disabled={isLoading}>
+          <Button type="submit" className="w-full h-11 rounded-xl font-semibold bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 hover:scale-[1.01] active:scale-[0.99] text-white shadow-md shadow-violet-500/20 hover:shadow-lg hover:shadow-violet-500/30 transition-all duration-200 cursor-pointer" disabled={isLoading}>
             {isLoading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -133,7 +133,7 @@ export function LoginForm({ onSwitchToRegister }: LoginFormProps) {
           Chưa có tài khoản?{' '}
           <button
             onClick={onSwitchToRegister}
-            className="font-semibold text-primary hover:underline underline-offset-2"
+            className="font-semibold text-primary hover:underline underline-offset-2 cursor-pointer"
           >
             Đăng ký ngay
           </button>

@@ -142,7 +142,7 @@ export function TaskBoard() {
   return (
     <div className="flex h-full flex-col space-y-4">
       {/* Top action bar: filters, search, and new task */}
-      <div className="flex flex-col gap-3 rounded-2xl border border-border/40 bg-card/45 p-4 backdrop-blur-md md:flex-row md:items-center md:justify-between">
+      <div className="flex flex-col gap-3 rounded-2xl border border-ultra-thin bg-card/40 p-4 backdrop-blur-xl md:flex-row md:items-center md:justify-between shadow-sm">
         {/* Left: Search & Filter inputs */}
         <div className="flex flex-1 flex-wrap items-center gap-3">
           <div className="relative w-full max-w-[260px]">
@@ -151,39 +151,39 @@ export function TaskBoard() {
               placeholder="Tìm kiếm công việc..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="h-9 pl-9 text-sm rounded-xl focus-visible:ring-violet-500/30"
+              className="h-9 pl-9 text-sm rounded-xl focus-visible:ring-violet-500/30 bg-background/30 hover:bg-background/50 focus:bg-background border-ultra-thin transition-colors"
             />
           </div>
 
           {/* Priority filter */}
           <Select value={priorityFilter} onValueChange={setPriorityFilter}>
-            <SelectTrigger className="h-9 w-[130px] rounded-xl text-xs">
+            <SelectTrigger className="h-9 w-[135px] rounded-xl text-xs bg-background/30 border-ultra-thin cursor-pointer hover:bg-background/50 transition-colors">
               <SlidersHorizontal className="mr-1.5 h-3.5 w-3.5 text-muted-foreground/60" />
               <SelectValue placeholder="Độ ưu tiên" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all" className="text-xs">Tất cả độ ưu tiên</SelectItem>
-              <SelectItem value="urgent" className="text-xs">🚨 Khẩn cấp</SelectItem>
-              <SelectItem value="high" className="text-xs">🟠 Cao</SelectItem>
-              <SelectItem value="medium" className="text-xs">🟡 Trung bình</SelectItem>
-              <SelectItem value="low" className="text-xs">🟢 Thấp</SelectItem>
+              <SelectItem value="all" className="text-xs cursor-pointer">Tất cả độ ưu tiên</SelectItem>
+              <SelectItem value="urgent" className="text-xs cursor-pointer">🚨 Khẩn cấp</SelectItem>
+              <SelectItem value="high" className="text-xs cursor-pointer">🟠 Cao</SelectItem>
+              <SelectItem value="medium" className="text-xs cursor-pointer">🟡 Trung bình</SelectItem>
+              <SelectItem value="low" className="text-xs cursor-pointer">🟢 Thấp</SelectItem>
             </SelectContent>
           </Select>
 
           {/* Assignee filter */}
           <Select value={assigneeFilter} onValueChange={setAssigneeFilter}>
-            <SelectTrigger className="h-9 w-[170px] rounded-xl text-xs">
+            <SelectTrigger className="h-9 w-[175px] rounded-xl text-xs bg-background/30 border-ultra-thin cursor-pointer hover:bg-background/50 transition-colors">
               <User className="mr-1.5 h-3.5 w-3.5 text-muted-foreground/60" />
               <SelectValue placeholder="Người thực hiện" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all" className="text-xs">Tất cả người thực hiện</SelectItem>
+              <SelectItem value="all" className="text-xs cursor-pointer">Tất cả người thực hiện</SelectItem>
               {users.map((u) => (
-                <SelectItem key={u.id} value={u.id} className="text-xs">
+                <SelectItem key={u.id} value={u.id} className="text-xs cursor-pointer">
                   <div className="flex items-center gap-2">
                     <Avatar className="h-4.5 w-4.5 shrink-0">
                       <AvatarImage src={u.avatar || undefined} alt={u.name} />
-                      <AvatarFallback className="text-[7px] font-semibold bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400">
+                      <AvatarFallback className="text-[7px] font-semibold bg-violet-500 text-white">
                         {getInitials(u.name)}
                       </AvatarFallback>
                     </Avatar>
@@ -200,7 +200,7 @@ export function TaskBoard() {
               variant="ghost"
               size="sm"
               onClick={handleResetFilters}
-              className="h-9 gap-1.5 rounded-xl text-xs hover:bg-muted text-muted-foreground hover:text-foreground"
+              className="h-9 gap-1.5 rounded-xl text-xs hover:bg-muted text-muted-foreground hover:text-foreground cursor-pointer"
             >
               <RotateCcw className="h-3.5 w-3.5" />
               Đặt lại
@@ -212,7 +212,7 @@ export function TaskBoard() {
         {isAdmin && (
           <Button
             onClick={() => setShowCreateDialog(true)}
-            className="h-9 shrink-0 gap-1.5 rounded-xl text-xs font-semibold bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white shadow-sm shadow-violet-500/20"
+            className="h-9 shrink-0 gap-1.5 rounded-xl text-xs font-semibold bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white shadow-sm shadow-violet-500/20 cursor-pointer hover:scale-102 active:scale-98 transition-all duration-150"
           >
             <Plus className="h-4 w-4" />
             Tạo công việc
@@ -243,34 +243,33 @@ export function TaskBoard() {
                 onDragLeave={handleDragLeave}
                 onDrop={(e) => handleDrop(e, col.id)}
                 className={cn(
-                  'flex flex-col rounded-2xl border border-border/40 bg-card/35 backdrop-blur-[2px] h-[75vh] md:h-full p-3 transition-all duration-200',
+                  'flex flex-col rounded-3xl border border-ultra-thin bg-card/25 backdrop-blur-md h-[75vh] md:h-full p-4.5 transition-all duration-200 shadow-sm',
                   col.bgColor,
-                  isTarget && 'ring-2 ring-violet-500/40 border-violet-500/30 bg-violet-500/5'
+                  isTarget && 'ring-2 ring-violet-500/40 border-violet-500/30 bg-violet-500/10 shadow-md'
                 )}
               >
                 {/* Column header */}
-                <div className={cn('mb-3 flex items-center justify-between border-t-2 pt-2.5 px-1.5', col.color)}>
+                <div className={cn('mb-3.5 flex items-center justify-between border-t-3 pt-2.5 px-1.5', col.color)}>
                   <div className="flex items-center gap-2">
                     <Icon className={cn('h-4.5 w-4.5', col.iconColor)} />
                     <h3 className="text-sm font-bold tracking-tight text-foreground/90">{col.title}</h3>
                   </div>
-                  <span className={cn('rounded-full px-2 py-0.5 text-[10px] font-bold', col.badgeBg)}>
+                  <span className={cn('rounded-full px-2.5 py-0.5 text-[10px] font-bold border border-ultra-thin shadow-sm', col.badgeBg)}>
                     {columnTasks.length}
                   </span>
                 </div>
 
                 {/* Column body - scrollable cards list */}
-                <div className="flex-1 overflow-y-auto space-y-3 pr-1 pb-4 custom-scrollbar">
+                <div className="flex-1 overflow-y-auto space-y-3.5 pr-1 pb-4 custom-scrollbar">
                   {columnTasks.length === 0 ? (
-                    <div className="flex h-36 flex-col items-center justify-center rounded-xl border border-dashed border-border/80 p-4 text-center">
-                      <p className="text-xs text-muted-foreground/60 font-medium">Chưa có công việc</p>
+                    <div className="flex h-36 flex-col items-center justify-center rounded-2xl border border-dashed border-border/40 p-4 text-center hover:bg-violet-500/5 hover:border-violet-500/25 transition-all duration-150">
+                      <p className="text-xs text-muted-foreground/60 font-semibold">Chưa có công việc</p>
                       {isAdmin && (
                         <button
                           onClick={() => {
-                            // Set status defaults when creating from empty column
                             setShowCreateDialog(true)
                           }}
-                          className="mt-2 text-[10px] font-bold text-violet-500 hover:text-violet-600 transition-colors"
+                          className="mt-2.5 text-[10px] font-bold text-violet-500 hover:text-violet-600 transition-colors cursor-pointer"
                         >
                           + Thêm mới
                         </button>

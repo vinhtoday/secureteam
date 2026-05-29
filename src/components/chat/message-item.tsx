@@ -176,11 +176,11 @@ export const MessageItem = memo(
       // Bubble corner rounding based on consecutive grouping (Messenger style)
       const bubbleRadius = isOwn
         ? cn(
-            'rounded-2xl text-white bg-gradient-to-r from-violet-600 to-indigo-600',
+            'rounded-2xl text-white bg-gradient-to-br from-violet-600 to-indigo-700 shadow-md shadow-violet-500/10 border border-violet-500/15',
             isConsecutive ? 'rounded-tr-xs rounded-br-xs' : 'rounded-tr-sm'
           )
         : cn(
-            'rounded-2xl text-foreground bg-muted dark:bg-muted/80',
+            'rounded-2xl text-foreground bg-card/75 dark:bg-card/45 border border-ultra-thin shadow-sm',
             isConsecutive ? 'rounded-tl-xs rounded-bl-xs' : 'rounded-tl-sm'
           )
 
@@ -264,16 +264,16 @@ export const MessageItem = memo(
                 {/* File attachment — inside bubble */}
                 {message.fileUrl && (
                   <div className={cn(
-                    'mt-2 flex items-center gap-2.5 rounded-lg px-3 py-2',
+                    'mt-2 flex items-center gap-2.5 rounded-xl px-3 py-2 border transition-all duration-150',
                     isOwn
-                      ? 'bg-white/15'
-                      : 'bg-muted/80 dark:bg-muted/60'
+                      ? 'bg-white/10 hover:bg-white/15 border-white/10'
+                      : 'bg-background/40 hover:bg-background/60 border-ultra-thin'
                   )}>
                     <Paperclip className="h-3.5 w-3.5 shrink-0 opacity-70" />
                     <div className="min-w-0 flex-1">
-                      <div className="text-xs font-medium truncate">{message.fileName || 'Tệp đính kèm'}</div>
+                      <div className="text-xs font-semibold truncate">{message.fileName || 'Tệp đính kèm'}</div>
                       {message.fileSize && (
-                        <div className="text-[11px] opacity-70">
+                        <div className="text-[10px] opacity-70 mt-0.5">
                           {formatFileSize(message.fileSize)}
                         </div>
                       )}
@@ -283,10 +283,10 @@ export const MessageItem = memo(
                       target="_blank"
                       rel="noopener noreferrer"
                       className={cn(
-                        'shrink-0 rounded-md px-2 py-0.5 text-xs font-medium transition-colors',
+                        'shrink-0 rounded-lg px-3 py-1 text-xs font-bold transition-all hover:scale-102 active:scale-98',
                         isOwn
-                          ? 'bg-white/20 hover:bg-white/30 text-white'
-                          : 'bg-primary/10 hover:bg-primary/20 text-primary'
+                          ? 'bg-white/25 hover:bg-white/35 text-white'
+                          : 'bg-violet-600 hover:bg-violet-700 text-white dark:bg-violet-500/20 dark:hover:bg-violet-500/30 dark:text-violet-300'
                       )}
                     >
                       Tải xuống
@@ -350,7 +350,7 @@ export const MessageItem = memo(
               )}
 
               {/* Reply count indicator — only shown if replies exist via metadata */}
-              {(message as unknown as Record<string, unknown>)?.replies && Array.isArray((message as unknown as Record<string, unknown>).replies) && ((message as unknown as Record<string, unknown>).replies as unknown[]).length > 0 && (
+              {Array.isArray((message as any).replies) && ((message as any).replies as any[]).length > 0 && (
                 <button
                   onClick={() => onThread?.(message)}
                   className={cn(
@@ -361,14 +361,14 @@ export const MessageItem = memo(
                   )}
                 >
                   <CornerDownRight className="h-3 w-3" />
-                  {((message as unknown as Record<string, unknown>).replies as unknown[]).length} phản hồi
+                  {((message as any).replies as any[]).length} phản hồi
                 </button>
               )}
 
               {/* Hover actions & Reactions bar */}
               {!isSystem && (
                 <div className={cn(
-                  'absolute -top-9 hidden items-center gap-1 rounded-full border border-violet-100 dark:border-violet-950 bg-background/95 backdrop-blur-md px-2 py-1 shadow-lg group-hover:flex z-20 animate-in fade-in slide-in-from-bottom-1 duration-150',
+                  'absolute -top-10 hidden items-center gap-1 rounded-full border border-ultra-thin bg-card/90 backdrop-blur-md px-2.5 py-1.5 shadow-xl group-hover:flex z-20 animate-in fade-in slide-in-from-bottom-1.5 duration-200',
                   isOwn ? 'right-2' : 'left-2'
                 )}>
                   {/* Emoji Quick Actions */}

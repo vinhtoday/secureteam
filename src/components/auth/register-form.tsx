@@ -87,9 +87,9 @@ export function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
   }
 
   return (
-    <Card className="w-full max-w-md glass-card shadow-2xl rounded-3xl glow-purple p-2 animate-in fade-in zoom-in duration-300">
-      <CardHeader className="text-center pb-2">
-        <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-500 to-indigo-600 shadow-lg shadow-violet-500/20 transition-all hover:scale-105 duration-300">
+    <Card className="w-full max-w-md glass-card-premium shadow-2xl rounded-3xl glow-premium p-3 animate-in fade-in zoom-in duration-500 border-ultra-thin">
+      <CardHeader className="text-center pb-2 group">
+        <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-500 to-indigo-600 shadow-lg shadow-violet-500/30 transition-all hover:scale-110 hover:rotate-6 duration-300">
           <Shield className="h-8 w-8 text-white" />
         </div>
         <CardTitle className="text-3xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-violet-600 to-indigo-600 dark:from-violet-400 dark:to-indigo-400">Tạo tài khoản</CardTitle>
@@ -105,7 +105,7 @@ export function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
             </div>
           )}
           <div className="space-y-2">
-            <Label htmlFor="reg-name" className="text-sm font-medium">Họ và tên</Label>
+            <Label htmlFor="reg-name" className="text-sm font-medium text-foreground/80">Họ và tên</Label>
             <Input
               id="reg-name"
               type="text"
@@ -114,11 +114,11 @@ export function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
               onChange={(e) => setName(e.target.value)}
               disabled={isLoading}
               autoComplete="name"
-              className="h-11 rounded-xl border-border/60 bg-background/50 focus-visible:ring-violet-500/30 focus-visible:border-violet-500"
+              className="h-11 rounded-xl border-border/40 bg-background/30 focus-visible:ring-violet-500/30 focus-visible:border-violet-500 transition-all hover:bg-background/50"
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="reg-email" className="text-sm font-medium">Email công ty</Label>
+            <Label htmlFor="reg-email" className="text-sm font-medium text-foreground/80">Email công ty</Label>
             <Input
               id="reg-email"
               type="email"
@@ -127,11 +127,11 @@ export function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
               onChange={(e) => setEmail(e.target.value)}
               disabled={isLoading}
               autoComplete="email"
-              className="h-11 rounded-xl border-border/60 bg-background/50 focus-visible:ring-violet-500/30 focus-visible:border-violet-500"
+              className="h-11 rounded-xl border-border/40 bg-background/30 focus-visible:ring-violet-500/30 focus-visible:border-violet-500 transition-all hover:bg-background/50"
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="reg-password" className="text-sm font-medium">Mật khẩu</Label>
+            <Label htmlFor="reg-password" className="text-sm font-medium text-foreground/80">Mật khẩu</Label>
             <div className="relative">
               <Input
                 id="reg-password"
@@ -141,7 +141,7 @@ export function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
                 onChange={(e) => setPassword(e.target.value)}
                 disabled={isLoading}
                 autoComplete="new-password"
-                className="h-11 rounded-xl border-border/60 bg-background/50 pr-10 focus-visible:ring-violet-500/30 focus-visible:border-violet-500"
+                className="h-11 rounded-xl border-border/40 bg-background/30 pr-10 focus-visible:ring-violet-500/30 focus-visible:border-violet-500 transition-all hover:bg-background/50"
               />
               <button
                 type="button"
@@ -158,21 +158,21 @@ export function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
                 <div className="flex items-center gap-2">
                   <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
                     <div
-                      className={`h-full rounded-full transition-all ${strength.color}`}
+                      className={`h-full rounded-full transition-all duration-300 ${strength.color}`}
                       style={{ width: `${(strength.score / 4) * 100}%` }}
                     />
                   </div>
-                  <span className="text-xs text-muted-foreground">{strength.label}</span>
+                  <span className="text-xs text-muted-foreground font-medium">{strength.label}</span>
                 </div>
-                <div className="grid grid-cols-2 gap-1">
+                <div className="grid grid-cols-2 gap-1 bg-muted/30 p-2 rounded-lg border border-border/20">
                   {rules.map((rule) => (
-                    <div key={rule.label} className="flex items-center gap-1.5 text-xs">
+                    <div key={rule.label} className="flex items-center gap-1.5 text-[11px]">
                       {rule.met ? (
                         <Check className="h-3 w-3 text-emerald-500" />
                       ) : (
-                        <X className="h-3 w-3 text-muted-foreground" />
+                        <X className="h-3 w-3 text-muted-foreground/60" />
                       )}
-                      <span className={rule.met ? 'text-emerald-600 dark:text-emerald-400' : 'text-muted-foreground'}>
+                      <span className={rule.met ? 'text-emerald-600 dark:text-emerald-400 font-medium' : 'text-muted-foreground/75'}>
                         {rule.label}
                       </span>
                     </div>
@@ -182,7 +182,7 @@ export function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
             )}
           </div>
           <div className="space-y-2">
-            <Label htmlFor="reg-confirm-password" className="text-sm font-medium">Xác nhận mật khẩu</Label>
+            <Label htmlFor="reg-confirm-password" className="text-sm font-medium text-foreground/80">Xác nhận mật khẩu</Label>
             <Input
               id="reg-confirm-password"
               type={showPassword ? 'text' : 'password'}
@@ -191,13 +191,13 @@ export function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
               onChange={(e) => setConfirmPassword(e.target.value)}
               disabled={isLoading}
               autoComplete="new-password"
-              className="h-11 rounded-xl border-border/60 bg-background/50 focus-visible:ring-violet-500/30 focus-visible:border-violet-500"
+              className="h-11 rounded-xl border-border/40 bg-background/30 focus-visible:ring-violet-500/30 focus-visible:border-violet-500 transition-all hover:bg-background/50"
             />
             {confirmPassword && password !== confirmPassword && (
-              <p className="text-xs text-destructive">Mật khẩu không khớp</p>
+              <p className="text-xs text-destructive font-medium mt-1">Mật khẩu không khớp</p>
             )}
           </div>
-          <Button type="submit" className="w-full h-11 rounded-xl font-semibold bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 hover:scale-[1.01] active:scale-[0.99] text-white shadow-md shadow-violet-500/20 hover:shadow-lg hover:shadow-violet-500/30 transition-all duration-200" disabled={isLoading}>
+          <Button type="submit" className="w-full h-11 rounded-xl font-semibold bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 hover:scale-[1.01] active:scale-[0.99] text-white shadow-md shadow-violet-500/20 hover:shadow-lg hover:shadow-violet-500/30 transition-all duration-200 cursor-pointer" disabled={isLoading}>
             {isLoading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -214,7 +214,7 @@ export function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
           Đã có tài khoản?{' '}
           <button
             onClick={onSwitchToLogin}
-            className="font-semibold text-primary hover:underline underline-offset-2"
+            className="font-semibold text-primary hover:underline underline-offset-2 cursor-pointer"
           >
             Đăng nhập
           </button>

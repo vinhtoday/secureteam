@@ -11,23 +11,23 @@ interface UserStatusBadgeProps {
 }
 
 const statusColors: Record<string, string> = {
-  online: 'bg-emerald-500',
+  online: 'bg-[#00e5a0]',
   away: 'bg-amber-500',
   busy: 'bg-red-500',
-  offline: 'bg-gray-400 dark:bg-gray-600',
+  offline: 'bg-[#1e2a35]',
 }
 
 const statusShadowColors: Record<string, string> = {
-  online: 'shadow-emerald-500/50',
-  away: 'shadow-amber-500/50',
-  busy: 'shadow-red-500/50',
+  online: 'shadow-[#00e5a0]/50 shadow-sm',
+  away: 'shadow-amber-500/50 shadow-sm',
+  busy: 'shadow-red-500/50 shadow-sm',
   offline: '',
 }
 
 const sizeClasses = {
-  sm: 'h-2.5 w-2.5',
-  md: 'h-3 w-3',
-  lg: 'h-3.5 w-3.5',
+  sm: 'h-2 w-2',
+  md: 'h-2.5 w-2.5',
+  lg: 'h-3 w-3',
 }
 
 export const UserStatusBadge = React.memo(function UserStatusBadge({
@@ -39,10 +39,10 @@ export const UserStatusBadge = React.memo(function UserStatusBadge({
   return (
     <span
       className={cn(
-        'inline-block rounded-full ring-2 ring-background',
+        'inline-block rounded-none border border-[#0a0c0f]',
         statusColors[status] || statusColors.offline,
         sizeClasses[size],
-        isOnline && 'shadow-sm',
+        isOnline && 'animate-online-glow',
         statusShadowColors[status],
         className
       )}
@@ -97,9 +97,9 @@ export function UserAvatar({
 }: UserAvatarProps) {
   return (
     <div className={cn('relative inline-flex', className)}>
-      <Avatar className={cn(avatarSizes[size], 'ring-2 ring-background')}>
-        <AvatarImage src={avatar || undefined} alt={name} />
-        <AvatarFallback className="bg-gradient-to-br from-violet-100 to-indigo-100 text-violet-700 dark:from-violet-900/40 dark:to-indigo-900/40 dark:text-violet-400">
+      <Avatar className={cn(avatarSizes[size], 'rounded-none border border-[#1e2a35] bg-[#0a0c0f]')}>
+        <AvatarImage className="rounded-none object-cover" src={avatar || undefined} alt={name} />
+        <AvatarFallback className="rounded-none bg-[#1e2a35] text-[#00e5a0] font-mono font-bold">
           {getInitials(name)}
         </AvatarFallback>
       </Avatar>
@@ -111,3 +111,4 @@ export function UserAvatar({
     </div>
   )
 }
+

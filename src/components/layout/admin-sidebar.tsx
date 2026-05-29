@@ -17,12 +17,12 @@ import {
 type NavItem = 'chat' | 'tasks' | 'admin-dashboard' | 'user-management' | 'message-viewer' | 'audit-logs'
 
 const navItems: { id: NavItem; label: string; icon: React.ElementType; adminOnly: boolean }[] = [
-  { id: 'chat', label: 'Tin nhắn', icon: MessageSquare, adminOnly: false },
-  { id: 'tasks', label: 'Kế hoạch', icon: Trello, adminOnly: false },
-  { id: 'admin-dashboard', label: 'Thống kê', icon: LayoutDashboard, adminOnly: true },
-  { id: 'user-management', label: 'Người dùng', icon: Users, adminOnly: true },
-  { id: 'message-viewer', label: 'Xem tin nhắn', icon: Eye, adminOnly: true },
-  { id: 'audit-logs', label: 'Nhật ký hệ thống', icon: ClipboardList, adminOnly: true },
+  { id: 'chat', label: 'TIN NHẮN / CHAT', icon: MessageSquare, adminOnly: false },
+  { id: 'tasks', label: 'KẾ HOẠCH / BOARD', icon: Trello, adminOnly: false },
+  { id: 'admin-dashboard', label: 'THỐNG KÊ / STATS', icon: LayoutDashboard, adminOnly: true },
+  { id: 'user-management', label: 'NGƯỜI DÙNG / AGENTS', icon: Users, adminOnly: true },
+  { id: 'message-viewer', label: 'XEM TIN NHẮN / VIEWER', icon: Eye, adminOnly: true },
+  { id: 'audit-logs', label: 'NHẬT KÝ / AUDIT LOGS', icon: ClipboardList, adminOnly: true },
 ]
 
 export type { NavItem }
@@ -46,10 +46,10 @@ export function AdminSidebar({
   )
 
   return (
-    <aside className="flex h-full w-full flex-col bg-sidebar/30 backdrop-blur-md border-r border-ultra-thin">
+    <aside className="flex h-full w-full flex-col bg-[#0f1318] border-r border-[#1e2a35]">
       <div className="px-4 pt-5 pb-2">
-        <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60 block px-2 mb-1">
-          Quản trị hệ thống
+        <span className="text-[9px] font-mono font-bold uppercase tracking-[2px] text-[#00e5a0]/50 block px-2 mb-1">
+          // SYSTEM CONTROL
         </span>
       </div>
       <ScrollArea className="flex-1 py-1">
@@ -62,35 +62,36 @@ export function AdminSidebar({
                 key={item.id}
                 variant="ghost"
                 className={cn(
-                  'h-10 justify-start gap-3 px-3 text-sm font-semibold rounded-lg transition-all duration-150 cursor-pointer',
+                  'h-10 justify-start gap-3 px-3 text-[11px] font-mono font-bold tracking-wider rounded-none transition-all duration-150 cursor-pointer border-l-[3px]',
                   isActive
-                    ? 'bg-violet-500/10 text-violet-600 dark:bg-violet-950/30 dark:text-violet-400 border-l-3 border-violet-600 dark:border-violet-400 shadow-sm rounded-l-none'
-                    : 'text-sidebar-foreground/75 hover:bg-sidebar-accent/40 hover:text-sidebar-accent-foreground rounded-l-none'
+                    ? 'bg-[#00e5a0]/8 text-[#00e5a0] border-l-[#00e5a0]'
+                    : 'text-muted-foreground hover:bg-[#1e2a35]/40 hover:text-white border-l-transparent'
                 )}
                 onClick={() => onNavigate(item.id)}
               >
-                <Icon className={cn('h-4.5 w-4.5 shrink-0 transition-colors', isActive ? 'text-violet-600 dark:text-violet-400' : 'text-muted-foreground')} />
+                <Icon className={cn('h-4 w-4 shrink-0 transition-colors', isActive ? 'text-[#00e5a0]' : 'text-muted-foreground')} />
                 {item.label}
               </Button>
             )
           })}
         </nav>
       </ScrollArea>
-      <Separator className="opacity-40" />
+      <Separator className="bg-[#1e2a35]" />
       <div className="p-3 flex flex-col gap-2">
         <Button
           variant="ghost"
           size="sm"
-          className="w-full justify-start gap-2.5 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg transition-colors cursor-pointer"
+          className="w-full justify-start gap-2.5 text-[11px] font-mono font-bold rounded-none text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors cursor-pointer"
           onClick={onLogout}
         >
           <LogOut className="h-4 w-4" />
-          Đăng xuất
+          TERMINATE SESSION
         </Button>
-        <div className="text-[10px] text-center text-muted-foreground/40 font-medium select-none pt-1">
-          SecureTeam v1.2 • By vinhtoday
+        <div className="text-[9px] font-mono text-center text-muted-foreground/35 select-none pt-1 uppercase tracking-wider">
+          SECURETEAM V2.0 // DEPLOYED
         </div>
       </div>
     </aside>
   )
 }
+

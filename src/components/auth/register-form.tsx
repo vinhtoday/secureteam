@@ -14,7 +14,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import { Shield, Eye, EyeOff, Loader2, Check, X } from 'lucide-react'
+import { Eye, EyeOff, Loader2, Check, X } from 'lucide-react'
 
 interface RegisterFormProps {
   onSwitchToLogin: () => void
@@ -31,10 +31,10 @@ function getPasswordStrength(password: string): {
   if (/[0-9]/.test(password)) score++
   if (/[^A-Za-z0-9]/.test(password)) score++
 
-  if (score <= 1) return { score, label: 'Yếu', color: 'bg-red-500' }
-  if (score === 2) return { score, label: 'Trung bình', color: 'bg-amber-500' }
-  if (score === 3) return { score, label: 'Khá', color: 'bg-emerald-400' }
-  return { score, label: 'Mạnh', color: 'bg-emerald-500' }
+  if (score <= 1) return { score, label: 'LOW SECURITY', color: 'bg-red-500' }
+  if (score === 2) return { score, label: 'MODERATE SECURITY', color: 'bg-amber-500' }
+  if (score === 3) return { score, label: 'HIGH SECURITY', color: 'bg-[#00e5a0]' }
+  return { score, label: 'TACTICAL ENCRYPTED', color: 'bg-[#00e5a0]' }
 }
 
 export function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
@@ -50,10 +50,10 @@ export function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
   const strength = getPasswordStrength(password)
 
   const rules = [
-    { label: 'Ít nhất 8 ký tự', met: password.length >= 8 },
-    { label: 'Chữ hoa', met: /[A-Z]/.test(password) },
-    { label: 'Chữ số', met: /[0-9]/.test(password) },
-    { label: 'Ký tự đặc biệt', met: /[^A-Za-z0-9]/.test(password) },
+    { label: 'MINIMUM 8 CHARACTERS', met: password.length >= 8 },
+    { label: 'UPPERCASE LETTER', met: /[A-Z]/.test(password) },
+    { label: 'NUMERIC DIGIT', met: /[0-9]/.test(password) },
+    { label: 'SPECIAL SYMBOL', met: /[^A-Za-z0-9]/.test(password) },
   ]
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -87,25 +87,28 @@ export function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
   }
 
   return (
-    <Card className="w-full max-w-md glass-card-premium shadow-2xl rounded-3xl glow-premium p-3 animate-in fade-in zoom-in duration-500 border-ultra-thin">
-      <CardHeader className="text-center pb-2 group">
-        <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-500 to-indigo-600 shadow-lg shadow-violet-500/30 transition-all hover:scale-110 hover:rotate-6 duration-300">
-          <Shield className="h-8 w-8 text-white" />
+    <Card className="w-full max-w-md bg-[#0f1318] border border-[#1e2a35] rounded-none p-6 shadow-xl relative corner-bracket corner-bracket-b">
+      <CardHeader className="text-center pb-4 pt-2">
+        <div 
+          className="mx-auto mb-4 flex h-14 w-14 items-center justify-center bg-[#00e5a0] text-black font-extrabold text-lg transition-transform hover:scale-105 duration-300"
+          style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }}
+        >
+          ST
         </div>
-        <CardTitle className="text-3xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-violet-600 to-indigo-600 dark:from-violet-400 dark:to-indigo-400">Tạo tài khoản</CardTitle>
-        <CardDescription className="mt-1.5 text-muted-foreground/80">
-          Đăng ký để tham gia SecureTeam
+        <CardTitle className="text-2xl font-title font-extrabold tracking-widest bg-clip-text text-white">AGENT REGISTER</CardTitle>
+        <CardDescription className="mt-1 font-mono text-[11px] text-[#00e5a0]/70 uppercase tracking-wider">
+          // CREATE NEW IDENTIFICATION PROTOCOL
         </CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="px-1">
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && (
-            <div className="rounded-lg bg-destructive/10 border border-destructive/20 p-3 text-sm text-destructive" role="alert">
-              {error}
+            <div className="rounded-none bg-destructive/15 border border-destructive/30 p-3 text-xs font-mono text-destructive uppercase tracking-wider" role="alert">
+              // ERROR: {error}
             </div>
           )}
-          <div className="space-y-2">
-            <Label htmlFor="reg-name" className="text-sm font-medium text-foreground/80">Họ và tên</Label>
+          <div className="space-y-1.5">
+            <Label htmlFor="reg-name" className="text-xs font-mono font-bold text-[#00e5a0] uppercase tracking-wider">AGENT NAME</Label>
             <Input
               id="reg-name"
               type="text"
@@ -114,34 +117,34 @@ export function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
               onChange={(e) => setName(e.target.value)}
               disabled={isLoading}
               autoComplete="name"
-              className="h-11 rounded-xl border-border/40 bg-background/30 focus-visible:ring-violet-500/30 focus-visible:border-violet-500 transition-all hover:bg-background/50"
+              className="h-10 rounded-none border-[#1e2a35] bg-[#0a0c0f] font-mono text-xs text-white focus-visible:ring-[#00e5a0]/30 focus-visible:border-[#00e5a0] placeholder:text-muted-foreground/40"
             />
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="reg-email" className="text-sm font-medium text-foreground/80">Email công ty</Label>
+          <div className="space-y-1.5">
+            <Label htmlFor="reg-email" className="text-xs font-mono font-bold text-[#00e5a0] uppercase tracking-wider">AGENT EMAIL</Label>
             <Input
               id="reg-email"
               type="email"
-              placeholder="email@company.com"
+              placeholder="agent@secureteam.io"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               disabled={isLoading}
               autoComplete="email"
-              className="h-11 rounded-xl border-border/40 bg-background/30 focus-visible:ring-violet-500/30 focus-visible:border-violet-500 transition-all hover:bg-background/50"
+              className="h-10 rounded-none border-[#1e2a35] bg-[#0a0c0f] font-mono text-xs text-white focus-visible:ring-[#00e5a0]/30 focus-visible:border-[#00e5a0] placeholder:text-muted-foreground/40"
             />
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="reg-password" className="text-sm font-medium text-foreground/80">Mật khẩu</Label>
+          <div className="space-y-1.5">
+            <Label htmlFor="reg-password" className="text-xs font-mono font-bold text-[#00e5a0] uppercase tracking-wider">SECURE PASSWORD</Label>
             <div className="relative">
               <Input
                 id="reg-password"
                 type={showPassword ? 'text' : 'password'}
-                placeholder="Nhập mật khẩu"
+                placeholder="••••••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 disabled={isLoading}
                 autoComplete="new-password"
-                className="h-11 rounded-xl border-border/40 bg-background/30 pr-10 focus-visible:ring-violet-500/30 focus-visible:border-violet-500 transition-all hover:bg-background/50"
+                className="h-10 rounded-none border-[#1e2a35] bg-[#0a0c0f] font-mono text-xs text-white pr-10 focus-visible:ring-[#00e5a0]/30 focus-visible:border-[#00e5a0]"
               />
               <button
                 type="button"
@@ -150,29 +153,29 @@ export function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
                 tabIndex={-1}
                 aria-label={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
               >
-                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                {showPassword ? <EyeOff className="h-4 w-4 text-[#00e5a0]" /> : <Eye className="h-4 w-4 text-[#00e5a0]" />}
               </button>
             </div>
             {password && (
-              <div className="space-y-2">
+              <div className="space-y-2 mt-2">
                 <div className="flex items-center gap-2">
-                  <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
+                  <div className="h-2 flex-1 bg-[#0a0c0f] border border-[#1e2a35] rounded-none">
                     <div
-                      className={`h-full rounded-full transition-all duration-300 ${strength.color}`}
+                      className={`h-full transition-all duration-300 ${strength.color}`}
                       style={{ width: `${(strength.score / 4) * 100}%` }}
                     />
                   </div>
-                  <span className="text-xs text-muted-foreground font-medium">{strength.label}</span>
+                  <span className="text-[10px] font-mono text-[#00e5a0] font-bold">{strength.label}</span>
                 </div>
-                <div className="grid grid-cols-2 gap-1 bg-muted/30 p-2 rounded-lg border border-border/20">
+                <div className="grid grid-cols-2 gap-1.5 bg-[#0a0c0f] p-2 border border-[#1e2a35] rounded-none">
                   {rules.map((rule) => (
-                    <div key={rule.label} className="flex items-center gap-1.5 text-[11px]">
+                    <div key={rule.label} className="flex items-center gap-1 text-[9px] font-mono">
                       {rule.met ? (
-                        <Check className="h-3 w-3 text-emerald-500" />
+                        <Check className="h-3 w-3 text-[#00e5a0]" />
                       ) : (
-                        <X className="h-3 w-3 text-muted-foreground/60" />
+                        <X className="h-3 w-3 text-destructive" />
                       )}
-                      <span className={rule.met ? 'text-emerald-600 dark:text-emerald-400 font-medium' : 'text-muted-foreground/75'}>
+                      <span className={rule.met ? 'text-[#00e5a0] font-bold' : 'text-muted-foreground/60'}>
                         {rule.label}
                       </span>
                     </div>
@@ -181,45 +184,46 @@ export function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
               </div>
             )}
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="reg-confirm-password" className="text-sm font-medium text-foreground/80">Xác nhận mật khẩu</Label>
+          <div className="space-y-1.5">
+            <Label htmlFor="reg-confirm-password" className="text-xs font-mono font-bold text-[#00e5a0] uppercase tracking-wider">CONFIRM PASSWORD</Label>
             <Input
               id="reg-confirm-password"
               type={showPassword ? 'text' : 'password'}
-              placeholder="Nhập lại mật khẩu"
+              placeholder="••••••••••••"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               disabled={isLoading}
               autoComplete="new-password"
-              className="h-11 rounded-xl border-border/40 bg-background/30 focus-visible:ring-violet-500/30 focus-visible:border-violet-500 transition-all hover:bg-background/50"
+              className="h-10 rounded-none border-[#1e2a35] bg-[#0a0c0f] font-mono text-xs text-white focus-visible:ring-[#00e5a0]/30 focus-visible:border-[#00e5a0]"
             />
             {confirmPassword && password !== confirmPassword && (
-              <p className="text-xs text-destructive font-medium mt-1">Mật khẩu không khớp</p>
+              <p className="text-[10px] font-mono text-destructive uppercase tracking-wider mt-1">// PASSWORD MISMATCH</p>
             )}
           </div>
-          <Button type="submit" className="w-full h-11 rounded-xl font-semibold bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 hover:scale-[1.01] active:scale-[0.99] text-white shadow-md shadow-violet-500/20 hover:shadow-lg hover:shadow-violet-500/30 transition-all duration-200 cursor-pointer" disabled={isLoading}>
+          <Button type="submit" className="w-full h-10 rounded-none font-title font-bold text-sm tracking-wider bg-[#00e5a0] text-black hover:bg-[#00c78b] active:scale-[0.98] shadow-md transition-all duration-150 cursor-pointer uppercase mt-2" disabled={isLoading}>
             {isLoading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Đang tạo tài khoản...
+                ENROLLING AGENT...
               </>
             ) : (
-              'Đăng ký'
+              'REGISTER PROTOCOL'
             )}
           </Button>
         </form>
       </CardContent>
-      <CardFooter className="justify-center pb-6">
-        <p className="text-sm text-muted-foreground">
-          Đã có tài khoản?{' '}
+      <CardFooter className="justify-center pb-2 pt-4">
+        <p className="text-xs font-mono text-muted-foreground">
+          ALREADY REGISTERED?{' '}
           <button
             onClick={onSwitchToLogin}
-            className="font-semibold text-primary hover:underline underline-offset-2 cursor-pointer"
+            className="font-bold text-[#00e5a0] hover:underline cursor-pointer tracking-wider"
           >
-            Đăng nhập
+            LOGIN TO SYSTEM
           </button>
         </p>
       </CardFooter>
     </Card>
   )
 }
+

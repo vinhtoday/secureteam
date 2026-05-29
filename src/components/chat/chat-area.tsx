@@ -230,129 +230,118 @@ export function ChatArea({
     }
 
     return (
-      <div className="flex-1 overflow-y-auto bg-gradient-to-b from-background via-violet-500/5 to-background relative p-6 md:p-10 flex flex-col justify-center items-center">
-        {/* Animated backdrop glow balls */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-1/4 left-1/4 w-80 h-80 rounded-full bg-violet-400/10 blur-3xl animate-pulse duration-[6000ms]" />
-          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 rounded-full bg-indigo-400/10 blur-3xl animate-pulse duration-[8000ms]" />
-        </div>
-
-        <div className="relative z-10 max-w-4xl w-full space-y-8 animate-in fade-in zoom-in-95 duration-500">
-          {/* Header section */}
-          <div className="text-center space-y-3">
-            <div className="relative inline-flex mx-auto">
-              <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-500 to-indigo-600 shadow-lg shadow-violet-500/25">
-                <Shield className="h-8 w-8 text-white" />
-              </div>
-              <span className="absolute -top-1 -right-1 flex h-4 w-4">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-4 w-4 bg-emerald-500"></span>
+      <div className="flex-1 overflow-y-auto bg-[#0a0c0f] bg-tactical-grid relative p-6 md:p-10 flex flex-col justify-center items-center">
+        <div className="relative z-10 max-w-4xl w-full space-y-6 animate-in fade-in zoom-in-95 duration-500">
+          
+          {/* Operational Status */}
+          <div className="border border-[#1e2a35] bg-[#0f1318] p-4 flex flex-col items-center gap-1.5 relative corner-bracket">
+            <span className="text-[10px] font-mono font-bold text-muted-foreground/50 tracking-[3px]">
+              // SECURE COMM-LINK TERMINAL
+            </span>
+            <div className="flex items-center gap-2 mt-1">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00e5a0] opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-[#00e5a0]"></span>
+              </span>
+              <span className="text-[11px] font-mono font-extrabold tracking-widest text-[#00e5a0] animate-online-glow">
+                ALL SYSTEMS OPERATIONAL
               </span>
             </div>
-            <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-violet-600 to-indigo-600 dark:from-violet-400 dark:to-indigo-400">
-              Chào mừng trở lại, {user?.name || 'Thành viên'}!
+          </div>
+
+          <div className="text-center space-y-2 py-2">
+            <h1 className="text-2xl md:text-3xl font-title font-extrabold tracking-widest text-white uppercase">
+              AGENT ACCESS VERIFIED
             </h1>
-            <p className="text-muted-foreground max-w-lg mx-auto text-sm md:text-base leading-relaxed">
-              Bạn đang ở trong không gian làm việc bảo mật của **SecureTeam**. Hãy chọn một kênh hoặc bắt đầu trò chuyện với AI Assistant của chúng tôi.
+            <p className="text-[11px] font-mono text-muted-foreground/80 max-w-lg mx-auto uppercase tracking-wider leading-relaxed">
+              WELCOME BACK AGENT. YOUR SESSION IS SECURED. SELECT AN OPERATIONS CHANNEL OR DIRECT TRANSMISSION PROTOCOL TO PROCEED.
             </p>
           </div>
 
           {/* Main Dashboard Cards */}
           <div className="grid gap-6 md:grid-cols-2">
             {/* User Profile Info Card */}
-            <div className="glass-card-premium rounded-3xl p-6 flex flex-col justify-between hover:scale-[1.02] hover:-translate-y-0.5 transition-all duration-300 border-ultra-thin shadow-xl">
+            <div className="bg-[#0f1318] border border-[#1e2a35] rounded-none p-5 flex flex-col justify-between relative corner-bracket">
               <div className="space-y-4">
-                <span className="text-[9px] font-bold uppercase tracking-wider text-violet-600 dark:text-violet-400 bg-violet-500/10 border border-ultra-thin border-violet-500/25 px-2.5 py-1 rounded-full">
-                  Thành viên hệ thống
+                <span className="text-[9px] font-mono font-bold uppercase tracking-wider text-[#00e5a0] bg-[#00e5a0]/8 border border-[#00e5a0]/25 px-2.5 py-1">
+                  AGENT CREDENTIALS
                 </span>
                 <div className="flex items-center gap-4 pt-2">
-                  <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center text-white text-lg font-bold border border-ultra-thin shadow-md transition-transform hover:rotate-3 duration-300">
+                  <div className="h-12 w-12 bg-[#0a0c0f] border border-[#1e2a35] flex items-center justify-center text-[#00e5a0] text-sm font-mono font-bold">
                     {user?.name ? user.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0,2) : '?'}
                   </div>
                   <div className="min-w-0">
-                    <h3 className="font-bold text-foreground text-lg truncate">{user?.name}</h3>
-                    <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
-                    <span className="inline-block mt-1.5 text-[10px] px-2.5 py-0.5 rounded-full font-bold bg-muted/60 text-muted-foreground border border-ultra-thin">
-                      {user?.role?.name || 'MEMBER'}
+                    <h3 className="font-mono font-bold text-white text-sm uppercase tracking-wider truncate">{user?.name}</h3>
+                    <p className="text-[10px] font-mono text-muted-foreground truncate">{user?.email}</p>
+                    <span className="inline-block mt-1.5 text-[9px] font-mono px-2 py-0.5 font-bold bg-[#1e2a35] text-[#00e5a0] border border-[#1e2a35] uppercase">
+                      ROLE: {user?.role?.name || 'MEMBER'}
                     </span>
                   </div>
                 </div>
               </div>
-              <div className="pt-6 border-t border-border/20 mt-6 flex items-center justify-between text-xs text-muted-foreground">
-                <span className="flex items-center gap-1.5 font-semibold">
-                  <span className="h-2 w-2 rounded-full bg-emerald-500 animate-online-glow" />
-                  {onlineUsers.length} trực tuyến
+              <div className="pt-4 border-t border-[#1e2a35] mt-6 flex items-center justify-between text-[10px] font-mono text-muted-foreground">
+                <span className="flex items-center gap-1.5">
+                  <span className="h-2 w-2 bg-[#00e5a0] animate-online-glow" />
+                  {onlineUsers.length} AGENTS ACTIVE
                 </span>
-                <span className="opacity-80">Mã hóa AES-256</span>
+                <span>SECURE TRACE</span>
               </div>
             </div>
 
-            {/* AI Assistant Quick Commands Widget (SecureBot Hub) */}
-            <div className="glass-card-premium rounded-3xl p-6 space-y-4 hover:scale-[1.02] hover:-translate-y-0.5 transition-all duration-300 border-ultra-thin shadow-xl">
+            {/* AI Assistant Quick Commands Widget */}
+            <div className="bg-[#0f1318] border border-[#1e2a35] rounded-none p-5 space-y-4 relative corner-bracket">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Bot className="h-5 w-5 text-violet-600 dark:text-violet-400" />
-                  <span className="text-sm font-bold text-foreground">SecureBot AI Assistant</span>
+                  <Bot className="h-4.5 w-4.5 text-[#00e5a0]" />
+                  <span className="text-xs font-mono font-bold text-white uppercase tracking-wider">SECUREBOT CONSOLE</span>
                 </div>
-                <span className="flex items-center gap-1 text-[10px] text-emerald-500 font-bold bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-online-glow" /> ONLINE
+                <span className="flex items-center gap-1 text-[9px] font-mono text-[#00e5a0] font-bold bg-[#00e5a0]/8 px-2 py-0.5 border border-[#00e5a0]/25">
+                  SYS ACTIVE
                 </span>
               </div>
-              <p className="text-xs text-muted-foreground leading-normal">
-                Nhấp chuột vào các phím tắt lệnh nhanh dưới đây để mở trò chuyện và chạy lệnh tự động với trợ lý ảo:
+              <p className="text-[10px] font-mono text-muted-foreground leading-normal uppercase">
+                EXECUTE AUTO DIRECTIVES TO CHAT WITH COMMAND BOT:
               </p>
               
-              <div className="grid grid-cols-2 gap-2.5 pt-1">
+              <div className="grid grid-cols-2 gap-2 pt-1">
                 <button
                   onClick={() => handleOpenBotDM('thông tin')}
-                  className="flex items-center justify-between rounded-2xl border border-ultra-thin bg-card/45 hover:bg-violet-500/15 p-3 text-left transition-all hover:-translate-y-0.5 active:translate-y-0 shadow-sm group cursor-pointer"
+                  className="flex items-center justify-between border border-[#1e2a35] bg-[#0a0c0f] hover:border-[#00e5a0] hover:bg-[#00e5a0]/5 p-2.5 text-left transition-all group cursor-pointer"
                 >
-                  <div className="flex items-center gap-2">
-                    <UserIcon className="h-4 w-4 text-violet-500 group-hover:scale-110 transition-transform" />
-                    <span className="text-xs font-bold text-foreground/80">Hồ sơ</span>
-                  </div>
-                  <ArrowRight className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <span className="text-[9px] font-mono font-bold text-white uppercase group-hover:text-[#00e5a0]">// SYS_INFO</span>
+                  <ArrowRight className="h-3 w-3 text-muted-foreground group-hover:text-[#00e5a0] transition-colors" />
                 </button>
 
                 <button
                   onClick={() => handleOpenBotDM('online')}
-                  className="flex items-center justify-between rounded-2xl border border-ultra-thin bg-card/45 hover:bg-violet-500/15 p-3 text-left transition-all hover:-translate-y-0.5 active:translate-y-0 shadow-sm group cursor-pointer"
+                  className="flex items-center justify-between border border-[#1e2a35] bg-[#0a0c0f] hover:border-[#00e5a0] hover:bg-[#00e5a0]/5 p-2.5 text-left transition-all group cursor-pointer"
                 >
-                  <div className="flex items-center gap-2">
-                    <UserCheck className="h-4 w-4 text-violet-500 group-hover:scale-110 transition-transform" />
-                    <span className="text-xs font-bold text-foreground/80">Online</span>
-                  </div>
-                  <ArrowRight className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <span className="text-[9px] font-mono font-bold text-white uppercase group-hover:text-[#00e5a0]">// ACTIVE_AGENTS</span>
+                  <ArrowRight className="h-3 w-3 text-muted-foreground group-hover:text-[#00e5a0] transition-colors" />
                 </button>
 
                 <button
                   onClick={() => handleOpenBotDM('task')}
-                  className="flex items-center justify-between rounded-2xl border border-ultra-thin bg-card/45 hover:bg-violet-500/15 p-3 text-left transition-all hover:-translate-y-0.5 active:translate-y-0 shadow-sm group cursor-pointer"
+                  className="flex items-center justify-between border border-[#1e2a35] bg-[#0a0c0f] hover:border-[#00e5a0] hover:bg-[#00e5a0]/5 p-2.5 text-left transition-all group cursor-pointer"
                 >
-                  <div className="flex items-center gap-2">
-                    <ListTodo className="h-4 w-4 text-violet-500 group-hover:scale-110 transition-transform" />
-                    <span className="text-xs font-bold text-foreground/80">Việc giao</span>
-                  </div>
-                  <ArrowRight className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <span className="text-[9px] font-mono font-bold text-white uppercase group-hover:text-[#00e5a0]">// LIST_TASKS</span>
+                  <ArrowRight className="h-3 w-3 text-muted-foreground group-hover:text-[#00e5a0] transition-colors" />
                 </button>
 
                 <button
                   onClick={() => handleOpenBotDM('tìm ')}
-                  className="flex items-center justify-between rounded-2xl border border-ultra-thin bg-card/45 hover:bg-violet-500/15 p-3 text-left transition-all hover:-translate-y-0.5 active:translate-y-0 shadow-sm group cursor-pointer"
+                  className="flex items-center justify-between border border-[#1e2a35] bg-[#0a0c0f] hover:border-[#00e5a0] hover:bg-[#00e5a0]/5 p-2.5 text-left transition-all group cursor-pointer"
                 >
-                  <div className="flex items-center gap-2">
-                    <Bot className="h-4 w-4 text-violet-500 group-hover:scale-110 transition-transform" />
-                    <span className="text-xs font-bold text-foreground/80">Tìm người</span>
-                  </div>
-                  <ArrowRight className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <span className="text-[9px] font-mono font-bold text-white uppercase group-hover:text-[#00e5a0]">// SEARCH_AGENT</span>
+                  <ArrowRight className="h-3 w-3 text-muted-foreground group-hover:text-[#00e5a0] transition-colors" />
                 </button>
               </div>
             </div>
           </div>
           
           {/* Footer signature */}
-          <div className="text-center pt-8 text-xs text-muted-foreground/35 select-none font-medium">
-            SecureTeam Platform • Developed with ❤️ by vinhtoday
+          <div className="text-center pt-8 text-[9px] font-mono text-muted-foreground/30 select-none uppercase tracking-wider">
+            SECURETEAM TRANSMISSION HUB // DEPLOYED v2.0
           </div>
         </div>
       </div>
@@ -360,7 +349,7 @@ export function ChatArea({
   }
 
   return (
-    <div className="flex flex-1 flex-col overflow-hidden">
+    <div className="flex flex-1 flex-col overflow-hidden bg-[#0a0c0f]">
       <ChannelHeader
         channel={channel}
         channelMembers={channel.members}
@@ -374,50 +363,40 @@ export function ChatArea({
             <div className="flex-1 p-4 space-y-6">
               {Array.from({ length: 5 }).map((_, i) => (
                 <div key={i} className={cn('flex gap-3', i % 2 === 0 ? 'flex-row' : 'flex-row-reverse')}>
-                  <Skeleton className="h-8 w-8 rounded-full shrink-0" />
+                  <Skeleton className="h-8 w-8 rounded-none bg-[#1e2a35] shrink-0" />
                   <div className={cn('space-y-2 max-w-[60%]', i % 2 === 0 ? 'items-start' : 'items-end')}>
-                    <Skeleton className="h-5 w-40 rounded-2xl" />
+                    <Skeleton className="h-5 w-40 rounded-none bg-[#1e2a35]" />
                   </div>
                 </div>
               ))}
             </div>
           ) : isError ? (
             <div className="flex flex-1 items-center justify-center">
-              <div className="text-center max-w-xs px-6">
-                <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-destructive/10">
+              <div className="text-center max-w-xs px-6 border border-destructive/30 bg-[#0f1318] p-6 rounded-none relative corner-bracket">
+                <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center bg-destructive/10">
                   <AlertCircle className="h-7 w-7 text-destructive" />
                 </div>
-                <p className="text-sm font-medium text-foreground">
-                  Không thể tải tin nhắn
+                <p className="text-xs font-mono font-bold text-white uppercase tracking-wider">
+                  // TRANSMISSION ERROR
                 </p>
-                <p className="mt-1 text-xs text-muted-foreground">
-                  Đã xảy ra lỗi khi tải tin nhắn. Vui lòng thử lại.
+                <p className="mt-2 text-[10px] font-mono text-muted-foreground uppercase leading-relaxed">
+                  FAILED TO RETRIEVE MESSAGE METRIC. RE-ESTABLISH HANDSHAKE.
                 </p>
                 <Button
                   variant="outline"
                   size="sm"
-                  className="mt-4 rounded-lg"
+                  className="mt-4 rounded-none border-[#1e2a35] hover:bg-[#1e2a35] hover:text-[#00e5a0] text-xs font-mono uppercase cursor-pointer"
                   onClick={() => {
                     queryClient.invalidateQueries({ queryKey: ['messages', channelId] })
                   }}
                 >
-                  Thử lại
+                  RECONNECT
                 </Button>
               </div>
             </div>
           ) : allMessages.length === 0 ? (
-            <div className="flex flex-1 items-center justify-center">
-              <div className="text-center max-w-xs px-6">
-                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-muted/80">
-                  <MessageSquarePlus className="h-8 w-8 text-muted-foreground/50" />
-                </div>
-                <p className="text-sm font-medium text-muted-foreground">
-                  Chưa có tin nhắn nào
-                </p>
-                <p className="mt-1 text-xs text-muted-foreground/70">
-                  Hãy bắt đầu cuộc trò chuyện!
-                </p>
-              </div>
+            <div className="flex flex-1 items-center justify-center font-mono text-xs text-muted-foreground/60 uppercase">
+              // NO TRANSMISSION RECORDS IN THIS CHANNEL
             </div>
           ) : (
             <div
@@ -428,15 +407,15 @@ export function ChatArea({
               {hasPreviousPage && (
                 <div className="flex justify-center py-2">
                   {isFetchingPreviousPage ? (
-                    <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                    <div className="h-6 w-6 animate-spin rounded-none border-2 border-[#00e5a0] border-t-transparent" />
                   ) : (
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={() => fetchNextPage()}
-                      className="text-xs rounded-lg"
+                      className="text-[10px] font-mono font-bold tracking-wider uppercase rounded-none border border-[#1e2a35] text-white hover:bg-[#1e2a35] cursor-pointer"
                     >
-                      Tải thêm tin nhắn
+                      LOAD PREVIOUS TRANSMISSIONS
                     </Button>
                   )}
                 </div>
@@ -474,7 +453,7 @@ export function ChatArea({
             replyTo={replyTo}
             onCancelReply={() => setReplyTo(null)}
             disabled={sendMessage.isPending || botIsThinking}
-            placeholder={isBotChannel ? 'Nhập tin nhắn cho SecureBot...' : undefined}
+            placeholder={isBotChannel ? 'TRANSMIT DIRECTIVE TO SECUREBOT...' : undefined}
             typingUsers={channelTypingUsers.map((t) => ({
               userId: t.userId,
               name: t.userName,
@@ -493,3 +472,4 @@ export function ChatArea({
     </div>
   )
 }
+

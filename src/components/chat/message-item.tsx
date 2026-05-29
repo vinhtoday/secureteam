@@ -67,15 +67,6 @@ function formatFileSize(bytes: number) {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
 }
 
-function getInitials(name: string) {
-  return name
-    .split(' ')
-    .map((n) => n[0])
-    .join('')
-    .toUpperCase()
-    .slice(0, 2)
-}
-
 export const MessageItem = memo(
   forwardRef<HTMLDivElement, MessageItemProps>(
     function MessageItem(
@@ -105,9 +96,9 @@ export const MessageItem = memo(
 
       if (isSystem || message.contentType === 'system') {
         return (
-          <div ref={ref} className="flex justify-center py-3 px-4">
-            <div className="rounded-full bg-muted/80 px-4 py-1.5 text-xs text-muted-foreground shadow-sm backdrop-blur-sm">
-              {message.content}
+          <div ref={ref} className="flex justify-center py-2.5 px-4">
+            <div className="border border-[#1e2a35]/60 bg-[#0a0c0f]/80 px-4 py-1 font-mono text-[9px] text-muted-foreground/80 tracking-wider uppercase rounded-none">
+              // SYSTEM: {message.content}
             </div>
           </div>
         )
@@ -119,38 +110,37 @@ export const MessageItem = memo(
       const isOwn = isOwnMessage || message.senderId === user?.id
       const isBot = message.sender?.isBot === true || message.senderId === 'securebot-system' || senderName === 'SecureBot'
 
-      // Special styling for bot messages
+      // Special styling for bot messages (tactical dashboard panel style)
       if (isBot) {
         return (
-          <div ref={ref} className={cn('group relative flex gap-2 px-4 py-0.5', isConsecutive ? 'pt-0.5' : 'pt-1.5')}>
+          <div ref={ref} className={cn('group relative flex gap-2 px-4 py-0.5', isConsecutive ? 'pt-0.5' : 'pt-2')}>
             <div className="flex-shrink-0 w-8 pt-0.5">
-              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-indigo-600 shadow-sm ring-2 ring-violet-200 dark:ring-violet-900/50">
-                <Bot className="h-3.5 w-3.5 text-white" />
+              <div 
+                className="flex h-7 w-7 items-center justify-center bg-[#0a0c0f] text-[#00e5a0] border border-[#1e2a35] transition-transform hover:scale-105 duration-200"
+                style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }}
+              >
+                <Bot className="h-3.5 w-3.5" />
               </div>
             </div>
             <div className="max-w-[75%] min-w-0">
               {showAvatar && (
                 <div className="mb-0.5 flex items-center gap-1.5 pl-1">
-                  <span className="text-xs font-semibold text-violet-600 dark:text-violet-400">SecureBot</span>
-                  <Bot className="h-3 w-3 text-violet-500" />
+                  <span className="text-[10px] font-mono font-bold text-[#00e5a0] uppercase tracking-wider">SecureBot</span>
+                  <span className="rounded-none bg-[#00e5a0]/15 px-1 py-0.5 text-[8px] font-mono font-bold text-[#00e5a0] border border-[#00e5a0]/30 uppercase">AI</span>
                 </div>
               )}
               <div className="relative">
-                <div className={cn(
-                  'rounded-2xl rounded-tl-sm px-3.5 py-2 shadow-sm',
-                  'bg-gradient-to-br from-violet-50/40 to-indigo-50/40 dark:from-violet-950/15 dark:to-indigo-950/15',
-                  'border border-violet-200/30 dark:border-violet-900/20'
-                )}>
-                  <div className="text-sm leading-relaxed break-words whitespace-pre-wrap text-foreground">
+                <div className="bg-[#0f1318] border-l-[3px] border-[#00e5a0] border-t border-b border-r border-[#1e2a35] rounded-none px-3.5 py-2">
+                  <div className="text-xs font-mono leading-relaxed break-words whitespace-pre-wrap text-white">
                     {message.content}
                   </div>
-                  <div className="flex items-center gap-1.5 mt-0.5 justify-end text-muted-foreground">
-                    {message.isEdited && <span className="text-[10px] italic">đã chỉnh sửa</span>}
+                  <div className="flex items-center gap-1.5 mt-1 justify-end text-muted-foreground/60">
+                    {message.isEdited && <span className="text-[9px] font-mono uppercase tracking-wider">EDITED</span>}
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <span className="text-[10px] leading-none cursor-default">{formatTime(message.createdAt)}</span>
+                        <span className="text-[9px] font-mono leading-none cursor-default">{formatTime(message.createdAt)}</span>
                       </TooltipTrigger>
-                      <TooltipContent>{formatRelativeTime(message.createdAt)}</TooltipContent>
+                      <TooltipContent className="bg-[#0f1318] border border-[#1e2a35] font-mono text-[10px] text-white">{formatRelativeTime(message.createdAt)}</TooltipContent>
                     </Tooltip>
                   </div>
                 </div>
@@ -173,16 +163,10 @@ export const MessageItem = memo(
         }
       }
 
-      // Bubble corner rounding based on consecutive grouping (Messenger style)
+      // Bubble corner rounding based on consecutive grouping (Messenger style) -> Flat sharp panels
       const bubbleRadius = isOwn
-        ? cn(
-            'rounded-2xl text-white bg-gradient-to-br from-violet-600 to-indigo-700 shadow-md shadow-violet-500/10 border border-violet-500/15',
-            isConsecutive ? 'rounded-tr-xs rounded-br-xs' : 'rounded-tr-sm'
-          )
-        : cn(
-            'rounded-2xl text-foreground bg-card/75 dark:bg-card/45 border border-ultra-thin shadow-sm',
-            isConsecutive ? 'rounded-tl-xs rounded-bl-xs' : 'rounded-tl-sm'
-          )
+        ? 'bg-[#141920] border-r-[3px] border-[#00e5a0] border-t border-b border-l border-[#1e2a35] rounded-none text-white'
+        : 'bg-[#0f1318] border-l-[3px] border-[#1e2a35] border-t border-b border-r border-[#1e2a35] rounded-none text-white'
 
       return (
         <div
@@ -214,7 +198,7 @@ export const MessageItem = memo(
             {/* Sender name — only for OTHER messages, first in group */}
             {!isOwn && showAvatar && (
               <div className="mb-0.5 flex items-center gap-1.5 pl-1">
-                <span className="text-xs font-semibold text-foreground/80">
+                <span className="text-[10px] font-mono font-bold text-white uppercase tracking-wider">
                   {senderName}
                 </span>
                 {message.isPinned && (
@@ -230,50 +214,34 @@ export const MessageItem = memo(
                 className={cn(
                   'relative',
                   bubbleRadius,
-                  'px-4 py-2.5 shadow-sm transition-all duration-200 hover:shadow-md'
+                  'px-4 py-2.5 shadow-sm transition-all duration-200'
                 )}
               >
                 {/* Reply reference — inside bubble */}
                 {message.replyTo && (
-                  <div className={cn(
-                    'mb-1.5 rounded-md px-2.5 py-1.5 border-l-2 border-current/30',
-                    isOwn
-                      ? 'bg-white/15 border-white/30'
-                      : 'bg-primary/5 border-primary/30 dark:bg-primary/10'
-                  )}>
-                    <div className={cn(
-                      'text-[11px] font-semibold',
-                      isOwn ? 'text-white/80' : 'text-primary dark:text-primary/80'
-                    )}>
-                      {message.replyTo.sender?.name}
+                  <div className="mb-1.5 rounded-none border-l-2 border-[#00e5a0] bg-[#0a0c0f] p-1.5">
+                    <div className="text-[9px] font-mono font-bold text-[#00e5a0] uppercase tracking-wider">
+                      {message.replyTo.sender?.name.toUpperCase()}
                     </div>
-                    <div className={cn(
-                      'text-xs truncate',
-                      isOwn ? 'text-white/70' : 'text-muted-foreground'
-                    )}>
+                    <div className="text-[10px] font-mono text-muted-foreground truncate max-w-[300px]">
                       {message.replyTo.content?.substring(0, 80) || '(tệp đính kèm)'}
                     </div>
                   </div>
                 )}
 
                 {/* Message body */}
-                <div className="text-sm leading-relaxed break-words whitespace-pre-wrap">
+                <div className="text-xs font-mono leading-relaxed break-words whitespace-pre-wrap">
                   {message.content}
                 </div>
 
                 {/* File attachment — inside bubble */}
                 {message.fileUrl && (
-                  <div className={cn(
-                    'mt-2 flex items-center gap-2.5 rounded-xl px-3 py-2 border transition-all duration-150',
-                    isOwn
-                      ? 'bg-white/10 hover:bg-white/15 border-white/10'
-                      : 'bg-background/40 hover:bg-background/60 border-ultra-thin'
-                  )}>
-                    <Paperclip className="h-3.5 w-3.5 shrink-0 opacity-70" />
+                  <div className="mt-2 flex items-center gap-2.5 rounded-none border border-[#1e2a35] bg-[#0a0c0f] p-2 hover:border-[#00e5a0]/40 transition-colors">
+                    <Paperclip className="h-3.5 w-3.5 shrink-0 text-[#00e5a0]/70" />
                     <div className="min-w-0 flex-1">
-                      <div className="text-xs font-semibold truncate">{message.fileName || 'Tệp đính kèm'}</div>
+                      <div className="text-[10px] font-mono font-bold truncate text-white uppercase">{message.fileName || 'ATTACHMENT'}</div>
                       {message.fileSize && (
-                        <div className="text-[10px] opacity-70 mt-0.5">
+                        <div className="text-[9px] font-mono text-muted-foreground/60 mt-0.5">
                           {formatFileSize(message.fileSize)}
                         </div>
                       )}
@@ -282,41 +250,35 @@ export const MessageItem = memo(
                       href={message.fileUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className={cn(
-                        'shrink-0 rounded-lg px-3 py-1 text-xs font-bold transition-all hover:scale-102 active:scale-98',
-                        isOwn
-                          ? 'bg-white/25 hover:bg-white/35 text-white'
-                          : 'bg-violet-600 hover:bg-violet-700 text-white dark:bg-violet-500/20 dark:hover:bg-violet-500/30 dark:text-violet-300'
-                      )}
+                      className="shrink-0 rounded-none bg-[#00e5a0] text-black font-mono text-[9px] hover:bg-[#00c78b] p-1.5 font-bold uppercase transition-all duration-150 cursor-pointer"
                     >
-                      Tải xuống
+                      DOWNLOAD
                     </a>
                   </div>
                 )}
 
                 {/* Timestamp + edited indicator */}
                 <div className={cn(
-                  'flex items-center gap-1.5 mt-1 justify-end',
-                  isOwn ? 'text-white/70' : 'text-muted-foreground'
+                  'flex items-center gap-1.5 mt-1 justify-end text-muted-foreground/50'
                 )}>
                   {message.isEdited && (
-                    <span className="text-[10px] italic">đã chỉnh sửa</span>
+                    <span className="text-[9px] font-mono uppercase tracking-wider">EDITED</span>
                   )}
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <span className="text-[10px] leading-none cursor-default">
+                      <span className="text-[9px] font-mono leading-none cursor-default">
                         {formatTime(message.createdAt)}
                       </span>
                     </TooltipTrigger>
-                    <TooltipContent side="top">
+                    <TooltipContent side="top" className="bg-[#0f1318] border border-[#1e2a35] font-mono text-[10px] text-white">
                       {formatRelativeTime(message.createdAt)}
                     </TooltipContent>
                   </Tooltip>
                   {message.isPinned && (
-                    <Pin className="h-2.5 w-2.5 text-amber-400 dark:text-amber-500" />
+                    <Pin className="h-2.5 w-2.5 text-amber-500" />
                   )}
                   {isOwn && (
-                    <span className="text-[10px] opacity-75 font-semibold ml-0.5 select-none" title="Đã nhận">✓✓</span>
+                    <span className="text-[9px] font-mono text-[#00e5a0] font-bold ml-0.5 select-none" title="Đã nhận">✓✓</span>
                   )}
                 </div>
               </div>
@@ -334,14 +296,14 @@ export const MessageItem = memo(
                         key={emoji}
                         onClick={() => handleToggleReaction(emoji)}
                         className={cn(
-                          'flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] border shadow-sm transition-all hover:scale-105 active:scale-95 duration-150',
+                          'flex items-center gap-1.5 rounded-none px-2 py-0.5 text-[9px] font-mono border shadow-sm transition-all hover:scale-105 active:scale-95 duration-150 cursor-pointer',
                           hasReacted
-                            ? 'bg-violet-50 border-violet-200 dark:bg-violet-950/40 dark:border-violet-900/30 text-violet-600 dark:text-violet-400 font-semibold'
-                            : 'bg-background border-border hover:bg-muted text-muted-foreground'
+                            ? 'bg-[#00e5a0]/8 border-[#00e5a0] text-[#00e5a0] font-bold'
+                            : 'bg-[#0a0c0f] border-[#1e2a35] hover:bg-[#1e2a35] text-muted-foreground'
                         )}
-                        title={`${userIds.length} người thả cảm xúc`}
+                        title={`${userIds.length} phản hồi`}
                       >
-                        <span className="text-xs">{emoji}</span>
+                        <span className="text-[10px]">{emoji}</span>
                         <span>{userIds.length}</span>
                       </button>
                     )
@@ -353,26 +315,21 @@ export const MessageItem = memo(
               {Array.isArray((message as any).replies) && ((message as any).replies as any[]).length > 0 && (
                 <button
                   onClick={() => onThread?.(message)}
-                  className={cn(
-                    'mt-1 flex items-center gap-1 text-xs transition-colors px-1 rounded-md',
-                    isOwn
-                      ? 'text-white/60 hover:text-white/80'
-                      : 'text-muted-foreground hover:text-foreground'
-                  )}
+                  className="mt-1.5 flex items-center gap-1 text-[9px] font-mono font-bold tracking-wider text-[#00e5a0] hover:text-[#00c78b] transition-colors uppercase cursor-pointer"
                 >
                   <CornerDownRight className="h-3 w-3" />
-                  {((message as any).replies as any[]).length} phản hồi
+                  {((message as any).replies as any[]).length} TRANSMISSION REPLIES
                 </button>
               )}
 
               {/* Hover actions & Reactions bar */}
               {!isSystem && (
                 <div className={cn(
-                  'absolute -top-10 hidden items-center gap-1 rounded-full border border-ultra-thin bg-card/90 backdrop-blur-md px-2.5 py-1.5 shadow-xl group-hover:flex z-20 animate-in fade-in slide-in-from-bottom-1.5 duration-200',
+                  'absolute -top-9 hidden items-center gap-1 border border-[#1e2a35] bg-[#0f1318] px-2.5 py-1 shadow-xl group-hover:flex z-20 animate-in fade-in slide-in-from-bottom-1 duration-200 rounded-none',
                   isOwn ? 'right-2' : 'left-2'
                 )}>
                   {/* Emoji Quick Actions */}
-                  <div className="flex items-center gap-1.5 pr-1.5 border-r border-border/50">
+                  <div className="flex items-center gap-1.5 pr-1.5 border-r border-[#1e2a35]">
                     {['👍', '❤️', '😂', '😮', '😢', '🙏'].map((emoji) => {
                       const userHasReacted = reactions[emoji]?.includes(user?.id || '')
                       return (
@@ -380,8 +337,8 @@ export const MessageItem = memo(
                           key={emoji}
                           onClick={() => handleToggleReaction(emoji)}
                           className={cn(
-                            'text-sm p-1 rounded-full hover:scale-125 active:scale-95 transition-all duration-100',
-                            userHasReacted && 'bg-violet-100 dark:bg-violet-900/30'
+                            'text-sm p-0.5 rounded-none hover:scale-125 active:scale-95 transition-all duration-100 cursor-pointer',
+                            userHasReacted && 'bg-[#00e5a0]/15'
                           )}
                         >
                           {emoji}
@@ -396,13 +353,13 @@ export const MessageItem = memo(
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-6 w-6 rounded-full hover:bg-muted"
+                          className="h-6 w-6 rounded-none text-white hover:bg-[#1e2a35] cursor-pointer"
                           onClick={() => onReply?.(message)}
                         >
                           <Reply className="h-3.5 w-3.5" />
                         </Button>
                       </TooltipTrigger>
-                      <TooltipContent>Phản hồi</TooltipContent>
+                      <TooltipContent className="bg-[#0f1318] border border-[#1e2a35] font-mono text-[9px] text-white">REPLY</TooltipContent>
                     </Tooltip>
                     <DropdownMenu>
                       <Tooltip>
@@ -411,30 +368,30 @@ export const MessageItem = memo(
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="h-6 w-6 rounded-full text-destructive hover:text-destructive hover:bg-destructive/10"
+                              className="h-6 w-6 rounded-none text-destructive hover:text-destructive hover:bg-destructive/10 cursor-pointer"
                             >
                               <Trash2 className="h-3.5 w-3.5" />
                             </Button>
                           </DropdownMenuTrigger>
                         </TooltipTrigger>
-                        <TooltipContent>Xóa tin nhắn</TooltipContent>
+                        <TooltipContent className="bg-[#0f1318] border border-[#1e2a35] font-mono text-[9px] text-white">DELETE TRANSMISSION</TooltipContent>
                       </Tooltip>
-                      <DropdownMenuContent align="end" className="w-48">
+                      <DropdownMenuContent align="end" className="w-52 bg-[#0f1318] border border-[#1e2a35] rounded-none p-1">
                         {(isOwn || user?.role?.name === 'SUPER_ADMIN' || user?.role?.name === 'ADMIN') && (
                           <DropdownMenuItem
                             onClick={() => onDelete?.(message, 'recall')}
-                            className="text-destructive focus:text-destructive text-xs cursor-pointer font-medium"
+                            className="text-destructive focus:text-destructive text-[10px] font-mono font-bold uppercase rounded-none hover:bg-destructive/10 cursor-pointer"
                           >
                             <Trash2 className="h-3.5 w-3.5 mr-2" />
-                            Thu hồi (cả 2 không thấy)
+                            RECALL (FOR ALL)
                           </DropdownMenuItem>
                         )}
                         <DropdownMenuItem
                           onClick={() => onDelete?.(message, 'me')}
-                          className="text-xs cursor-pointer font-medium"
+                          className="text-white text-[10px] font-mono font-bold uppercase rounded-none hover:bg-[#1e2a35] cursor-pointer"
                         >
                           <Trash2 className="h-3.5 w-3.5 mr-2 text-muted-foreground" />
-                          Xóa phía tôi (ẩn tin nhắn)
+                          DELETE (FOR ME)
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
@@ -448,3 +405,4 @@ export const MessageItem = memo(
     }
   )
 )
+

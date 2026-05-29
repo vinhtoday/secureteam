@@ -69,37 +69,83 @@ export default function Home() {
   // Auth screens
   if (!isAuthenticated) {
     return (
-      <div className="relative flex min-h-screen items-center justify-center overflow-hidden p-4 bg-gradient-to-br from-violet-950/20 via-background to-indigo-950/20">
-        {/* Animated Aurora Fallback */}
-        <div className="absolute inset-0 bg-gradient-to-tr from-violet-900/10 via-indigo-900/5 to-fuchsia-900/10 dark:from-violet-950/20 dark:via-indigo-950/10 dark:to-fuchsia-950/20 animate-aurora opacity-70 pointer-events-none" />
-        
-        {/* Dynamic Looping Background Video */}
-        <video
-          autoPlay
-          loop
-          muted
-          playsInline
-          className="absolute inset-0 h-full w-full object-cover opacity-25 dark:opacity-15 pointer-events-none transition-opacity duration-1000 mix-blend-screen dark:mix-blend-lighten"
-          onError={(e) => {
-            (e.target as HTMLVideoElement).style.opacity = '0';
-          }}
-        >
-          <source src="/auth-bg.mp4" type="video/mp4" />
-          <source src="/auth-bg.webm" type="video/webm" />
-        </video>
+      <div className="flex min-h-screen flex-col md:flex-row bg-[#0a0c0f]">
+        {/* LEFT Panel - Branding and Features (Hidden on Mobile) */}
+        <div className="relative hidden md:flex md:w-1/2 flex-col justify-between p-12 lg:p-20 bg-[#0a0c0f] border-r border-[#1e2a35] overflow-hidden">
+          {/* Subtle Grid Overlay */}
+          <div className="absolute inset-0 bg-tactical-grid opacity-30 pointer-events-none" />
+          
+          {/* Top Hexagon Brand */}
+          <div className="relative z-10 flex items-center gap-3">
+            <div 
+              className="flex h-12 w-12 items-center justify-center bg-[#00e5a0] text-black font-extrabold text-lg"
+              style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }}
+            >
+              ST
+            </div>
+            <div className="font-title text-2xl font-bold tracking-[4px] uppercase text-white">
+              SECURE<span className="text-[#00e5a0]">|TEAM</span>
+            </div>
+          </div>
 
-        {/* Ambient Blur Bubbles */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-40">
-          <div className="absolute -top-40 -right-40 w-96 h-96 rounded-full bg-violet-500/10 blur-3xl animate-pulse-glow" />
-          <div className="absolute -bottom-40 -left-40 w-96 h-96 rounded-full bg-indigo-500/10 blur-3xl animate-pulse-glow" style={{ animationDelay: '-2s' }} />
+          {/* Central Tagline & Features */}
+          <div className="relative z-10 space-y-8 my-auto">
+            <div className="space-y-3">
+              <span className="font-mono text-xs text-[#00e5a0] tracking-wider block">
+                // SYSTEM AUTHENTICATION PROTOCOL
+              </span>
+              <h2 className="font-title text-4xl lg:text-5xl font-extrabold uppercase text-white leading-tight">
+                SECURE ACCESS <br />
+                CONTROL GATEWAY
+              </h2>
+              <p className="text-muted-foreground text-sm font-sans max-w-md">
+                Phân quyền truy cập đa cấp, mã hóa đầu cuối và nhật ký hoạt động quân sự cho toàn bộ giao tiếp doanh nghiệp.
+              </p>
+            </div>
+
+            <ul className="font-mono text-xs text-[#00e5a0]/85 space-y-3.5 pl-1.5">
+              <li className="flex items-center gap-3">
+                <span className="h-1.5 w-1.5 bg-[#00e5a0]" />
+                <span>MÃ HÓA TIN NHẮN ĐẦU CUỐI [AES-256-GCM]</span>
+              </li>
+              <li className="flex items-center gap-3">
+                <span className="h-1.5 w-1.5 bg-[#00e5a0]" />
+                <span>KẾT NỐI CUỘC GỌI WebRTC TRỰC TIẾP P2P</span>
+              </li>
+              <li className="flex items-center gap-3">
+                <span className="h-1.5 w-1.5 bg-[#00e5a0]" />
+                <span>XÁC THỰC HAI YẾU TỐ BẮT BUỘC [2FA]</span>
+              </li>
+              <li className="flex items-center gap-3">
+                <span className="h-1.5 w-1.5 bg-[#00e5a0]" />
+                <span>NHẬT KÝ ĐỐI SOÁT HỆ THỐNG [AUDIT LOGS]</span>
+              </li>
+              <li className="flex items-center gap-3">
+                <span className="h-1.5 w-1.5 bg-[#00e5a0]" />
+                <span>PHÂN QUYỀN TRUY CẬP 4 VAI TRÒ [RBAC]</span>
+              </li>
+            </ul>
+          </div>
+
+          {/* Bottom security status tag */}
+          <div className="relative z-10 flex items-center gap-2.5 font-mono text-[10px] text-muted-foreground/60 tracking-wider">
+            <span className="h-2 w-2 rounded-full bg-[#00e5a0] animate-online-glow" />
+            <span>CONNECTION SECURED • TLS 1.3 • MIL-SPEC</span>
+          </div>
         </div>
 
-        <div className="relative z-10 w-full flex justify-center">
-          {authView === 'login' ? (
-            <LoginForm onSwitchToRegister={() => setAuthView('register')} />
-          ) : (
-            <RegisterForm onSwitchToLogin={() => setAuthView('login')} />
-          )}
+        {/* RIGHT Panel - Auth Forms */}
+        <div className="relative flex flex-1 items-center justify-center p-6 md:p-12 lg:p-20 bg-[#0a0c0f] overflow-hidden">
+          {/* Background grid for mobile fallback */}
+          <div className="absolute inset-0 bg-tactical-grid opacity-15 md:hidden pointer-events-none" />
+          
+          <div className="relative z-10 w-full max-w-md flex justify-center">
+            {authView === 'login' ? (
+              <LoginForm onSwitchToRegister={() => setAuthView('register')} />
+            ) : (
+              <RegisterForm onSwitchToLogin={() => setAuthView('login')} />
+            )}
+          </div>
         </div>
       </div>
     )

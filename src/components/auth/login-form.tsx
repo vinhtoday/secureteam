@@ -51,48 +51,51 @@ export function LoginForm({ onSwitchToRegister }: LoginFormProps) {
   }
 
   return (
-    <Card className="w-full max-w-md glass-card-premium shadow-2xl rounded-3xl glow-premium p-3 animate-in fade-in zoom-in duration-500 border-ultra-thin">
-      <CardHeader className="text-center pb-2 group">
-        <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-500 to-indigo-600 shadow-lg shadow-violet-500/30 transition-all hover:scale-110 hover:rotate-6 duration-300">
-          <Shield className="h-8 w-8 text-white" />
+    <Card className="w-full max-w-md bg-[#0f1318] border border-[#1e2a35] rounded-none p-6 shadow-xl relative corner-bracket corner-bracket-b">
+      <CardHeader className="text-center pb-4 pt-2">
+        <div 
+          className="mx-auto mb-4 flex h-14 w-14 items-center justify-center bg-[#00e5a0] text-black font-extrabold text-lg transition-transform hover:scale-105 duration-300"
+          style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }}
+        >
+          ST
         </div>
-        <CardTitle className="text-3xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-violet-600 to-indigo-600 dark:from-violet-400 dark:to-indigo-400">SecureTeam</CardTitle>
-        <CardDescription className="mt-1.5 text-muted-foreground/80">
-          Đăng nhập để truy cập hệ thống nhắn tin nội bộ
+        <CardTitle className="text-2xl font-title font-extrabold tracking-widest bg-clip-text text-white">SECURE ACCESS</CardTitle>
+        <CardDescription className="mt-1 font-mono text-[11px] text-[#00e5a0]/70 uppercase tracking-wider">
+          // AUTHENTICATE TO PROCEED
         </CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="px-1">
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && (
-            <div className="rounded-lg bg-destructive/10 border border-destructive/20 p-3 text-sm text-destructive" role="alert">
-              {error}
+            <div className="rounded-none bg-destructive/15 border border-destructive/30 p-3 text-xs font-mono text-destructive uppercase tracking-wider" role="alert">
+              // ERROR: {error}
             </div>
           )}
-          <div className="space-y-2">
-            <Label htmlFor="login-email" className="text-sm font-medium text-foreground/80">Email</Label>
+          <div className="space-y-1.5">
+            <Label htmlFor="login-email" className="text-xs font-mono font-bold text-[#00e5a0] uppercase tracking-wider">AGENT EMAIL</Label>
             <Input
               id="login-email"
               type="email"
-              placeholder="email@company.com"
+              placeholder="agent@secureteam.io"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               disabled={isLoading}
               autoComplete="email"
-              className="h-11 rounded-xl border-border/40 bg-background/30 focus-visible:ring-violet-500/30 focus-visible:border-violet-500 transition-all hover:bg-background/50"
+              className="h-10 rounded-none border-[#1e2a35] bg-[#0a0c0f] font-mono text-xs text-white focus-visible:ring-[#00e5a0]/30 focus-visible:border-[#00e5a0] placeholder:text-muted-foreground/40"
             />
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="login-password" className="text-sm font-medium text-foreground/80">Mật khẩu</Label>
+          <div className="space-y-1.5">
+            <Label htmlFor="login-password" className="text-xs font-mono font-bold text-[#00e5a0] uppercase tracking-wider">SECURE PASSWORD</Label>
             <div className="relative">
               <Input
                 id="login-password"
                 type={showPassword ? 'text' : 'password'}
-                placeholder="Nhập mật khẩu"
+                placeholder="••••••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 disabled={isLoading}
                 autoComplete="current-password"
-                className="h-11 rounded-xl border-border/40 bg-background/30 pr-10 focus-visible:ring-violet-500/30 focus-visible:border-violet-500 transition-all hover:bg-background/50"
+                className="h-10 rounded-none border-[#1e2a35] bg-[#0a0c0f] font-mono text-xs text-white pr-10 focus-visible:ring-[#00e5a0]/30 focus-visible:border-[#00e5a0]"
               />
               <button
                 type="button"
@@ -101,41 +104,69 @@ export function LoginForm({ onSwitchToRegister }: LoginFormProps) {
                 tabIndex={-1}
                 aria-label={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
               >
-                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                {showPassword ? <EyeOff className="h-4 w-4 text-[#00e5a0]" /> : <Eye className="h-4 w-4 text-[#00e5a0]" />}
               </button>
             </div>
           </div>
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-2 py-1">
             <Checkbox
               id="login-remember"
               checked={rememberMe}
               onCheckedChange={(checked) => setRememberMe(checked === true)}
-              className="border-border/60 data-[state=checked]:bg-violet-600 data-[state=checked]:border-violet-600"
+              className="border-[#1e2a35] rounded-none data-[state=checked]:bg-[#00e5a0] data-[state=checked]:border-[#00e5a0] data-[state=checked]:text-black"
             />
-            <Label htmlFor="login-remember" className="cursor-pointer text-sm font-normal text-muted-foreground hover:text-foreground transition-colors">
-              Ghi nhớ đăng nhập
+            <Label htmlFor="login-remember" className="cursor-pointer text-xs font-mono text-muted-foreground/80 hover:text-white transition-colors">
+              REMEMBER SESSION
             </Label>
           </div>
-          <Button type="submit" className="w-full h-11 rounded-xl font-semibold bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 hover:scale-[1.01] active:scale-[0.99] text-white shadow-md shadow-violet-500/20 hover:shadow-lg hover:shadow-violet-500/30 transition-all duration-200 cursor-pointer" disabled={isLoading}>
+          
+          <Button type="submit" className="w-full h-10 rounded-none font-title font-bold text-sm tracking-wider bg-[#00e5a0] text-black hover:bg-[#00c78b] active:scale-[0.98] shadow-md transition-all duration-150 cursor-pointer uppercase" disabled={isLoading}>
             {isLoading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Đang đăng nhập...
+                VERIFYING PROTOCOLS...
               </>
             ) : (
-              'Đăng nhập'
+              'AUTHENTICATE →'
             )}
           </Button>
+
+          {/* 2FA Divider */}
+          <div className="relative flex items-center justify-center my-4.5">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-[#1e2a35]"></div>
+            </div>
+            <span className="relative z-10 bg-[#0f1318] px-3 font-mono text-[9px] text-muted-foreground tracking-[3px] uppercase font-bold">2FA VERIFICATION</span>
+          </div>
+
+          {/* 6-box OTP row */}
+          <div className="flex justify-between gap-1.5 py-1">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <Input
+                key={i}
+                type="text"
+                maxLength={1}
+                className="h-10 w-10 text-center font-mono text-sm font-extrabold bg-[#0a0c0f] border-[#1e2a35] rounded-none text-white focus-visible:border-[#00e5a0] focus-visible:ring-[#00e5a0]/30"
+                placeholder="-"
+                onChange={(e) => {
+                  const val = e.target.value
+                  if (val && e.target.nextElementSibling) {
+                    (e.target.nextElementSibling as HTMLInputElement).focus()
+                  }
+                }}
+              />
+            ))}
+          </div>
         </form>
       </CardContent>
-      <CardFooter className="justify-center pb-6">
-        <p className="text-sm text-muted-foreground">
-          Chưa có tài khoản?{' '}
+      <CardFooter className="justify-center pb-2 pt-4">
+        <p className="text-xs font-mono text-muted-foreground">
+          NEW AGENT?{' '}
           <button
             onClick={onSwitchToRegister}
-            className="font-semibold text-primary hover:underline underline-offset-2 cursor-pointer"
+            className="font-bold text-[#00e5a0] hover:underline cursor-pointer tracking-wider"
           >
-            Đăng ký ngay
+            CREATE ACCOUNT
           </button>
         </p>
       </CardFooter>

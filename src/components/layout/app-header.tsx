@@ -15,7 +15,6 @@ import {
 import { cn } from '@/lib/utils'
 import { getInitials, getRoleBadgeColor, getRoleLabel } from '@/lib/helpers'
 import {
-  Shield,
   Sun,
   Moon,
   Monitor,
@@ -23,8 +22,6 @@ import {
   User,
   Settings,
   Menu,
-  PanelLeftClose,
-  PanelLeft,
 } from 'lucide-react'
 
 interface AppHeaderProps {
@@ -34,8 +31,6 @@ interface AppHeaderProps {
   onNavigate?: (item: string) => void
   isAdmin?: boolean
 }
-
-
 
 export function AppHeader({
   onToggleSidebar,
@@ -53,31 +48,36 @@ export function AppHeader({
   }
 
   return (
-    <header className="sticky top-2 z-40 mx-4 mt-3 mb-1.5 flex h-14 items-center gap-3 rounded-2xl border border-ultra-thin bg-card/50 backdrop-blur-xl shadow-md transition-all duration-300 px-4">
+    <header className="sticky top-0 z-40 flex h-14 w-full items-center gap-3 border-b border-[#1e2a35] bg-[#0f1318] px-6">
       {/* Left: Hamburger + Logo */}
-      <div className="flex items-center gap-2.5">
+      <div className="flex items-center gap-4">
         {onToggleSidebar && (
           <Button
             variant="ghost"
             size="icon"
-            className="h-9 w-9 rounded-lg hover:bg-muted/60 transition-colors"
+            className="h-9 w-9 rounded-none border border-[#1e2a35] bg-[#0a0c0f] hover:bg-[#1e2a35] text-[#00e5a0] transition-colors cursor-pointer"
             onClick={onToggleSidebar}
             aria-label="Toggle sidebar"
           >
             <Menu className="h-4.5 w-4.5" />
           </Button>
         )}
-        <div className="flex items-center gap-2 group cursor-pointer">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400 transition-transform group-hover:scale-105 group-hover:rotate-3 duration-200">
-            <Shield className="h-4 w-4" />
+        <div className="flex items-center gap-2 group.cursor-pointer">
+          <div 
+            className="flex h-8 w-8 items-center justify-center bg-[#00e5a0] text-black font-extrabold text-sm transition-transform group-hover:scale-105 duration-200"
+            style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }}
+          >
+            ST
           </div>
-          <span className="hidden font-bold text-sm sm:inline-block tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/80">SecureTeam</span>
+          <span className="hidden font-title font-extrabold text-lg tracking-widest sm:inline-block text-white">
+            SECURE<span className="text-[#00e5a0]">|TEAM</span>
+          </span>
         </div>
       </div>
 
-      {/* Center: Nav tabs - pill style */}
+      {/* Center: Nav tabs */}
       {navItems && onNavigate && (
-        <nav className="hidden md:flex items-center gap-1 mx-2 bg-muted/40 border border-ultra-thin rounded-xl p-1">
+        <nav className="hidden md:flex items-center gap-1.5 mx-4 bg-[#0a0c0f] border border-[#1e2a35] rounded-none p-1">
           {navItems
             .filter((item) => !item.adminOnly || isAdmin)
             .map((item) => {
@@ -88,10 +88,10 @@ export function AppHeader({
                   key={item.id}
                   onClick={() => onNavigate(item.id)}
                   className={cn(
-                    'flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] cursor-pointer',
+                    'flex items-center gap-1.5 rounded-none px-3 py-1.5 text-[10px] font-mono font-bold tracking-wider transition-all duration-200 cursor-pointer uppercase border',
                     isActive
-                      ? 'bg-background text-violet-600 dark:text-violet-400 shadow-sm border border-ultra-thin'
-                      : 'text-muted-foreground hover:text-foreground hover:bg-background/20'
+                      ? 'bg-[#00e5a0]/10 text-[#00e5a0] border-[#00e5a0]'
+                      : 'text-muted-foreground hover:text-white border-transparent hover:bg-[#1e2a35]/20'
                   )}
                 >
                   <Icon className="h-3.5 w-3.5" />
@@ -106,24 +106,29 @@ export function AppHeader({
       <div className="flex-1" />
 
       {/* Right section */}
-      <div className="flex items-center gap-1.5">
-        {/* Dark mode toggle */}
+      <div className="flex items-center gap-2">
+        {/* Theme toggle */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-9 w-9 rounded-lg hover:bg-muted" aria-label="Theme">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="h-9 w-9 rounded-none border border-[#1e2a35] bg-[#0a0c0f] hover:bg-[#1e2a35] text-[#00e5a0] cursor-pointer" 
+              aria-label="Theme"
+            >
               <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
               <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => setTheme('light')}>
-              <Sun className="mr-2 h-4 w-4" /> Sáng
+          <DropdownMenuContent align="end" className="bg-[#0f1318] border border-[#1e2a35] rounded-none p-1">
+            <DropdownMenuItem onClick={() => setTheme('light')} className="text-xs font-mono font-bold text-white hover:bg-[#1e2a35] rounded-none cursor-pointer">
+              <Sun className="mr-2 h-4 w-4 text-[#00e5a0]" /> LIGHT PROTOCOL
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setTheme('dark')}>
-              <Moon className="mr-2 h-4 w-4" /> Tối
+            <DropdownMenuItem onClick={() => setTheme('dark')} className="text-xs font-mono font-bold text-white hover:bg-[#1e2a35] rounded-none cursor-pointer">
+              <Moon className="mr-2 h-4 w-4 text-[#00e5a0]" /> DARK PROTOCOL
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setTheme('system')}>
-              <Monitor className="mr-2 h-4 w-4" /> Hệ thống
+            <DropdownMenuItem onClick={() => setTheme('system')} className="text-xs font-mono font-bold text-white hover:bg-[#1e2a35] rounded-none cursor-pointer">
+              <Monitor className="mr-2 h-4 w-4 text-[#00e5a0]" /> SYSTEM DEFAULT
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -131,46 +136,45 @@ export function AppHeader({
         {/* User menu */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="relative h-9 gap-2 rounded-full pl-1 pr-3 hover:bg-muted">
-              <Avatar className="h-7 w-7 ring-2 ring-background shadow-sm">
-                <AvatarImage src={user?.avatar || undefined} alt={user?.name} />
-                <AvatarFallback className="bg-violet-100 text-violet-700 text-[10px] dark:bg-violet-900/30 dark:text-violet-400">
+            <Button variant="ghost" className="relative h-9 gap-2 rounded-none border border-[#1e2a35] bg-[#0a0c0f] hover:bg-[#1e2a35] pl-1 pr-3 cursor-pointer">
+              <Avatar className="h-6 w-6 rounded-none ring-1 ring-[#1e2a35]">
+                <AvatarImage className="rounded-none object-cover" src={user?.avatar || undefined} alt={user?.name} />
+                <AvatarFallback className="rounded-none bg-[#1e2a35] text-[#00e5a0] text-[9px] font-mono font-bold">
                   {user?.name ? getInitials(user.name) : '?'}
                 </AvatarFallback>
               </Avatar>
-              <span className="hidden max-w-[100px] truncate text-xs font-medium md:inline-block">
+              <span className="hidden max-w-[100px] truncate text-[11px] font-mono font-bold text-white uppercase tracking-wider md:inline-block">
                 {user?.name}
               </span>
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-56" align="end" forceMount>
-            <DropdownMenuLabel className="font-normal">
+          <DropdownMenuContent className="w-56 bg-[#0f1318] border border-[#1e2a35] rounded-none p-1" align="end" forceMount>
+            <DropdownMenuLabel className="font-normal px-2 py-1.5 border-b border-[#1e2a35] mb-1">
               <div className="flex flex-col space-y-1">
-                <p className="text-sm font-medium leading-none">{user?.name}</p>
-                <p className="text-xs leading-none text-muted-foreground">{user?.email}</p>
+                <p className="text-xs font-mono font-bold text-white uppercase">{user?.name}</p>
+                <p className="text-[10px] font-mono text-muted-foreground">{user?.email}</p>
                 {user?.role && (
                   <span className={cn(
-                    'mt-1 inline-flex w-fit items-center rounded-full px-2 py-0.5 text-[10px] font-medium',
-                    getRoleBadgeColor(user.role.name)
+                    'mt-1 inline-flex w-fit items-center rounded-none px-2 py-0.5 text-[9px] font-mono font-bold uppercase border border-[#1e2a35]',
+                    user.role.name === 'admin' ? 'bg-destructive/15 text-destructive border-destructive/30' : 'bg-[#00e5a0]/15 text-[#00e5a0] border-[#00e5a0]/30'
                   )}>
                     {getRoleLabel(user.role.name)}
                   </span>
                 )}
               </div>
             </DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <User className="mr-2 h-4 w-4" />
-              Hồ sơ
+            <DropdownMenuItem className="text-xs font-mono font-bold text-white hover:bg-[#1e2a35] rounded-none cursor-pointer">
+              <User className="mr-2 h-4 w-4 text-[#00e5a0]" />
+              PROFILE SETTINGS
             </DropdownMenuItem>
-            <DropdownMenuItem>
-              <Settings className="mr-2 h-4 w-4" />
-              Cài đặt
+            <DropdownMenuItem className="text-xs font-mono font-bold text-white hover:bg-[#1e2a35] rounded-none cursor-pointer">
+              <Settings className="mr-2 h-4 w-4 text-[#00e5a0]" />
+              SYSTEM OPTIONS
             </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleLogout} className="text-destructive focus:text-destructive">
+            <DropdownMenuSeparator className="bg-[#1e2a35]" />
+            <DropdownMenuItem onClick={handleLogout} className="text-xs font-mono font-bold text-destructive hover:bg-destructive/10 rounded-none cursor-pointer focus:bg-destructive/15 focus:text-destructive">
               <LogOut className="mr-2 h-4 w-4" />
-              Đăng xuất
+              TERMINATE SESSION
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -178,3 +182,4 @@ export function AppHeader({
     </header>
   )
 }
+

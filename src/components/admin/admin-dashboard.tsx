@@ -20,24 +20,24 @@ export function AdminDashboard() {
 
   if (isLoading) {
     return (
-      <div className="space-y-6 p-6">
-        <h2 className="text-2xl font-bold">Bảng điều khiển</h2>
+      <div className="space-y-6 p-6 font-mono">
+        <h2 className="text-xl font-title font-extrabold tracking-widest text-white uppercase">// LOADING METRICS...</h2>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {Array.from({ length: 4 }).map((_, i) => (
-            <Skeleton key={i} className="h-32" />
+            <Skeleton key={i} className="h-32 rounded-none bg-[#0f1318]/50 border border-[#1e2a35]" />
           ))}
         </div>
-        <Skeleton className="h-64" />
+        <Skeleton className="h-64 rounded-none bg-[#0f1318]/50 border border-[#1e2a35]" />
       </div>
     )
   }
 
   if (isError || !data) {
     return (
-      <div className="flex flex-1 items-center justify-center p-6">
-        <div className="text-center">
-          <AlertCircle className="mx-auto h-10 w-10 text-destructive" />
-          <p className="mt-2 text-muted-foreground">Không thể tải dữ liệu bảng điều khiển</p>
+      <div className="flex flex-1 items-center justify-center p-6 border border-destructive/30 bg-[#0f1318] rounded-none">
+        <div className="text-center font-mono uppercase">
+          <AlertCircle className="mx-auto h-10 w-10 text-destructive mb-2" />
+          <p className="text-xs text-white">// TRANSMISSION ERROR: FAILED TO RETRIEVE ANALYTICS HANDSHAKE</p>
         </div>
       </div>
     )
@@ -45,73 +45,73 @@ export function AdminDashboard() {
 
   const stats = [
     {
-      title: 'Tổng người dùng',
+      title: 'TOTAL REGISTERED AGENTS',
       value: data.totalUsers,
       icon: Users,
-      color: 'text-violet-600 dark:text-violet-400',
-      bg: 'bg-violet-100 dark:bg-violet-950/30',
+      color: 'text-[#00e5a0]',
+      bg: 'bg-[#00e5a0]/8 border-[#00e5a0]/20',
     },
     {
-      title: 'Đang trực tuyến',
+      title: 'ACTIVE SESSIONS',
       value: data.onlineUsers,
       icon: Radio,
-      color: 'text-indigo-600 dark:text-indigo-400',
-      bg: 'bg-indigo-100 dark:bg-indigo-950/30',
+      color: 'text-[#00e5a0]',
+      bg: 'bg-[#00e5a0]/8 border-[#00e5a0]/20',
     },
     {
-      title: 'Tin nhắn hôm nay',
+      title: 'TRANSMISSIONS TODAY',
       value: data.messagesToday,
       icon: MessageSquare,
-      color: 'text-fuchsia-600 dark:text-fuchsia-400',
-      bg: 'bg-fuchsia-100 dark:bg-fuchsia-950/30',
+      color: 'text-[#00e5a0]',
+      bg: 'bg-[#00e5a0]/8 border-[#00e5a0]/20',
     },
     {
-      title: 'Kênh hoạt động',
+      title: 'OPERATIONAL CHANNELS',
       value: data.activeChannels,
       icon: Hash,
-      color: 'text-pink-600 dark:text-pink-400',
-      bg: 'bg-pink-100 dark:bg-pink-950/30',
+      color: 'text-[#00e5a0]',
+      bg: 'bg-[#00e5a0]/8 border-[#00e5a0]/20',
     },
   ]
 
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold tracking-tight bg-gradient-to-r from-violet-600 to-indigo-600 dark:from-violet-400 dark:to-indigo-400 bg-clip-text text-transparent">Bảng điều khiển</h2>
-        <p className="text-sm text-muted-foreground">
-          Tổng quan hệ thống SecureTeam
+        <h2 className="text-2xl font-title font-extrabold tracking-widest text-white uppercase">SYSTEM ANALYTICS</h2>
+        <p className="text-xs font-mono text-muted-foreground uppercase tracking-wider">
+          // SECURETEAM CORE OPERATIONAL PARAMETERS
         </p>
       </div>
 
       {/* Stats Cards */}
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         {stats.map((stat) => {
-          const isMessages = stat.title === 'Tin nhắn hôm nay'
+          const isMessages = stat.title === 'TRANSMISSIONS TODAY'
           return (
             <Card
               key={stat.title}
               className={cn(
-                'glass-card-premium border border-ultra-thin shadow-md relative group overflow-hidden transition-all duration-300 hover:scale-[1.02] hover:-translate-y-0.5 rounded-3xl p-2',
+                'bg-[#0f1318] border border-[#1e2a35] rounded-none p-2 relative corner-bracket',
                 isMessages ? 'lg:col-span-2' : ''
               )}
             >
               <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-xs font-bold uppercase tracking-wider text-muted-foreground/80">
+                <CardTitle className="text-[10px] font-mono font-bold uppercase tracking-wider text-muted-foreground/80">
                   {stat.title}
                 </CardTitle>
-                <div className={cn('rounded-2xl p-2.5 transition-all duration-300 group-hover:scale-110 shadow-sm border border-ultra-thin', stat.bg)}>
-                  <stat.icon className={cn('h-4.5 w-4.5', stat.color)} />
+                <div className={cn('rounded-none p-2 shadow-sm border', stat.bg)}>
+                  <stat.icon className={cn('h-4 w-4', stat.color)} />
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-extrabold tracking-tight">{stat.value.toLocaleString()}</div>
+                <div className="text-4xl font-title font-extrabold tracking-widest text-white">{stat.value.toLocaleString()}</div>
                 {isMessages && (
-                  <p className="text-xs text-muted-foreground/75 mt-1.5 font-semibold">Tần suất trao đổi tăng 12% so với hôm qua</p>
+                  <p className="text-[9px] font-mono text-[#00e5a0]/80 mt-1.5 uppercase font-bold tracking-wider">// VOLUME UP 12% VS YESTERDAY</p>
                 )}
-                {stat.title === 'Đang trực tuyến' && (
+                {stat.title === 'ACTIVE SESSIONS' && (
                   <div className="flex items-center gap-1.5 mt-1.5">
-                    <span className="h-2 w-2 rounded-full bg-emerald-500 animate-online-glow" />
-                    <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-bold">Kết nối hoạt động ổn định</span>
+                    <span className="h-2 w-2 bg-[#00e5a0] animate-online-glow" />
+                    <span className="text-[9px] font-mono text-[#00e5a0] font-bold uppercase tracking-wider">CHANNELS OPERATING STABLE</span>
                   </div>
                 )}
               </CardContent>
@@ -121,50 +121,44 @@ export function AdminDashboard() {
       </div>
 
       {/* Chart */}
-      <Card className="glass-card-premium border border-ultra-thin shadow-md overflow-hidden rounded-3xl p-2">
+      <Card className="bg-[#0f1318] border border-[#1e2a35] rounded-none p-2 relative corner-bracket">
         <CardHeader>
-          <CardTitle className="text-base font-bold text-foreground/90">Tin nhắn 7 ngày qua</CardTitle>
+          <CardTitle className="text-xs font-mono font-bold text-white uppercase tracking-widest">// WEEKLY TRANSMISSION FREQUENCY</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={data.chartData || []}>
-                <defs>
-                  <linearGradient id="messagesGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="oklch(0.55 0.22 275)" stopOpacity={1} />
-                    <stop offset="100%" stopColor="oklch(0.68 0.19 275)" stopOpacity={0.25} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" className="stroke-muted opacity-30" vertical={false} />
+                <CartesianGrid strokeDasharray="3 3" stroke="#1e2a35" opacity={0.3} vertical={false} />
                 <XAxis
                   dataKey="date"
-                  className="text-xs"
-                  tick={{ fontSize: 11, fill: 'var(--muted-foreground)' }}
-                  axisLine={false}
+                  tick={{ fontSize: 9, fontFamily: 'monospace', fill: 'var(--muted-foreground)' }}
+                  axisLine={{ stroke: '#1e2a35' }}
                   tickLine={false}
                 />
                 <YAxis
-                  className="text-xs"
-                  tick={{ fontSize: 11, fill: 'var(--muted-foreground)' }}
-                  axisLine={false}
+                  tick={{ fontSize: 9, fontFamily: 'monospace', fill: 'var(--muted-foreground)' }}
+                  axisLine={{ stroke: '#1e2a35' }}
                   tickLine={false}
                 />
                 <Tooltip
+                  cursor={{ fill: 'rgba(0, 229, 160, 0.04)' }}
                   contentStyle={{
-                    backgroundColor: 'rgba(15, 15, 20, 0.85)',
-                    backdropFilter: 'blur(12px)',
-                    borderColor: 'rgba(255,255,255,0.06)',
-                    borderRadius: '16px',
-                    fontSize: '12px',
-                    boxShadow: '0 12px 32px rgba(0,0,0,0.3)',
+                    backgroundColor: '#0f1318',
+                    borderColor: '#1e2a35',
+                    borderRadius: '0px',
+                    fontSize: '11px',
+                    fontFamily: 'monospace',
+                    boxShadow: '0 10px 25px rgba(0,0,0,0.5)',
                     color: '#fff',
                   }}
+                  itemStyle={{ color: '#00e5a0' }}
+                  labelStyle={{ color: '#888' }}
                 />
                 <Bar
                   dataKey="messages"
-                  fill="url(#messagesGrad)"
-                  radius={[8, 8, 0, 0]}
-                  maxBarSize={40}
+                  fill="#00e5a0"
+                  maxBarSize={30}
                 />
               </BarChart>
             </ResponsiveContainer>
@@ -173,30 +167,30 @@ export function AdminDashboard() {
       </Card>
 
       {/* Recent Activity */}
-      <Card className="glass-card-premium border border-ultra-thin shadow-md overflow-hidden rounded-3xl p-2">
+      <Card className="bg-[#0f1318] border border-[#1e2a35] rounded-none p-2 relative corner-bracket">
         <CardHeader>
-          <CardTitle className="text-base font-bold text-foreground/90">Hoạt động gần đây</CardTitle>
+          <CardTitle className="text-xs font-mono font-bold text-white uppercase tracking-widest">// RECENT AUDIT LOG EVENTS</CardTitle>
         </CardHeader>
         <CardContent>
           {data.recentActivity && data.recentActivity.length > 0 ? (
-            <div className="space-y-3">
+            <div className="space-y-2">
               {data.recentActivity.map((activity) => (
                 <div
                   key={activity.id}
-                  className="flex items-start gap-3 rounded-2xl border border-ultra-thin p-3.5 hover:bg-muted/40 dark:hover:bg-muted/10 transition-colors"
+                  className="flex items-start gap-3 rounded-none border border-[#1e2a35] bg-[#0a0c0f] p-3 hover:bg-[#1e2a35]/20 transition-colors"
                 >
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-indigo-600 text-white text-xs font-bold shadow-sm">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center bg-[#1e2a35] border border-[#1e2a35] text-[#00e5a0] text-xs font-mono font-bold">
                     {activity.user.name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2)}
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm text-foreground/90 leading-relaxed">
-                      <span className="font-bold text-foreground">{activity.user.name}</span>{' '}
-                      <span className="text-muted-foreground">{activity.action}</span>
+                  <div className="flex-1 min-w-0 font-mono text-[10px]">
+                    <p className="text-muted-foreground leading-normal uppercase">
+                      <span className="font-bold text-white">{activity.user.name.toUpperCase()}</span>{' '}
+                      <span>{activity.action.toUpperCase()}</span>
                       {activity.target && (
-                        <span className="font-semibold text-foreground"> — {activity.target}</span>
+                        <span className="text-white"> — {activity.target.toUpperCase()}</span>
                       )}
                     </p>
-                    <p className="text-[11px] text-muted-foreground mt-1 font-medium">
+                    <p className="text-[8px] text-muted-foreground/60 mt-1 uppercase">
                       {new Date(activity.createdAt).toLocaleString('vi-VN')}
                     </p>
                   </div>
@@ -204,8 +198,8 @@ export function AdminDashboard() {
               ))}
             </div>
           ) : (
-            <p className="py-8 text-center text-sm text-muted-foreground font-semibold">
-              Chưa có hoạt động nào
+            <p className="py-8 text-center text-xs font-mono text-muted-foreground/50 uppercase">
+              // NO RECENT AUDIT RECORDS FOUND
             </p>
           )}
         </CardContent>
@@ -213,3 +207,4 @@ export function AdminDashboard() {
     </div>
   )
 }
+

@@ -83,14 +83,14 @@ export function ChatSidebar({
   }).filter(Boolean))
 
   return (
-    <div className={cn('flex h-full w-72 flex-col bg-[#0f1318] border-r border-[#1e2a35]', className)}>
+    <div className={cn('flex h-full w-[260px] flex-col bg-[#0d1117] border-r border-[#1e2d3d]', className)}>
       {/* Top spacing and search bar */}
       <div className="px-3 pt-5 pb-2">
         <div className="relative">
-          <Search className="absolute top-1/2 left-3 h-3.5 w-3.5 -translate-y-1/2 text-[#00e5a0]/50" />
+          <Search className="absolute top-1/2 left-3 h-3.5 w-3.5 -translate-y-1/2 text-[#00d68f]/50" />
           <Input
             placeholder="MÃ HÓA TÌM KÊNH..."
-            className="h-9 pl-9 text-xs font-mono rounded-none bg-[#0a0c0f] border-[#1e2a35] text-white focus-visible:ring-[#00e5a0]/30 focus-visible:border-[#00e5a0] placeholder:text-muted-foreground/30"
+            className="h-9 pl-9 text-xs font-mono-jb rounded-[8px] bg-[#111820] border-[#1e2d3d] text-[#dce8f0] focus-visible:ring-[#00d68f]/30 focus-visible:border-[#00d68f] placeholder:text-[#4d6b80]/30"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -102,23 +102,23 @@ export function ChatSidebar({
         <div className="px-3 pb-2">
           <button
             onClick={() => setShowNewDM(true)}
-            className="flex w-full items-center justify-center gap-2 rounded-none px-3 py-2 text-xs font-mono font-bold tracking-wider text-[#00e5a0] bg-[#00e5a0]/8 hover:bg-[#00e5a0]/15 border border-[#00e5a0]/20 transition-all cursor-pointer uppercase"
+            className="flex w-full items-center justify-center gap-2 rounded-[6px] px-3 py-2 text-xs font-rajdhani font-bold tracking-wider text-[#00d68f] bg-[#00d68f]/14 hover:bg-[#00d68f]/20 border border-dashed border-[#00d68f]/25 hover:border-[#00d68f]/40 transition-all cursor-pointer uppercase"
           >
             <UserPlus className="h-4 w-4" />
-            TẠO LIÊN LẠC MỚI
+            TẠO LIÊN KẾT
           </button>
         </div>
 
-        <Separator className="mx-3 w-auto bg-[#1e2a35]" />
+        <Separator className="mx-3 w-auto bg-[#1e2d3d]" />
 
         {/* Channels section */}
         <div className="px-3 pt-3 pb-1 flex items-center justify-between">
-          <span className="flex items-center gap-1.5 px-1 text-[9px] font-mono font-bold uppercase tracking-[2px] text-[#00e5a0]/50">
+          <span className="flex items-center gap-1.5 px-1 text-[9px] font-mono-jb font-bold uppercase tracking-[2px] text-[#4d6b80]">
             KÊNH TRUYỀN TIN
           </span>
           <CreateChannelDialog
             trigger={
-              <button className="text-[#00e5a0]/70 hover:text-[#00e5a0] transition-colors p-0.5 rounded-none border border-transparent hover:bg-[#1e2a35]/50" title="Tạo kênh mới">
+              <button className="text-[#00d68f]/70 hover:text-[#00d68f] transition-colors p-0.5 rounded-[4px] border border-transparent hover:bg-[#161f2a]" title="Tạo kênh mới">
                 <Plus className="h-3.5 w-3.5" />
               </button>
             }
@@ -128,13 +128,13 @@ export function ChatSidebar({
         <div className="pl-2 pr-3.5 space-y-0.5">
           {channelsLoading ? (
             Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="flex items-center gap-2.5 rounded-none px-3 py-2.5">
-                <Skeleton className="h-4 w-4 rounded-none bg-[#1e2a35]" />
-                <Skeleton className="h-4 flex-1 rounded-none bg-[#1e2a35]" />
+              <div key={i} className="flex items-center gap-2.5 rounded-[6px] px-3 py-2.5">
+                <Skeleton className="h-4 w-4 rounded-[4px] bg-[#1e2d3d]" />
+                <Skeleton className="h-4 flex-1 rounded-[4px] bg-[#1e2d3d]" />
               </div>
             ))
           ) : groupChannels.length === 0 ? (
-            <div className="px-3 py-4 text-center font-mono text-[10px] text-muted-foreground/60 uppercase">
+            <div className="px-3 py-4 text-center font-mono-jb text-[10px] text-[#4d6b80]/60 uppercase">
               {search ? '// KHÔNG TÌM THẤY KÊNH' : '// CHƯA CÓ KÊNH TRUYỀN TIN'}
             </div>
           ) : (
@@ -149,12 +149,12 @@ export function ChatSidebar({
           )}
         </div>
 
-        <Separator className="mx-3 my-3 w-auto bg-[#1e2a35]" />
+        <Separator className="mx-3 my-3 w-auto bg-[#1e2d3d]" />
 
         {/* Direct Messages */}
         <div className="px-3 pb-1">
-          <span className="flex items-center gap-1.5 px-1 text-[9px] font-mono font-bold uppercase tracking-[2px] text-[#00e5a0]/50">
-            TIN NHẮN RIÊNG // DMs
+          <span className="flex items-center gap-1.5 px-1 text-[9px] font-mono-jb font-bold uppercase tracking-[2px] text-[#4d6b80]">
+            TIN NHẮN RIÊNG // DMS
           </span>
         </div>
 
@@ -172,26 +172,26 @@ export function ChatSidebar({
               }
             }}
             className={cn(
-              'flex w-full items-center gap-2.5 rounded-none px-3 py-2 text-left transition-all duration-150 border-l-[3px] cursor-pointer',
+              'flex w-full items-center gap-2.5 px-3 py-2 text-left transition-all duration-150 border-l-2 cursor-pointer rounded-none',
               activeChannelId === dmChannels?.find(c => c.members?.some(m => m.userId === 'securebot-system'))?.id
-                ? 'border-l-[#00e5a0] bg-[#00e5a0]/8 text-white font-semibold'
-                : 'border-l-transparent hover:bg-[#1e2a35]/40 text-muted-foreground'
+                ? 'border-l-[#00d68f] bg-[#00d68f]/14 text-white font-semibold'
+                : 'border-l-transparent hover:bg-[#161f2a] text-muted-foreground'
             )}
           >
             <div 
-              className="flex h-7 w-7 items-center justify-center bg-[#0a0c0f] text-[#00e5a0] border border-[#1e2a35] transition-transform hover:scale-105 duration-200"
+              className="flex h-7 w-7 items-center justify-center bg-[#111820] text-[#00d68f] border border-[#1e2d3d] transition-transform hover:scale-105 duration-200"
               style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }}
             >
               <Bot className="h-3.5 w-3.5" />
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-1.5">
-                <span className="truncate text-xs font-mono font-bold uppercase text-[#00e5a0]">SecureBot</span>
-                <span className="rounded-none bg-[#00e5a0]/15 px-1 py-0.5 text-[8px] font-mono font-bold text-[#00e5a0] border border-[#00e5a0]/30">
+                <span className="truncate text-[13px] font-dm font-bold text-[#00d68f]">SecureBot</span>
+                <span className="rounded-[4px] bg-[#00d68f]/14 px-1 py-0.5 text-[9px] font-mono-jb font-bold text-[#00d68f] border border-[#00d68f]/25">
                   AI
                 </span>
               </div>
-              <div className="truncate font-mono text-[9px] text-muted-foreground/60 mt-0.5 uppercase">
+              <div className="truncate font-mono-jb text-[9px] text-[#4d6b80] mt-0.5 uppercase">
                 Trợ lý chỉ huy AI
               </div>
             </div>
@@ -199,7 +199,7 @@ export function ChatSidebar({
 
           {/* Regular DMs */}
           {directChannels.length === 0 && (
-            <div className="px-3 py-4 text-center font-mono text-[10px] text-muted-foreground/60 uppercase">
+            <div className="px-3 py-4 text-center font-mono-jb text-[10px] text-[#4d6b80]/60 uppercase">
               // KHÔNG CÓ LIÊN LẠC RIÊNG
             </div>
           )}
@@ -221,25 +221,25 @@ export function ChatSidebar({
         </div>
       </ScrollArea>
 
-      <Separator className="bg-[#1e2a35]" />
-      <div className="py-2.5 px-3 bg-[#0a0c0f]">
-        <div className="text-[9px] font-mono text-center text-muted-foreground/35 select-none uppercase tracking-wider">
+      <Separator className="bg-[#1e2d3d]" />
+      <div className="py-2 px-3 bg-[#080b0e]">
+        <div className="text-[9px] font-mono-jb text-center text-[#4d6b80]/40 select-none uppercase tracking-wider">
           SECURETEAM V2.0 // ACTIVE
         </div>
       </div>
 
       {/* New DM Sheet */}
       <Sheet open={showNewDM} onOpenChange={setShowNewDM}>
-        <SheetContent className="bg-[#0f1318] border-l border-[#1e2a35] text-white">
-          <SheetHeader className="pb-4 border-b border-[#1e2a35]">
-            <SheetTitle className="text-lg font-title font-extrabold tracking-widest text-white uppercase">// NEW TRANSMISSION</SheetTitle>
+        <SheetContent className="bg-[#0d1117] border-l border-[#1e2d3d] text-[#dce8f0]">
+          <SheetHeader className="pb-4 border-b border-[#1e2d3d]">
+            <SheetTitle className="text-lg font-rajdhani font-bold tracking-wider text-[#dce8f0] uppercase">// NEW TRANSMISSION</SheetTitle>
           </SheetHeader>
           <div className="mt-4 space-y-4">
             <div className="relative">
-              <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-[#00e5a0]/50" />
+              <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-[#00d68f]/50" />
               <Input
                 placeholder="TÌM KIẾM MẬT DANH..."
-                className="pl-9 rounded-none border-[#1e2a35] bg-[#0a0c0f] font-mono text-xs text-white focus-visible:ring-[#00e5a0]/30 focus-visible:border-[#00e5a0] placeholder:text-muted-foreground/30"
+                className="pl-9 rounded-[8px] border-[#1e2d3d] bg-[#111820] font-mono-jb text-xs text-[#dce8f0] focus-visible:ring-[#00d68f]/30 focus-visible:border-[#00d68f] placeholder:text-[#4d6b80]/40"
                 value={dmSearch}
                 onChange={(e) => setDmSearch(e.target.value)}
               />
@@ -251,13 +251,13 @@ export function ChatSidebar({
                   .map((u) => (
                     <button
                       key={u.id}
-                      className="flex w-full items-center gap-3 rounded-none border border-transparent hover:border-[#1e2a35] px-3 py-2 bg-[#0a0c0f] hover:bg-[#1e2a35]/25 transition-all text-left"
+                      className="flex w-full items-center gap-3 rounded-[6px] border border-transparent hover:border-[#1e2d3d] px-3 py-2 bg-[#111820] hover:bg-[#161f2a] transition-all text-left"
                       onClick={() => handleCreateDM(u.id)}
                     >
                       <UserAvatar name={u.name} avatar={u.avatar} size="sm" />
                       <div className="min-w-0 flex-1">
-                        <div className="text-xs font-mono font-bold uppercase text-white truncate">{u.name}</div>
-                        <div className="text-[10px] font-mono text-muted-foreground truncate">{u.email}</div>
+                        <div className="text-xs font-dm font-bold uppercase text-[#dce8f0] truncate">{u.name}</div>
+                        <div className="text-[10px] font-mono-jb text-[#4d6b80] truncate">{u.email}</div>
                       </div>
                     </button>
                   ))}
@@ -279,27 +279,27 @@ interface ChannelItemProps {
 function ChannelItem({ channel, isActive, onClick }: ChannelItemProps) {
   const icon =
     channel.type === 'private' ? (
-      <Lock className={cn("h-3.5 w-3.5 shrink-0", isActive ? "text-[#00e5a0]" : "text-muted-foreground/60")} />
+      <Lock className={cn("h-3.5 w-3.5 shrink-0", isActive ? "text-[#00d68f]" : "text-[#4d6b80]")} />
     ) : (
-      <Hash className={cn("h-3.5 w-3.5 shrink-0", isActive ? "text-[#00e5a0]" : "text-muted-foreground/60")} />
+      <Hash className={cn("h-3.5 w-3.5 shrink-0", isActive ? "text-[#00d68f]" : "text-[#4d6b80]")} />
     )
 
   return (
     <button
       className={cn(
-        'flex w-full items-center gap-2.5 px-3 py-2 text-left transition-all duration-150 border-l-[3px] cursor-pointer rounded-none',
+        'flex w-full items-center gap-2.5 px-3 py-2 text-left transition-all duration-150 border-l-2 cursor-pointer rounded-none',
         isActive
-          ? 'border-l-[#00e5a0] bg-[#00e5a0]/8 text-white font-semibold'
-          : 'border-l-transparent text-muted-foreground hover:bg-[#1e2a35]/40 hover:text-white'
+          ? 'border-l-[#00d68f] bg-[#00d68f]/14 text-white font-semibold'
+          : 'border-l-transparent text-muted-foreground hover:bg-[#161f2a] hover:text-white'
       )}
       onClick={onClick}
     >
       {icon}
       <div className="flex-1 min-w-0">
-        <div className="truncate font-mono text-[11px] uppercase tracking-wider">{channel.name}</div>
+        <div className="truncate font-dm text-[13px] text-[#dce8f0] tracking-normal">{channel.name}</div>
         {channel.lastMessage && (
-          <div className="truncate font-mono text-[9px] text-muted-foreground/60 mt-0.5">
-            <span className="font-bold text-[#00e5a0]/70">{channel.lastMessage.sender.name.toUpperCase()}: </span>
+          <div className="truncate font-mono-jb text-[9px] text-[#4d6b80] mt-0.5">
+            <span className="font-bold text-[#00d68f]/70">{channel.lastMessage.sender.name.toUpperCase()}: </span>
             {channel.lastMessage.content}
           </div>
         )}
@@ -322,10 +322,10 @@ function DMItem({ channel, isActive, onClick, isOnline, currentUserId }: DMItemP
   return (
     <button
       className={cn(
-        'flex w-full items-center gap-2.5 px-3 py-2 text-left transition-all duration-150 border-l-[3px] cursor-pointer rounded-none',
+        'flex w-full items-center gap-2.5 px-3 py-2 text-left transition-all duration-150 border-l-2 cursor-pointer rounded-none',
         isActive
-          ? 'border-l-[#00e5a0] bg-[#00e5a0]/8 text-white font-semibold'
-          : 'border-l-transparent text-muted-foreground hover:bg-[#1e2a35]/40 hover:text-white'
+          ? 'border-l-[#00d68f] bg-[#00d68f]/14 text-white font-semibold'
+          : 'border-l-transparent text-muted-foreground hover:bg-[#161f2a] hover:text-white'
       )}
       onClick={onClick}
     >
@@ -333,15 +333,15 @@ function DMItem({ channel, isActive, onClick, isOnline, currentUserId }: DMItemP
         <UserAvatar name={displayName} size="sm" />
         <span
           className={cn(
-            'absolute -bottom-0.5 -right-0.5 h-2 w-2 rounded-none border border-[#0f1318] transition-all duration-300',
-            isOnline ? 'bg-[#00e5a0] animate-online-glow' : 'bg-[#1e2a35]'
+            'absolute -bottom-0.5 -right-0.5 h-2 w-2 rounded-full border border-[#0d1117] transition-all duration-300',
+            isOnline ? 'bg-[#00d68f] animate-online-glow' : 'bg-[#1e2d3d]'
           )}
         />
       </div>
       <div className="flex-1 min-w-0">
-        <div className={cn('truncate font-mono text-[11px] uppercase tracking-wider', isOnline ? 'text-white font-bold' : 'text-muted-foreground/80')}>{displayName}</div>
+        <div className={cn('truncate font-dm text-[13px]', isActive ? 'text-white font-semibold' : 'text-[#dce8f0]')}>{displayName}</div>
         {channel.lastMessage && (
-          <div className="truncate font-mono text-[9px] text-muted-foreground/60 mt-0.5">
+          <div className="truncate font-mono-jb text-[9px] text-[#4d6b80] mt-0.5">
             {channel.lastMessage.content}
           </div>
         )}

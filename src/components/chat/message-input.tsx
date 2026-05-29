@@ -115,22 +115,22 @@ export function MessageInput({
   const hasContent = content.trim().length > 0
 
   return (
-    <div className="bg-background/80 backdrop-blur-md border-t border-border/40 px-4 py-3">
+    <div className="bg-[#0d1117] border-t border-[#1e2d3d] px-4 py-3 relative">
       {/* Reply preview */}
       {replyTo && (
-        <div className="flex items-center gap-2 border-b border-border/40 pb-2 mb-2 px-2 max-w-5xl mx-auto">
-          <div className="border-l-2 border-violet-500 pl-3 flex-1 min-w-0">
-            <div className="text-xs font-semibold text-muted-foreground">
+        <div className="flex items-center gap-2 border border-[#1e2d3d] bg-[#111820] rounded-[6px] p-2 mb-2 max-w-5xl mx-auto">
+          <div className="border-l-2 border-l-[#00d68f] pl-3 flex-1 min-w-0">
+            <div className="text-xs font-rajdhani font-semibold text-[#00d68f] uppercase tracking-wider">
               Phản hồi {replyTo.sender?.name}
             </div>
-            <div className="text-xs truncate text-muted-foreground/70 mt-0.5">
+            <div className="text-xs truncate text-[#4d6b80] font-dm mt-0.5">
               {replyTo.content?.substring(0, 100)}
             </div>
           </div>
           <Button
             variant="ghost"
             size="icon"
-            className="h-6 w-6 shrink-0 rounded-full hover:bg-muted"
+            className="h-6 w-6 shrink-0 rounded-[4px] hover:bg-[#161f2a] text-[#4d6b80] hover:text-[#d06363] cursor-pointer"
             onClick={onCancelReply}
             aria-label="Hủy phản hồi"
           >
@@ -143,11 +143,11 @@ export function MessageInput({
       {typingUsers.length > 0 && (
         <div className="px-2 pb-1.5 flex items-center gap-2 max-w-5xl mx-auto">
           <div className="flex items-center gap-0.5">
-            <span className="h-1 w-1 rounded-full bg-violet-500/80 animate-bounce" style={{ animationDelay: '0ms' }} />
-            <span className="h-1 w-1 rounded-full bg-violet-500/80 animate-bounce" style={{ animationDelay: '150ms' }} />
-            <span className="h-1 w-1 rounded-full bg-violet-500/80 animate-bounce" style={{ animationDelay: '300ms' }} />
+            <span className="h-1 w-1 rounded-full bg-[#00d68f] animate-bounce shadow-[0_0_4px_#00d68f]" style={{ animationDelay: '0ms' }} />
+            <span className="h-1 w-1 rounded-full bg-[#00d68f] animate-bounce shadow-[0_0_4px_#00d68f]" style={{ animationDelay: '150ms' }} />
+            <span className="h-1 w-1 rounded-full bg-[#00d68f] animate-bounce shadow-[0_0_4px_#00d68f]" style={{ animationDelay: '300ms' }} />
           </div>
-          <span className="text-xs text-muted-foreground">
+          <span className="text-[11px] font-mono-jb text-[#4d6b80]">
             {typingUsers.length === 1
               ? `${typingUsers[0].name} đang nhập...`
               : `${typingUsers.length} người đang nhập...`}
@@ -158,7 +158,7 @@ export function MessageInput({
       {/* Input area */}
       <div className="flex items-end gap-2.5 max-w-5xl mx-auto">
         {/* Unified Input Pill Container */}
-        <div className="flex-1 flex items-end gap-1 rounded-2xl border border-border/50 bg-muted/40 dark:bg-muted/15 focus-within:bg-background focus-within:ring-2 focus-within:ring-violet-500/20 focus-within:border-violet-500/50 transition-all p-1.5 pl-2 shadow-inner">
+        <div className="flex-1 flex items-end gap-1 rounded-[10px] border border-[#243448] bg-[#111820] focus-within:bg-[#161f2a] focus-within:border-[#00d68f]/35 focus-within:ring-0 transition-all p-1.5 pl-2 shadow-inner">
           {/* Actions on left (Emoji and File Upload) */}
           <div className="flex gap-0.5 pb-0.5 shrink-0">
             <Popover open={showEmoji} onOpenChange={setShowEmoji}>
@@ -166,19 +166,19 @@ export function MessageInput({
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-colors"
+                  className="h-8 w-8 rounded-[6px] text-[#4d6b80] hover:text-[#dce8f0] hover:bg-[#161f2a] transition-colors cursor-pointer"
                   disabled={disabled}
                   aria-label="Chọn emoji"
                 >
                   <Smile className="h-4.5 w-4.5" />
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-72 p-2.5" align="start">
+              <PopoverContent className="w-72 p-2.5 bg-[#111820] border border-[#1e2d3d] rounded-[8px]" align="start">
                 <div className="grid grid-cols-8 gap-0.5">
                   {EMOJI_LIST.map((emoji) => (
                     <button
                       key={emoji}
-                      className="flex h-9 w-9 items-center justify-center rounded-lg text-lg hover:bg-muted transition-colors animate-in fade-in duration-100"
+                      className="flex h-9 w-9 items-center justify-center rounded-[6px] text-lg hover:bg-[#161f2a] transition-colors animate-in fade-in duration-100 cursor-pointer"
                       onClick={() => insertEmoji(emoji)}
                     >
                       {emoji}
@@ -193,7 +193,7 @@ export function MessageInput({
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-colors"
+                  className="h-8 w-8 rounded-[6px] text-[#4d6b80] hover:text-[#dce8f0] hover:bg-[#161f2a] transition-colors cursor-pointer"
                   disabled={disabled}
                   onClick={() => document.getElementById('file-upload-input')?.click()}
                   aria-label="Đính kèm tệp"
@@ -201,7 +201,7 @@ export function MessageInput({
                   <Paperclip className="h-4.5 w-4.5" />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent>Tệp đính kèm (tối đa 10MB)</TooltipContent>
+              <TooltipContent className="bg-[#111820] border border-[#1e2d3d] font-mono-jb text-[9px] text-[#dce8f0]">Tệp đính kèm (tối đa 10MB)</TooltipContent>
             </Tooltip>
             <input
               id="file-upload-input"
@@ -222,11 +222,20 @@ export function MessageInput({
                 const formData = new FormData()
                 formData.append('file', file)
                 try {
-                  const { api } = await import('@/lib/api')
-                  const res = await api.post('/api/v1/upload', formData, {
-                    headers: { 'Content-Type': 'multipart/form-data' },
+                  const { getAccessToken } = await import('@/lib/api')
+                  const token = getAccessToken()
+                  const headers: Record<string, string> = {}
+                  if (token) {
+                    headers['Authorization'] = `Bearer ${token}`
+                  }
+                  const uploadRes = await fetch('/api/v1/upload', {
+                    method: 'POST',
+                    headers,
+                    body: formData,
                   })
-                  const fileData = res.data
+                  if (!uploadRes.ok) throw new Error('Upload failed')
+                  const json = await uploadRes.json() as { data: { url: string } }
+                  const fileData = json.data
                   if (fileData?.url) {
                     onSend(fileData.url, 'file')
                   }
@@ -249,8 +258,9 @@ export function MessageInput({
               onChange={handleChange}
               onKeyDown={handleKeyDown}
               placeholder={placeholder}
+              maxLength={4000}
               disabled={disabled || isSending}
-              className="min-h-[36px] max-h-[150px] resize-none border-0 bg-transparent px-2.5 py-2 text-sm shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-muted-foreground/60 w-full focus-visible:outline-none"
+              className="min-h-[36px] max-h-[150px] resize-none border-0 bg-transparent px-2.5 py-2 text-sm text-[#dce8f0] font-dm shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-[#4d6b80]/60 w-full focus-visible:outline-none"
               rows={1}
             />
           </div>
@@ -260,10 +270,10 @@ export function MessageInput({
         <Button
           size="icon"
           className={cn(
-            'h-10 w-10 rounded-full shrink-0 transition-all duration-200 mb-0.5',
+            'h-10 w-10 shrink-0 transition-all duration-200 mb-0.5 rounded-[6px] cursor-pointer',
             hasContent && !disabled
-              ? 'bg-gradient-to-br from-violet-600 to-indigo-600 text-white shadow-md shadow-violet-500/20 hover:shadow-lg hover:shadow-violet-500/30 hover:scale-105 active:scale-95 border-0'
-              : 'bg-muted text-muted-foreground disabled:opacity-40'
+              ? 'bg-[#00d68f] hover:bg-[#00a86b] text-black shadow-md shadow-[#00d68f]/20 hover:scale-105 active:scale-95 border-0'
+              : 'bg-[#111820] text-[#4d6b80] border border-[#1e2d3d] disabled:opacity-40'
           )}
           disabled={!hasContent || isSending || disabled}
           onClick={handleSend}
@@ -275,6 +285,22 @@ export function MessageInput({
             <Send className="h-4.5 w-4.5" />
           )}
         </Button>
+      </div>
+
+      {/* Encryption & Character counter status row */}
+      <div className="flex items-center justify-between mt-2 max-w-5xl mx-auto px-1">
+        <div className="flex items-center gap-1.5 select-none">
+          <span className="relative flex h-1.5 w-1.5">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00d68f] opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-[#00d68f]"></span>
+          </span>
+          <span className="text-[9px] font-mono-jb text-[#4d6b80] tracking-wider uppercase">
+            E2E ENCRYPTED · AES-256
+          </span>
+        </div>
+        <div className="text-[9px] font-mono-jb text-[#4d6b80]/60">
+          {content.length} / 4000
+        </div>
       </div>
     </div>
   )

@@ -11,14 +11,14 @@ interface UserStatusBadgeProps {
 }
 
 const statusColors: Record<string, string> = {
-  online: 'bg-[#00e5a0]',
+  online: 'bg-[#00d68f]',
   away: 'bg-amber-500',
   busy: 'bg-red-500',
-  offline: 'bg-[#1e2a35]',
+  offline: 'bg-[#1e2d3d]',
 }
 
 const statusShadowColors: Record<string, string> = {
-  online: 'shadow-[#00e5a0]/50 shadow-sm',
+  online: 'shadow-[#00d68f]/50 shadow-sm',
   away: 'shadow-amber-500/50 shadow-sm',
   busy: 'shadow-red-500/50 shadow-sm',
   offline: '',
@@ -39,7 +39,7 @@ export const UserStatusBadge = React.memo(function UserStatusBadge({
   return (
     <span
       className={cn(
-        'inline-block rounded-none border border-[#0a0c0f]',
+        'inline-block rounded-full border border-[#0d1117]',
         statusColors[status] || statusColors.offline,
         sizeClasses[size],
         isOnline && 'animate-online-glow',
@@ -68,7 +68,7 @@ interface UserAvatarProps {
 }
 
 const avatarSizes = {
-  sm: 'h-7 w-7 text-[10px]',
+  sm: 'h-8 w-8 text-[11px]',
   md: 'h-9 w-9 text-xs',
   lg: 'h-11 w-11 text-sm',
 }
@@ -97,9 +97,9 @@ export function UserAvatar({
 }: UserAvatarProps) {
   return (
     <div className={cn('relative inline-flex', className)}>
-      <Avatar className={cn(avatarSizes[size], 'rounded-none border border-[#1e2a35] bg-[#0a0c0f]')}>
-        <AvatarImage className="rounded-none object-cover" src={avatar || undefined} alt={name} />
-        <AvatarFallback className="rounded-none bg-[#1e2a35] text-[#00e5a0] font-mono font-bold">
+      <Avatar className={cn(avatarSizes[size], 'rounded-full border border-[#1e2d3d] bg-[#111820]')}>
+        <AvatarImage className="rounded-full object-cover" src={avatar || undefined} alt={name} />
+        <AvatarFallback className="rounded-full bg-[#1e2d3d] text-[#00d68f] font-mono-jb font-bold">
           {getInitials(name)}
         </AvatarFallback>
       </Avatar>

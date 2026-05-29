@@ -1,31 +1,31 @@
 import type { Metadata } from "next";
-import { Rajdhani, Share_Tech_Mono, Inter } from 'next/font/google'
+import { Rajdhani, JetBrains_Mono, DM_Sans } from 'next/font/google'
 import "./globals.css";
 import { Providers } from "@/components/providers";
 
 const rajdhani = Rajdhani({ 
   variable: '--font-rajdhani', 
   subsets: ['latin'],
-  weight: ['300', '400', '500', '600', '700'],
+  weight: ['400', '500', '600', '700'],
 })
 
-const shareTechMono = Share_Tech_Mono({ 
-  variable: '--font-share-tech-mono', 
+const jetbrainsMono = JetBrains_Mono({ 
+  variable: '--font-jetbrains-mono', 
   subsets: ['latin'],
-  weight: ['400'],
+  weight: ['400', '500'],
 })
 
-const inter = Inter({ 
-  variable: '--font-inter', 
-  subsets: ['latin', 'vietnamese'],
-  weight: ['300', '400', '500', '600', '700'],
+const dmSans = DM_Sans({ 
+  variable: '--font-dm-sans', 
+  subsets: ['latin'],
+  weight: ['300', '400', '500'],
 })
 
 export const metadata: Metadata = {
   title: "SecureTeam - Hệ thống nhắn tin nội bộ",
   description: "Ứng dụng nhắn tin nội bộ bảo mật cho doanh nghiệp",
   icons: {
-    icon: "/logo.svg",
+    icon: "/—Pngtree—letter v icon_8627704.png",
   },
 };
 
@@ -38,7 +38,7 @@ export default function RootLayout({
     <html lang="vi" suppressHydrationWarning>
       <body
         suppressHydrationWarning
-        className={`${rajdhani.variable} ${shareTechMono.variable} ${inter.variable} antialiased bg-background text-foreground relative overflow-hidden`}
+        className={`${rajdhani.variable} ${jetbrainsMono.variable} ${dmSans.variable} antialiased bg-background text-foreground relative overflow-hidden`}
       >
         {/* Tactical Grid Background */}
         <div className="pointer-events-none absolute inset-0 overflow-hidden -z-10 bg-tactical-grid opacity-20" />
@@ -47,3 +47,4 @@ export default function RootLayout({
     </html>
   );
 }
+
